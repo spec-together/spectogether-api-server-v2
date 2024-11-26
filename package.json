@@ -1,0 +1,39 @@
+{
+  "name": "spectogether-backend-v2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js --host 0.0.0.0"
+  },
+  "keywords": [],
+  "author": "Kyeoung Woon Park <saveearth1@naver.com> (https://blog.naver.com/saveearth1)",
+  "license": "MIT",
+  "description": "backend server for spectogether",
+  "devDependencies": {
+    "nodemon": "^3.1.7",
+    "prettier": "3.3.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sns": "^3.682.0",
+    "aws-sdk": "^2.1691.0",
+    "axios": "^1.7.7",
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.3",
+    "nodemailer": "^6.9.16",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0",
+    "passport-oauth2": "^1.8.0",
+    "sequelize": "^6.37.4",
+    "socket.io": "^4.8.1",
+    "winston": "^3.15.0"
+  }
+}
