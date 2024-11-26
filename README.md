@@ -17,6 +17,10 @@ preset 코드에 버그가 있을 경우 issue 생성하시어 남겨주시면 �
 
 made and owned by [@kyeoungwoon](https://github.com/kyeoungwoon)
 
+# 이 프로젝트의 변경사항
+
+### 변수명 : Snake Case -> Camel Case 사용
+
 # Git Convention : Strategy
 
 ### Strategy #1 : Git Flow
