@@ -2,7 +2,7 @@ const { Model, DataTypes } = require("sequelize");
 
 class UserOauth extends Model {
   static init(sequelize) {
-    super.init(
+    return super.init(
       {
         user_oauth_id: {
           type: DataTypes.BIGINT,

@@ -2,7 +2,7 @@ const { Model, DataTypes } = require("sequelize");
 
 class Todo extends Model {
   static init(sequelize) {
-    super.init(
+    return super.init(
       {
         todo_id: {
           type: DataTypes.BIGINT,

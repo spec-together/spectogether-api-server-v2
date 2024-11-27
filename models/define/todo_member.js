@@ -2,7 +2,7 @@ const { Model, DataTypes } = require("sequelize");
 
 class TodoMember extends Model {
   static init(sequelize) {
-    super.init(
+    return super.init(
       {
         todo_member_id: {
           type: DataTypes.BIGINT,

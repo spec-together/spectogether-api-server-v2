@@ -1,15 +1,15 @@
 const { Model, DataTypes } = require("sequelize");
 
-class StudyroomCalendar extends Model {
+class ContestCalendar extends Model {
   static init(sequelize) {
     return super.init(
       {
-        studyroom_calendar_id: {
+        contest_calendar_id: {
           type: DataTypes.BIGINT,
           autoIncrement: true,
           primaryKey: true,
         },
-        studyroom_id: {
+        contest_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
         },
@@ -30,18 +30,16 @@ class StudyroomCalendar extends Model {
       },
       {
         sequelize,
-        tableName: "studyroom_calendar",
+        tableName: "contest_calendar",
         timestamps: false,
       }
     );
   }
 
   static associate(models) {
-    StudyroomCalendar.belongsTo(models.Studyroom, {
-      foreignKey: "studyroom_id",
-    });
-    StudyroomCalendar.belongsTo(models.Calendar, { foreignKey: "calendar_id" });
+    ContestCalendar.belongsTo(models.Contest, { foreignKey: "contest_id" });
+    ContestCalendar.belongsTo(models.Calendar, { foreignKey: "calendar_id" });
   }
 }
 
-module.exports = StudyroomCalendar;
+module.exports = ContestCalendar;

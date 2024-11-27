@@ -180,10 +180,10 @@ try:
             status = random.choice(['verified', 'unverified'])
             cursor.execute(sql, (user_id, verified_email, verification_type, status))
 
-        # 14. user_refreshtoken 테이블에 데이터 삽입
+        # 14. user_refresh_token 테이블에 데이터 삽입
         for _ in range(100):
             sql = """
-            INSERT INTO user_refreshtoken (user_id, refresh_token)
+            INSERT INTO user_refresh_token (user_id, refresh_token)
             VALUES (%s, %s)
             """
             user_id = random.randint(1, 100)

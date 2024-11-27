@@ -2,7 +2,7 @@ const { Model, DataTypes } = require("sequelize");
 
 class EmailVerificationCode extends Model {
   static init(sequelize) {
-    super.init(
+    return super.init(
       {
         email_verification_code_id: {
           type: DataTypes.BIGINT,

@@ -141,8 +141,8 @@ CREATE TABLE user_verified_email (
 );
 
 -- 14. 사용자 리프레시 토큰 테이블 생성
-CREATE TABLE user_refreshtoken (
-  user_refreshtoken_id BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+CREATE TABLE user_refresh_token (
+  user_refresh_token_id BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL,
   user_id BIGINT NOT NULL,
   refresh_token TEXT NOT NULL,
   created_at TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) NOT NULL,
