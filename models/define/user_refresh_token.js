@@ -2,9 +2,9 @@ const { Model, DataTypes } = require("sequelize");
 
 class UserRefreshToken extends Model {
   static init(sequelize) {
-    super.init(
+    return super.init(
       {
-        user_refreshtoken_id: {
+        user_refresh_token_id: {
           type: DataTypes.BIGINT,
           autoIncrement: true,
           primaryKey: true,
@@ -30,7 +30,7 @@ class UserRefreshToken extends Model {
       },
       {
         sequelize,
-        tableName: "user_refreshtoken",
+        tableName: "user_refresh_token",
         timestamps: false,
       }
     );

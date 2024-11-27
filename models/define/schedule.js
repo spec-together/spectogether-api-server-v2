@@ -2,7 +2,7 @@ const { Model, DataTypes } = require("sequelize");
 
 class Schedule extends Model {
   static init(sequelize) {
-    super.init(
+    return super.init(
       {
         schedule_id: {
           type: DataTypes.BIGINT,

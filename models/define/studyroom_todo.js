@@ -2,7 +2,7 @@ const { Model, DataTypes } = require("sequelize");
 
 class StudyroomTodo extends Model {
   static init(sequelize) {
-    super.init(
+    return super.init(
       {
         studyroom_todo_id: {
           type: DataTypes.BIGINT,
