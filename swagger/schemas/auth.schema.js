@@ -81,4 +81,5 @@ const CreateTestUserSchema = {
 
 module.exports = {
   RegisterUserSchema,
+  CreateTestUserSchema,
 };
