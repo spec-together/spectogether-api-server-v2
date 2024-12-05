@@ -19,6 +19,8 @@ const { AccessTokenStrategy } = require("./passport.setup");
 const { errorHandler } = require("./handlers/req.res.handlers");
 
 // Routers는 이 주석 아래에 import 해주시면 됩니다.
+// ex) const exampleRouter = require("./routers/example.router");
+const authRouter = require("./routes/auth.router");
 
 // ** 중요 ** 미들웨어 순서를 변경할 때는 신경써서 작업해 주세요.
 const app = express();
@@ -37,6 +39,7 @@ passport.use("accessToken", AccessTokenStrategy);
 
 // 이 주석 하단에 Router들을 use 해주시면 됩니다.
 // ex) app.use("/example", exampleRouter);
+app.use("/auth", authRouter);
 
 // 에러 핸들러는 최하단에 위치해야 하는 미들웨어입니다. 절대 순서를 변경하지 마세요.
 app.use(errorHandler);
