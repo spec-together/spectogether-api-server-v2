@@ -11,12 +11,17 @@ const { Server } = require("socket.io");
 const http = require("http");
 // 로컬 파일들 import, 기능별로 구분해주세요.
 const logger = require("./logger");
-const { corsOptions, sslOptions } = require("./options");
+const {
+  corsOptions,
+  //  sslOptions
+} = require("./options");
 
 const { PORT } = require("./config.json").SERVER;
 
 const { AccessTokenStrategy } = require("./passport.setup");
 const { errorHandler } = require("./handlers/req.res.handlers");
+
+const { swaggerUi, specs } = require("./swagger/swagger");
 
 // Routers는 이 주석 아래에 import 해주시면 됩니다.
 // ex) const exampleRouter = require("./routers/example.router");
@@ -36,6 +41,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(passport.initialize());
 // Passport Strategy 설정
 passport.use("accessToken", AccessTokenStrategy);
+
+// Swagger 설정
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 // 이 주석 하단에 Router들을 use 해주시면 됩니다.
 // ex) app.use("/example", exampleRouter);
