@@ -1,49 +1,70 @@
+// base-x 패키지 설치 필요
+// 터미널에서 다음 명령어를 실행하세요:
+// npm install base-x
+
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
+const baseX = require("base-x").default;
+const { SALT_ROUNDS, CIPHER_SECRET_KEY } = require("../config.json");
+
+// Base62 문자 집합 정의
+const BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const BASE62_ENCODER = baseX(BASE62);
 
 // 암호화 함수
-function encrypt(text, secretKey) {
+const encrypt62 = (text) => {
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv(
     "aes-256-cbc",
-    Buffer.from(secretKey, "hex"),
+    Buffer.from(CIPHER_SECRET_KEY, "hex"),
     iv
   );
-  let encrypted = cipher.update(text, "utf8", "hex");
-  encrypted += cipher.final("hex");
-  return iv.toString("hex") + ":" + encrypted;
-}
+  let encrypted = cipher.update(text, "utf8");
+  encrypted = Buffer.concat([encrypted, cipher.final()]);
+
+  // IV와 암호문을 결합
+  const combined = Buffer.concat([iv, encrypted]);
+
+  // Base62 인코딩
+  const base62 = BASE62_ENCODER.encode(combined);
+
+  return base62;
+};
 
 // 복호화 함수
-function decrypt(encryptedText, secretKey) {
-  const textParts = encryptedText.split(":");
-  const iv = Buffer.from(textParts.shift(), "hex");
-  const encrypted = textParts.join(":");
+const decrypt62 = (encryptedText) => {
+  // Base62 디코딩
+  const combined = BASE62_ENCODER.decode(encryptedText);
+
+  // IV와 암호문 분리
+  const iv = combined.slice(0, 16);
+  const encrypted = combined.slice(16);
+
   const decipher = crypto.createDecipheriv(
     "aes-256-cbc",
-    Buffer.from(secretKey, "hex"),
+    Buffer.from(CIPHER_SECRET_KEY, "hex"),
     iv
   );
-  let decrypted = decipher.update(encrypted, "hex", "utf8");
-  decrypted += decipher.final("utf8");
-  return decrypted;
-}
+  let decrypted = decipher.update(encrypted);
+  decrypted = Buffer.concat([decrypted, decipher.final()]);
 
-// 사용 예시
-console.time("Generate Secret Key");
-const secretKey = crypto.randomBytes(32).toString("hex"); // 256비트 키
-console.timeEnd("Generate Secret Key");
+  return decrypted.toString("utf8");
+};
 
-console.time("Set Original Text");
-const originalText = "암호화할 텍스트입니다.";
-console.timeEnd("Set Original Text");
+const generateeHashedPassword = async (password) => {
+  const bcryptSalt = await bcrypt.genSalt(SALT_ROUNDS);
+  const hashedPassword = await bcrypt.hash(password, bcryptSalt);
 
-console.time("Encrypt Text");
-const encrypted = encrypt(originalText, secretKey);
-console.timeEnd("Encrypt Text");
-console.log("Encrypted:", encrypted);
+  return hashedPassword;
+};
 
-console.time("Decrypt Text");
-const decrypted = decrypt(encrypted, secretKey);
-console.timeEnd("Decrypt Text");
-console.log("Decrypted:", decrypted);
+// async이나 어차피 promise를 반환하기에
+const comparePassword = (password, hashedPassword) =>
+  bcrypt.compare(password, hashedPassword);
+
+module.exports = {
+  encrypt62,
+  decrypt62,
+  generateeHashedPassword,
+  comparePassword,
+};
