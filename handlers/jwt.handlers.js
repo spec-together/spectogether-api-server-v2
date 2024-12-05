@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const logger = require("../logger");
-const { JWT_SECRET } = require("./config.json");
+const { JWT_SECRET } = require("./config.json").SERVER;
 
 const parseBearerFromHeader = (req, res, next) => {
   const authHeader = req.headers.authorization;
