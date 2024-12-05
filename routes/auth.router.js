@@ -8,6 +8,7 @@ const {
   handleKakaoCallback,
   handleUserLogout,
   handleReissueAccessToken,
+  handleCreateTestUser,
 } = require("../controllers/auth.controller");
 
 // 회원가입
@@ -36,6 +37,8 @@ const {
  *         description: 서버 오류
  */
 router.post("/register", handleUserRegister);
+
+router.post("/register/test", handleCreateTestUser);
 // 로컬 로그인
 router.get("/login/local", handleUserLocalLogin);
 // OAuth2 : 카카오 로그인

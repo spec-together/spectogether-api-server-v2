@@ -1,3 +1,5 @@
+const { User } = require("../models");
+const { generateHashedPassword } = require("./encrypt.service");
 const { validateNewUserInputSchema } = require("./validation.service");
 
 const validateUserData = (data) => {
@@ -14,8 +16,27 @@ const validateUserData = (data) => {
   };
 };
 
+const createTestUserService = async (name, email, phoneNumber) => {
+  const user = {
+    user_register_type: "local",
+    name,
+    nickname: "Johnny",
+    birthdate: "1980-01-01",
+    phone_number: phoneNumber,
+    email,
+    password: "password",
+    profile_image: "binary data",
+    // 원래는 email_verification_id, phone_number_verification_id 가 필요합니다.
+  };
+  user.password = await generateHashedPassword(user.password);
+  const newUser = await User.create(user);
+
+  return newUser;
+};
+
 module.exports = {
   validateUserData,
+  createTestUserService,
 };
 
 /*

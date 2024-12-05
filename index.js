@@ -19,7 +19,10 @@ const {
 const { PORT } = require("./config.json").SERVER;
 
 const { AccessTokenStrategy } = require("./passport.setup");
-const { errorHandler } = require("./handlers/req.res.handlers");
+const {
+  errorHandler,
+  responseHandler,
+} = require("./handlers/req.res.handlers");
 
 const { swaggerUi, specs } = require("./swagger/swagger");
 
@@ -29,6 +32,8 @@ const authRouter = require("./routes/auth.router");
 
 // ** 중요 ** 미들웨어 순서를 변경할 때는 신경써서 작업해 주세요.
 const app = express();
+
+app.use(responseHandler);
 
 app.use(cookieParser());
 app.use(cors(corsOptions));

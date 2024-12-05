@@ -47,7 +47,7 @@ const decrypt62 = (encryptedText) => {
   return decrypted.toString("utf8");
 };
 
-const generateeHashedPassword = async (password) => {
+const generateHashedPassword = async (password) => {
   const bcryptSalt = await bcrypt.genSalt(SALT_ROUNDS);
   const hashedPassword = await bcrypt.hash(password, bcryptSalt);
 
@@ -61,6 +61,6 @@ const comparePassword = (password, hashedPassword) =>
 module.exports = {
   encrypt62,
   decrypt62,
-  generateeHashedPassword,
+  generateHashedPassword,
   comparePassword,
 };
