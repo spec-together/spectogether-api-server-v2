@@ -1,8 +1,15 @@
 const { User } = require("../models");
 const { generateHashedPassword } = require("./encrypt.service");
 const { validateNewUserInputSchema } = require("./auth.validation.service");
+const {
+  getUserByEmailOrPhoneNumber,
+  createNewUser,
+  createNewCalendar,
+  connectUserWithCalendar,
+} = require("../repositories/auth.repository");
+const logger = require("../logger");
 
-const validateUserData = (data) => {
+const validateUserDataService = (data) => {
   const valid = validateNewUserInputSchema(data);
   if (!valid) {
     return {
@@ -14,6 +21,28 @@ const validateUserData = (data) => {
     isValid: true,
     errors: null,
   };
+};
+
+const createNewUserService = async (user) => {
+  const newUser = {
+    name: user.name,
+    nickname: user.nickname,
+    password: user.password,
+    birthdate: user.birthdate,
+    phone_number: user.phone_number,
+    email: user.email,
+    profile_image: user.profile_image,
+  };
+  logger.debug(
+    `[createNewUserService] 새로운 사용자 생성: ${JSON.stringify(newUser, null, 2)}`
+  );
+  newUser.password = await generateHashedPassword(newUser.password);
+  logger.debug(`[createNewUserService] 암호화된 비밀번호: ${newUser.password}`);
+  const createdUser = await createNewUser(newUser);
+  logger.debug(
+    `[createNewUserService] 새로운 사용자 생성: ${JSON.stringify(createdUser, null, 2)}`
+  );
+  return createdUser;
 };
 
 const createTestUserService = async (name, email, phoneNumber) => {
@@ -34,9 +63,28 @@ const createTestUserService = async (name, email, phoneNumber) => {
   return newUser;
 };
 
+const checkDuplicateUserService = async (email, phoneNumber) => {
+  const result = await getUserByEmailOrPhoneNumber(email, phoneNumber);
+
+  return result;
+};
+
+const createCalendarForNewUserService = async (userId) => {
+  const calendar = await createNewCalendar();
+  const userCalendar = await connectUserWithCalendar(
+    userId,
+    calendar.calendar_id
+  );
+
+  return userCalendar;
+};
+
 module.exports = {
-  validateUserData,
+  validateUserDataService,
   createTestUserService,
+  checkDuplicateUserService,
+  createNewUserService,
+  createCalendarForNewUserService,
 };
 
 /*

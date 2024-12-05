@@ -27,11 +27,11 @@ const errorHandler = (err, req, res, next) => {
     );
     return next(err);
   }
-  logger.error(err);
+  logger.error(JSON.stringify(err, null, 2));
   res.status(err.statusCode || 500).error({
     errorCode: err.errorCode || "UNHANDLED_ERROR",
     reason: err.name || err.reason || err.message || null,
-    data: err.data || null,
+    data: err.message || err.data || null,
   });
 };
 

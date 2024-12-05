@@ -10,7 +10,7 @@ const customFormat = printf(({ level, message, timestamp, stack }) => {
 
 // 로거 설정
 const logger = winston.createLogger({
-  level: "info", // 기본 로그 레벨
+  level: "debug", // 기본 로그 레벨
   format: combine(
     timestamp(), // 타임스탬프 추가
     winston.format.errors({ stack: true }), // 스택 트레이스 추가
@@ -22,6 +22,10 @@ const logger = winston.createLogger({
     new winston.transports.File({
       filename: "./logs/error.log",
       level: "error",
+    }), // 에러 로그를 파일에 기록
+    new winston.transports.File({
+      filename: "./logs/debug.log",
+      level: "debug",
     }), // 에러 로그를 파일에 기록
     new winston.transports.File({ filename: "./logs/combined.log" }), // 모든 로그를 파일에 기록
   ],

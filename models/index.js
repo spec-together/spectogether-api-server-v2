@@ -88,16 +88,13 @@ const models = {
   InquiryAnswer: InquiryAnswer.init(sequelize),
   StudyroomVideocallMember: StudyroomVideocallMember.init(sequelize),
   StudyroomChat: StudyroomChat.init(sequelize),
+  Sequelize,
+  sequelize,
 };
 
 // 모델 간의 관계 설정
 Object.values(models)
   .filter((model) => typeof model.associate === "function")
   .forEach((model) => model.associate(models));
-
-// Sequelize 인스턴스
-models.sequelize = sequelize;
-// Sequelize 패키지
-models.Sequelize = Sequelize;
 
 module.exports = models;

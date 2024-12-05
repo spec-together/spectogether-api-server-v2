@@ -1,7 +1,7 @@
 const RegisterUserSchema = {
   type: "object",
   properties: {
-    userRegisterType: {
+    user_register_type: {
       type: "string",
       enum: ["local", "kakao"],
       description: "The type of user registration",
@@ -19,11 +19,11 @@ const RegisterUserSchema = {
       format: "date",
       description: "The birthdate of the user",
     },
-    phoneNumber: {
+    phone_number: {
       type: "string",
       description: "The phone number of the user",
     },
-    phoneNumberVerificationId: {
+    phone_number_verification_id: {
       type: "string",
       description: "The phone number verification ID",
     },
@@ -32,11 +32,11 @@ const RegisterUserSchema = {
       format: "email",
       description: "The email of the user",
     },
-    emailVerificationId: {
+    email_verification_id: {
       type: "string",
       description: "The email verification ID",
     },
-    profileImage: {
+    profile_image: {
       type: "string",
       format: "binary",
       description: "The profile image of the user",
