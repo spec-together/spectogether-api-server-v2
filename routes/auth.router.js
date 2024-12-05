@@ -13,7 +13,7 @@ const {
 // 회원가입
 /**
  * @swagger
- * /users:
+ * /auth/register:
  *   post:
  *     summary: 새로운 사용자를 생성합니다.
  *     tags: [Users]
@@ -35,7 +35,7 @@ const {
  *       500:
  *         description: 서버 오류
  */
-router.get("/register", handleUserRegister);
+router.post("/register", handleUserRegister);
 // 로컬 로그인
 router.get("/login/local", handleUserLocalLogin);
 // OAuth2 : 카카오 로그인
