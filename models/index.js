@@ -100,7 +100,9 @@ Object.values(models)
   .filter((model) => typeof model.associate === "function")
   .forEach((model) => model.associate(models));
 
+// Sequelize 인스턴스
 models.sequelize = sequelize;
+// Sequelize 패키지
 models.Sequelize = Sequelize;
 
 module.exports = models;

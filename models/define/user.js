@@ -17,6 +17,11 @@ class User extends Model {
           type: DataTypes.STRING(255),
           allowNull: false,
         },
+        password: {
+          // 추가된 비밀번호 필드
+          type: DataTypes.STRING(1024),
+          allowNull: false,
+        },
         birthdate: {
           type: DataTypes.DATEONLY,
           allowNull: false,
@@ -28,18 +33,23 @@ class User extends Model {
         email: {
           type: DataTypes.STRING(255),
           allowNull: false,
+          unique: true, // 이메일의 고유성 추가
         },
         profile_image: {
           type: DataTypes.STRING(255),
           allowNull: false,
         },
         spec_level: {
+          // 기본값 추가
           type: DataTypes.INTEGER,
           allowNull: false,
+          defaultValue: 1,
         },
-        manner_level: {
-          type: DataTypes.INTEGER,
+        manner_score: {
+          // 필드명 변경 및 기본값, unsigned 설정
+          type: DataTypes.INTEGER.UNSIGNED,
           allowNull: false,
+          defaultValue: 5000,
         },
         created_at: {
           type: DataTypes.DATE(6),
@@ -55,7 +65,7 @@ class User extends Model {
       {
         sequelize,
         tableName: "user",
-        timestamps: false,
+        timestamps: false, // created_at 및 updated_at을 수동으로 관리
       }
     );
   }
