@@ -20,6 +20,57 @@ class DatabaseError extends Error {
   }
 }
 
+class InvalidInputError extends Error {
+  errorCode = "INVALID_INPUT"; // 한두단어로 에러표시
+  statusCode = 400; // 해당 에러 발생 시 전달할 응답코드
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+class AlreadyExistsError extends Error {
+  errorCode = "ALREADY_EXISTS"; // 한두단어로 에러표시
+  statusCode = 407; // 해당 에러 발생 시 전달할 응답코드
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+class NotExistsError extends Error {
+  errorCode = "NOT_EXISTS"; // 한두단어로 에러표시
+  statusCode = 404; // 해당 에러 발생 시 전달할 응답코드
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+class NotAllowedError extends Error {
+  errorCode = "NOT_ALLOWED"; // 한두단어로 에러표시
+  statusCode = 403; // 해당 에러 발생 시 전달할 응답코드
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+class UnauthorizedError extends Error {
+  errorCode = "UNAUTHORIZED"; // 한두단어로 에러표시
+  statusCode = 401; // 해당 에러 발생 시 전달할 응답코드
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+
 /*
 사용할 땐 아래와 같이 사용하면 됩니다.
 throw new SampleError("그냥 냈음", { data: "sample data" });
@@ -28,4 +79,9 @@ throw new SampleError("그냥 냈음", { data: "sample data" });
 module.exports = {
   SampleError,
   DatabaseError,
+  InvalidInputError,
+  AlreadyExistsError,
+  NotExistsError,
+  NotAllowedError,
+  UnauthorizedError,
 };

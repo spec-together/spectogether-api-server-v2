@@ -11,6 +11,23 @@ const handleUserRegister = async (req, res, next) => {
   5. calendar 생성, user_calendar 연결
   6. todo는 나중에 테이블에 쿼리 떄릴거임
   */
+  try {
+    const {
+      user_register_type,
+      name,
+      nickname,
+      birthdate,
+      phone_number,
+      phone_number_verification_id,
+      email,
+      email_verification_id,
+      profile_image,
+      password,
+    } = req.body;
+  } catch (error) {
+    logger.error(error);
+    next(error);
+  }
 };
 
 const handleCreateTestUser = async (req, res, next) => {

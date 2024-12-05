@@ -11,7 +11,6 @@ const {
   handleCreateTestUser,
 } = require("../controllers/auth.controller");
 
-// 회원가입
 /**
  * @swagger
  * /auth/register:
