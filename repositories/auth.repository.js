@@ -69,6 +69,21 @@ const getUserByEmailOrPhoneNumber = async (email, phoneNumber) => {
   return user;
 };
 
+const getUserByPhoneNumber = async (phoneNumber) => {
+  logger.debug(`[getUserByPhoneNumber] 찾을 전화번호 : ${phoneNumber}`);
+  const user = await User.findOne({
+    attributes: ["user_id", "name", "nickname", "password"],
+    where: {
+      phone_number: phoneNumber,
+    },
+  });
+  logger.debug(
+    `[getUserByPhoneNumber] 전화번호로 사용자를 검색했습니다 : ${JSON.stringify(user, null, 2)}`
+  );
+
+  return user;
+};
+
 const getEmailByEmailVerificationId = async (id) => {
   const result = await EmailVerificationCode.findByPk(id);
   logger.debug(
@@ -89,4 +104,5 @@ module.exports = {
   connectUserWithCalendar,
   getUserByEmailOrPhoneNumber,
   getEmailByEmailVerificationId,
+  getUserByPhoneNumber,
 };

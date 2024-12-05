@@ -51,7 +51,31 @@ router.post("/register", handleUserRegister);
  */
 router.post("/register/test", handleCreateTestUser);
 // 로컬 로그인
-router.get("/login/local", handleUserLocalLogin);
+/**
+ * @swagger
+ * /auth/login/local:
+ *   post:
+ *     summary: 로컬 로그인을 수행합니다.
+ *     tags: [auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginUserSchema'
+ *     responses:
+ *       200:
+ *         description: 로그인 성공
+ *       400:
+ *         description: 잘못된 요청 데이터
+ *       403:
+ *         description: 비밀번호 일치하지 않음
+ *       404:
+ *         description: 존재하지 않는 사용자에 대한 로그인 시도
+ *       500:
+ *         description: 서버 오류
+ */
+router.post("/login/local", handleUserLocalLogin);
 // OAuth2 : 카카오 로그인
 router.get("/login/kakao", handleKakaoLogin);
 router.get("/login/kakao/callback", handleKakaoCallback);

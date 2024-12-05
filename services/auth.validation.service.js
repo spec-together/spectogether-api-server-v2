@@ -32,8 +32,20 @@ const newUserInputSchema = {
   additionalProperties: false,
 };
 
+const loginInputSchema = {
+  type: "object",
+  properties: {
+    login_id: { type: "string", pattern: "^\\d{3}-\\d{3,4}-\\d{4}$" },
+    password: { type: "string" },
+  },
+  required: ["login_id", "password"],
+  additionalProperties: false,
+};
+
 const validateNewUserInputSchema = ajv.compile(newUserInputSchema);
+const validateLoginInputSchema = ajv.compile(loginInputSchema);
 
 module.exports = {
   validateNewUserInputSchema,
+  validateLoginInputSchema,
 };

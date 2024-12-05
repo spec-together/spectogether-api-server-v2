@@ -79,7 +79,17 @@ const CreateTestUserSchema = {
   required: ["name", "email", "phone_number"],
 };
 
+const LoginUserSchema = {
+  type: "object",
+  properties: {
+    login_id: { type: "string", description: "로그인 아이디" },
+    password: { type: "string", description: "비밀번호" },
+  },
+  required: ["loginId", "password"],
+};
+
 module.exports = {
   RegisterUserSchema,
   CreateTestUserSchema,
+  LoginUserSchema,
 };

@@ -1,17 +1,27 @@
 const { DatabaseError } = require("sequelize");
 const {
   createTestUserService,
-  validateUserDataService,
+  validateRegisterInputService,
   checkDuplicateUserService,
   createNewUserService,
   createCalendarForNewUserService,
+  validateLoginInputService,
+  getUserInfoService,
 } = require("../services/auth.service");
 const logger = require("../logger");
-const { InvalidInputError, AlreadyExistsError } = require("../errors");
-const { decrypt62 } = require("../services/encrypt.service");
+const {
+  InvalidInputError,
+  AlreadyExistsError,
+  NotAllowedError,
+} = require("../errors");
+const { decrypt62, comparePassword } = require("../services/encrypt.service");
 const {
   getEmailByEmailVerificationId,
 } = require("../repositories/auth.repository");
+const {
+  createAccessTokenService,
+  createRefreshTokenService,
+} = require("../services/auth.token.service");
 
 const handleUserRegister = async (req, res, next) => {
   /*
@@ -26,7 +36,7 @@ const handleUserRegister = async (req, res, next) => {
     const newUserData = req.body;
     // 데이터 검증
     logger.debug(`[handleUserRegister] 데이터 검증`);
-    const validation = validateUserDataService(newUserData);
+    const validation = validateRegisterInputService(newUserData);
     if (!validation.isValid) {
       throw new InvalidInputError({
         error: validation.errors,
@@ -67,7 +77,13 @@ const handleUserRegister = async (req, res, next) => {
       message: "사용자 생성에 성공했습니다.",
     });
   } catch (error) {
-    logger.error(`[handleUserRegister] ${JSON.stringify(error, null, 2)}`);
+    logger.error(
+      `[handleUserRegister]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
     next(error);
   }
 };
@@ -84,7 +100,13 @@ const handleCreateTestUser = async (req, res, next) => {
       message: "테스트 유저 생성에 성공했습니다.",
     });
   } catch (error) {
-    logger.error(`[handleCreateTestUser] ${JSON.stringify(error, null, 2)}`);
+    logger.error(
+      `[handleCreateTestUser]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
     next(error);
   }
 };
@@ -97,6 +119,60 @@ const handleUserLocalLogin = async (req, res, next) => {
   4. 사용자가 존재하면 비밀번호 확인 - 틀리면 401 반환
   5. JWT 토큰 발급
   */
+  try {
+    // 데이터 검증
+    const reqBody = req.body;
+    const { login_id, password } = reqBody;
+    const validation = validateLoginInputService(reqBody);
+    if (!validation.isValid) {
+      throw new InvalidInputError({
+        error: validation.errors,
+        message: "입력값이 올바르지 않습니다.",
+      });
+    }
+
+    // 사용자 조회 후 사용자 정보 받아오기
+    logger.debug(`[handleUserLocalLogin] 사용자 조회`);
+    const user = await getUserInfoService(login_id);
+    const passwordCheck = await comparePassword(password, user.password);
+    if (!passwordCheck) {
+      throw new NotAllowedError({
+        message: "비밀번호가 일치하지 않습니다.",
+      });
+    }
+
+    // JWT 토큰 발급
+    const { user_id, name, nickname } = user;
+    const accessToken = createAccessTokenService(user_id, name, nickname);
+    const refreshToken = await createRefreshTokenService(user_id);
+    logger.debug(
+      `[handleUserLocalLogin] 토큰 발급 완료\
+      \nAT : ${accessToken}\
+      \nRT : ${refreshToken}`
+    );
+    const cookieOptions = {
+      maxAge: 1000 * 60 * 60 * 24 * 7, // ms * s * m * h * d 7일
+      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+    };
+
+    return res
+      .status(200)
+      .cookie("SPECTOGETHER_RT", refreshToken, cookieOptions)
+      .success({
+        access_token: accessToken,
+      });
+  } catch (error) {
+    logger.error(
+      `[handleUserLocalLogin]\
+      \nNAME ${error.name} \
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
 };
 
 const handleKakaoLogin = async (req, res, next) => {

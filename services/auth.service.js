@@ -1,20 +1,39 @@
 const { User } = require("../models");
 const { generateHashedPassword } = require("./encrypt.service");
-const { validateNewUserInputSchema } = require("./auth.validation.service");
+const {
+  validateNewUserInputSchema,
+  validateLoginInputSchema,
+} = require("./auth.validation.service");
 const {
   getUserByEmailOrPhoneNumber,
   createNewUser,
   createNewCalendar,
   connectUserWithCalendar,
+  getUserByPhoneNumber,
 } = require("../repositories/auth.repository");
 const logger = require("../logger");
+const { NotExistsError } = require("../errors");
 
-const validateUserDataService = (data) => {
+const validateRegisterInputService = (data) => {
   const valid = validateNewUserInputSchema(data);
   if (!valid) {
     return {
       isValid: false,
       errors: validateNewUserInputSchema.errors,
+    };
+  }
+  return {
+    isValid: true,
+    errors: null,
+  };
+};
+
+const validateLoginInputService = (data) => {
+  const valid = validateLoginInputSchema(data);
+  if (!valid) {
+    return {
+      isValid: false,
+      errors: validateLoginInputSchema.errors,
     };
   }
   return {
@@ -79,12 +98,22 @@ const createCalendarForNewUserService = async (userId) => {
   return userCalendar;
 };
 
+const getUserInfoService = async (loginId, password) => {
+  const user = await getUserByPhoneNumber(loginId);
+  if (!user) {
+    throw new NotExistsError("가입되지 않은 사용자입니다.");
+  }
+  return user;
+};
+
 module.exports = {
-  validateUserDataService,
+  validateRegisterInputService,
+  validateLoginInputService,
   createTestUserService,
   checkDuplicateUserService,
   createNewUserService,
   createCalendarForNewUserService,
+  getUserInfoService,
 };
 
 /*
