@@ -1,5 +1,6 @@
 const { DatabaseError } = require("sequelize");
 const { createTestUserService } = require("../services/auth.service");
+const logger = require("../logger");
 
 const handleUserRegister = async (req, res, next) => {
   /*
@@ -13,13 +14,18 @@ const handleUserRegister = async (req, res, next) => {
 };
 
 const handleCreateTestUser = async (req, res, next) => {
-  const { name, email, phone_number } = req.body;
-  const newUser = await createTestUserService(name, email, phone_number);
-  if (!newUser) throw new DatabaseError("테스트 유저 생성에 실패했습니다.");
-  res.status(201).success({
-    created_user: newUser,
-    message: "테스트 유저 생성에 성공했습니다.",
-  });
+  try {
+    const { name, email, phone_number } = req.body;
+    const newUser = await createTestUserService(name, email, phone_number);
+    if (!newUser) throw new DatabaseError("테스트 유저 생성에 실패했습니다.");
+    res.status(201).success({
+      created_user: newUser,
+      message: "테스트 유저 생성에 성공했습니다.",
+    });
+  } catch (error) {
+    logger.error(error);
+    next(error);
+  }
 };
 
 const handleUserLocalLogin = async (req, res, next) => {

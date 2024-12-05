@@ -29,6 +29,7 @@ class User extends Model {
         phone_number: {
           type: DataTypes.STRING(50),
           allowNull: false,
+          unique: true, // 전화번호의 고유성 추가
         },
         email: {
           type: DataTypes.STRING(255),

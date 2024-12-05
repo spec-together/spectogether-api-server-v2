@@ -27,10 +27,10 @@ const errorHandler = (err, req, res, next) => {
     );
     return next(err);
   }
-
+  logger.error(err);
   res.status(err.statusCode || 500).error({
-    errorCode: err.errorCode || "unknown",
-    reason: err.reason || err.message || null,
+    errorCode: err.errorCode || "UNHANDLED_ERROR",
+    reason: err.name || err.reason || err.message || null,
     data: err.data || null,
   });
 };

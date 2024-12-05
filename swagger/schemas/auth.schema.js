@@ -59,6 +59,26 @@ const RegisterUserSchema = {
   ],
 };
 
+const CreateTestUserSchema = {
+  type: "object",
+  properties: {
+    name: {
+      type: "string",
+      description: "테스트 유저 이름",
+    },
+    email: {
+      type: "string",
+      format: "email",
+      description: "테스트 유저 이메일, 중복되면 안됩니다.",
+    },
+    phone_number: {
+      type: "string",
+      description: "테스트 유저 전화번호, 중복되면 안됩니다.",
+    },
+  },
+  required: ["name", "email", "phone_number"],
+};
+
 module.exports = {
   RegisterUserSchema,
 };

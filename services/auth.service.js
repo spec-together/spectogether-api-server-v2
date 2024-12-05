@@ -1,6 +1,6 @@
 const { User } = require("../models");
 const { generateHashedPassword } = require("./encrypt.service");
-const { validateNewUserInputSchema } = require("./validation.service");
+const { validateNewUserInputSchema } = require("./auth.validation.service");
 
 const validateUserData = (data) => {
   const valid = validateNewUserInputSchema(data);
