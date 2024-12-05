@@ -1,11 +1,7 @@
-// base-x 패키지 설치 필요
-// 터미널에서 다음 명령어를 실행하세요:
-// npm install base-x
-
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const baseX = require("base-x").default;
-const { SALT_ROUNDS, CIPHER_SECRET_KEY } = require("../config.json");
+const { SALT_ROUNDS, CIPHER_SECRET_KEY } = require("../config.json").SERVER;
 
 // Base62 문자 집합 정의
 const BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";

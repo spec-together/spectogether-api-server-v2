@@ -1,11 +1,6 @@
 const Sequelize = require("sequelize");
-const {
-  MYSQL_DATABASE,
-  MYSQL_HOST,
-  MYSQL_PASSWORD,
-  MYSQL_PORT,
-  MYSQL_USER,
-} = require("../config.json");
+const { MYSQL_DATABASE, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_PORT, MYSQL_USER } =
+  require("../config.json").DATABASE;
 const logger = require("../logger");
 
 const User = require("./define/user");

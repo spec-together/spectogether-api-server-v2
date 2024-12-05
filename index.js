@@ -13,8 +13,7 @@ const http = require("http");
 const logger = require("./logger");
 const { corsOptions, sslOptions } = require("./options");
 
-const ENV = process.env.NODE_ENV || "development"; // false 부분에 추후 정리
-const { PORT } = require("./config.json")[ENV];
+const { PORT } = require("./config.json").SERVER;
 
 const { AccessTokenStrategy } = require("./passport.setup");
 const { errorHandler } = require("./handlers/req.res.handlers");
