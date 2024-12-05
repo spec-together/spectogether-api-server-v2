@@ -32,7 +32,7 @@ class InvalidInputError extends Error {
 }
 class AlreadyExistsError extends Error {
   errorCode = "ALREADY_EXISTS"; // 한두단어로 에러표시
-  statusCode = 407; // 해당 에러 발생 시 전달할 응답코드
+  statusCode = 409; // 해당 에러 발생 시 전달할 응답코드
 
   constructor(reason, data) {
     super(reason);

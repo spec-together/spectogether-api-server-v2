@@ -27,11 +27,14 @@ const errorHandler = (err, req, res, next) => {
     );
     return next(err);
   }
-  logger.error(JSON.stringify(err, null, 2));
+  logger.error(`[handleUserRegister] ${err.message}`, {
+    stack: err.stack,
+  });
   res.status(err.statusCode || 500).error({
     errorCode: err.errorCode || "UNHANDLED_ERROR",
     reason: err.name || err.reason || err.message || null,
-    data: err.message || err.data || null,
+    data: err.data || null,
+    stack: err.stack || null,
   });
 };
 
