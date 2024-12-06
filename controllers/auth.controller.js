@@ -9,6 +9,7 @@ const {
   checkIfTokenIsValidService,
   removeRefreshTokenFromDatabaseByTokenStringService,
   checkIfRefreshTokenExistsByTokenStringService,
+  checkAndReturnRefreshTokenIfExistsInRequestCookie,
 } = require("../services/auth.service");
 const logger = require("../logger");
 const {
@@ -257,24 +258,11 @@ const handleKakaoPassportCallback = async (err, user, info, req, res, next) => {
 const handleUserLogout = async (req, res, next) => {
   // FE에서 AT는 직접 지워야 합니다.
   try {
-    const refreshToken = req.cookies.SPECTOGETHER_RT;
-    if (!refreshToken) {
-      throw new UnauthorizedError("로그인 상태가 아닙니다.");
-    }
+    const refreshToken = checkAndReturnRefreshTokenIfExistsInRequestCookie(req);
     const isTokenValid = checkIfTokenIsValidService(refreshToken);
-    if (!isTokenValid.isValid) {
-      throw new NotAllowedError("유효하지 않은 토큰입니다.");
-    }
     // const { user_id } = isTokenValid.decoded;
     // DB에 저장된 RT 삭제
-    const deleteResult =
-      await removeRefreshTokenFromDatabaseByTokenStringService(refreshToken);
-    if (deleteResult === 0) {
-      throw new NotExistsError("존재하지 않는 RT 입니다.");
-    }
-    logger.debug(
-      `[handleUserLogout] 로그아웃 성공, ${deleteResult}개의 refresh token이 삭제되었습니다.`
-    );
+    await removeRefreshTokenFromDatabaseByTokenStringService(refreshToken);
 
     return res
       .status(200)
@@ -298,19 +286,9 @@ const handleReissueAccessToken = async (req, res, next) => {
   2. AT 재발급
   */
   try {
-    const refreshToken = req.cookies.SPECTOGETHER_RT;
-    if (!refreshToken) {
-      throw new UnauthorizedError("로그인 상태가 아닙니다.");
-    }
+    const refreshToken = checkAndReturnRefreshTokenIfExistsInRequestCookie(req);
     const isTokenValid = checkIfTokenIsValidService(refreshToken);
-    if (!isTokenValid.isValid) {
-      throw new NotAllowedError("유효하지 않은 토큰입니다.");
-    }
-    const isRefreshTokenExists =
-      await checkIfRefreshTokenExistsByTokenStringService(refreshToken);
-    if (!isRefreshTokenExists) {
-      throw new NotExistsError("존재하지 않는 RT 입니다.");
-    }
+    await checkIfRefreshTokenExistsByTokenStringService(refreshToken);
     const { user_id, name, nickname } = isTokenValid.decoded;
     const newAccessToken = createAccessTokenService(user_id, name, nickname);
 

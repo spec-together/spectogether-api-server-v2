@@ -15,7 +15,7 @@ const {
   checkIfRefreshTokenExistsByTokenString,
 } = require("../repositories/auth.repository");
 const logger = require("../logger");
-const { NotExistsError } = require("../errors");
+const { NotExistsError, NotAllowedError } = require("../errors");
 const { saveKakaoUserInfo } = require("../repositories/passport.repository");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config.json").SERVER;
@@ -130,26 +130,45 @@ const checkIfTokenIsValidService = (token) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     return { isValid: true, decoded };
   } catch (error) {
-    return { isValid: false, error: error.message };
+    throw new NotAllowedError("유효하지 않은 토큰입니다.");
+    // return { isValid: false, error: error.message };
   }
 };
 
-const removeRefreshTokenFromDatabaseByUserIdService = async (userId) => {
-  const result = await removeRefreshTokenFromDatabaseByUserId(userId);
+// deprecated
+// const removeRefreshTokenFromDatabaseByUserIdService = async (userId) => {
+//   const result = await removeRefreshTokenFromDatabaseByUserId(userId);
 
-  return result;
-};
+//   return result;
+// };
 
 const removeRefreshTokenFromDatabaseByTokenStringService = async (token) => {
   const result = await removeRefreshTokenFromDatabaseByTokenString(token);
-
+  if (result === 0) {
+    throw new NotExistsError("존재하지 않는 RT 입니다.");
+  }
+  logger.debug(
+    `[removeRefreshTokenFromDatabaseByTokenStringService] 로그아웃 성공, ${result}개의 refresh token이 삭제되었습니다.`
+  );
   return result;
 };
 
 const checkIfRefreshTokenExistsByTokenStringService = async (token) => {
   const result = await checkIfRefreshTokenExistsByTokenString(token);
 
+  if (!result) {
+    throw new NotExistsError("존재하지 않는 RT 입니다.");
+  }
+
   return result;
+};
+
+const checkAndReturnRefreshTokenIfExistsInRequestCookie = (req) => {
+  const refreshToken = req.cookies.SPECTOGETHER_RT;
+  if (!refreshToken) {
+    throw new UnauthorizedError("로그인 상태가 아닙니다.");
+  }
+  return refreshToken;
 };
 
 module.exports = {
@@ -162,9 +181,9 @@ module.exports = {
   getUserInfoService,
   saveKakaoUserInfoService,
   checkIfTokenIsValidService,
-  removeRefreshTokenFromDatabaseByUserIdService,
   removeRefreshTokenFromDatabaseByTokenStringService,
   checkIfRefreshTokenExistsByTokenStringService,
+  checkAndReturnRefreshTokenIfExistsInRequestCookie,
 };
 
 /*
