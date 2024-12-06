@@ -92,6 +92,15 @@ router.get("/login/kakao", passport.authenticate("kakao", { session: false }));
  *   get:
  *     summary: 카카오 로그인 콜백을 수행합니다.
  *     tags: [auth]
+ *     responses:
+ *       200:
+ *         description: 로그인 성공
+ *       202:
+ *         description: 가입되지 않은 사용자
+ *       500:
+ *         description: 서버 오류
+ *       503:
+ *         description: 연결된 서비스 오류
  */
 router.get("/login/kakao/callback", handleKakaoCallback);
 // 로그아웃

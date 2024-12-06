@@ -211,9 +211,9 @@ const handleKakaoPassportCallback = async (err, user, info, req, res, next) => {
         `[handleKakaoCallback 2-1] 가입되어 있지 않은 사용자입니다. info : ${JSON.stringify(info, null, 2)}`
       );
       return res.status(202).success(`
-          <script>\
-            window.opener.postMessage({ not_registered_user: ${JSON.stringify({ email })} }, '${FRONTEND_URL}');\
-            window.close();\
+          <script>
+            window.opener.postMessage({ not_registered_user: ${JSON.stringify({ email })} }, '${FRONTEND_URL}');
+            window.close();
           </script>
         `);
     }
@@ -232,9 +232,9 @@ const handleKakaoPassportCallback = async (err, user, info, req, res, next) => {
       .status(200)
       .cookie("SPECTOGETHER_RT", refreshToken, refreshTokenCookieOptions)
       .success(`
-          <script>\
-            window.opener.postMessage(${JSON.stringify({ token: accessToken, user_id, name, nickname })}, '${FRONTEND_URL}');\
-            window.close();\
+          <script>
+            window.opener.postMessage(${JSON.stringify({ token: accessToken, user_id, name, nickname })}, '${FRONTEND_URL}');
+            window.close();
           </script>
         `);
   } catch (error) {

@@ -24,10 +24,17 @@ const options = {
     ],
     components: {
       securitySchemes: {
-        bearerAuth: {
+        AccessToken_Bearer: {
           type: "http",
           scheme: "bearer",
           bearerFormat: "JWT",
+          description: "Bearer JWT를 활용한 AT 인증입니다.",
+        },
+        RefreshToken_Cookie: {
+          type: "apiKey",
+          in: "cookie",
+          name: "SPECTOGETHER_RT",
+          description: "Secure & HTTP-Only Cookie를 활용한 RT 인증입니다.",
         },
       },
       schemas: {
@@ -37,7 +44,8 @@ const options = {
     },
     security: [
       {
-        bearerAuth: [],
+        AccessToken_Bearer: [],
+        RefreshToken_Cookie: [],
       },
     ],
   },
