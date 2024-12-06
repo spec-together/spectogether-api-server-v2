@@ -2,6 +2,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const authSchema = require("./schemas/auth.schema");
 const responseSchema = require("./schemas/response.schema");
+const usersSchema = require("./schemas/users.schema");
 
 // Swagger 옵션 설정
 const options = {
@@ -40,6 +41,7 @@ const options = {
       schemas: {
         ...authSchema,
         ...responseSchema,
+        ...usersSchema,
       },
     },
     security: [

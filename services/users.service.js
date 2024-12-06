@@ -1,6 +1,10 @@
 const { NotExistsError } = require("../errors");
 const logger = require("../logger");
-const { getAgreedTermsByUserId } = require("../repositories/users.repository");
+const {
+  getAgreedTermsByUserId,
+  getUserTodoByUserId,
+  getUserStudyroomByUserId,
+} = require("../repositories/users.repository");
 
 const getUserAgreedTermsService = async (user_id) => {
   const userAgreedTerms = await getAgreedTermsByUserId(user_id);
@@ -29,6 +33,54 @@ const getUserAgreedTermsService = async (user_id) => {
   return ret;
 };
 
+const getUserStudyroomService = async (userId) => {
+  const studyrooms = await getUserStudyroomByUserId(userId);
+  if (!studyrooms) {
+    throw new NotExistsError("해당 사용자의 스터디룸이 없습니다.");
+  }
+
+  let ret = [];
+  for (const studyroom of studyrooms) {
+    ret.push({
+      studyroom_id: studyroom.studyroom_id,
+      title: studyroom.title,
+      description: studyroom.description,
+      status: studyroom.status,
+      created_at: studyroom.created_at,
+    });
+  }
+
+  return ret;
+};
+
+const getUserTodoService = async (userId) => {
+  const todos = await getUserTodoByUserId(userId);
+  if (!todos) {
+    throw new NotExistsError("해당 사용자의 할 일이 없습니다.");
+  }
+
+  let ret = [];
+
+  for (const todo of todos) {
+    ret.push({
+      todo_id: todo.todo_id,
+      title: todo.title,
+      subtitle: todo.subtitle,
+      content: todo.content,
+      creater_id: todo.creater_id,
+      deadline: todo.deadline,
+      status: todo.status,
+      created_at: todo.created_at,
+      assigned_user_id: userId,
+      assigned_status: todo.TodoMembers[0]?.status,
+    });
+  }
+
+  return ret;
+};
+
 module.exports = {
   getUserAgreedTermsService,
+  getUserStudyroomService,
+  getUserTodoService,
 };

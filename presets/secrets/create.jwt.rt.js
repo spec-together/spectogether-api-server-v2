@@ -19,4 +19,4 @@ const createRefreshTokenWithoutWritingToDb = async (user_id) => {
   return result;
 };
 
-console.log(createRefreshTokenWithoutWritingToDb(30));
+console.log(createRefreshTokenWithoutWritingToDb(6));

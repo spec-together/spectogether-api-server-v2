@@ -1,12 +1,16 @@
 const express = require("express");
-const { handleGetUsersAgreedTerm } = require("../controllers/users.controller");
+const {
+  handleGetUsersAgreedTerm,
+  handleGetUserStudyrooms,
+  handleGetUserTodos,
+} = require("../controllers/users.controller");
 const { authenticateAccessToken } = require("../middleware/authenticate.jwt");
 const router = express.Router();
 
 router.get("/terms", authenticateAccessToken, handleGetUsersAgreedTerm);
 
-router.get("/studyrooms");
-router.get("/todos");
+router.get("/studyrooms", authenticateAccessToken, handleGetUserStudyrooms);
+router.get("/todos", authenticateAccessToken, handleGetUserTodos);
 router.get("/specs");
 router.get("/neighborhoods");
 router.get("/profile");
@@ -55,6 +59,10 @@ module.exports = router;
  *     responses:
  *       200:
  *         description: 투두 목록을 성공적으로 가져왔습니다.
+ *         content:
+ *          application/json:
+ *           schema:
+ *            $ref: '#/components/schemas/getUsersTodosResponseSchema'
  *       401:
  *         description: 인증이 필요합니다.
  *       500:
