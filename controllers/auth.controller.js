@@ -180,7 +180,7 @@ const handleKakaoPassportCallback = async (err, user, info, req, res, next) => {
     if (!user) {
       const email = info?.user?.email;
       if (!email) {
-        logger.fatal(
+        logger.error(
           `[handleKakaoCallback 2] 카카오 서버에서 받아온 정보가 올바르지 않습니다. ${JSON.stringify(info, null, 2)}`
         );
         throw new RelatedServiceUnavailableError({

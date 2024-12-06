@@ -1,9 +1,13 @@
 const logger = require("../logger");
+const { encrypt62, decrypt62 } = require("../services/encrypt.service");
 const {
   getUserAgreedTermsService,
   getUserTodoService,
   getUserStudyroomService,
   getUserSpecsByUserIdService,
+  getUserNeighborhoodsByUserIdService,
+  getUserMyProfileService,
+  getOtherUserProfileService,
 } = require("../services/users.service");
 
 const handleGetUsersAgreedTerm = async (req, res, next) => {
@@ -94,9 +98,82 @@ const handleGetUserSpecs = async (req, res, next) => {
   }
 };
 
+const handleGetUserNeighborhoods = async (req, res, next) => {
+  try {
+    logger.info(
+      `[handleGetUserNeighborhoods] req.user : ${JSON.stringify(req.user, null, 2)}`
+    );
+    const { user_id } = req.user;
+    const userNeighborhoods =
+      await getUserNeighborhoodsByUserIdService(user_id);
+    return res.status(200).success({
+      neighborhoods: userNeighborhoods,
+    });
+  } catch (error) {
+    logger.error(
+      `[handleGetUserNeighborhoods]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
+};
+
+const handleGetUserMyProfile = async (req, res, next) => {
+  try {
+    logger.info(
+      `[handleGetUserMyProfile] req.user : ${JSON.stringify(req.user, null, 2)}`
+    );
+    const { user_id } = req.user;
+    const user = await getUserMyProfileService(user_id);
+    const neighborhoods = await getUserNeighborhoodsByUserIdService(user_id);
+    user.dataValues.neighborhoods = neighborhoods;
+    user.dataValues.user_id = encrypt62(user.dataValues.user_id);
+    return res.status(200).success({
+      user,
+    });
+  } catch (error) {
+    logger.error(
+      `[handleGetUserMyProfile]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
+};
+
+const handleGetOtherUserProfile = async (req, res, next) => {
+  try {
+    logger.info(
+      `[handleGetOtherUserProfile] req.params : ${JSON.stringify(req.params, null, 2)}`
+    );
+    const { user_id } = req.params;
+    const user = await getOtherUserProfileService(decrypt62(user_id));
+    return res.status(200).success({
+      user,
+    });
+  } catch (error) {
+    logger.error(
+      `[handleGetOtherUserProfile]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
+};
+
 module.exports = {
   handleGetUsersAgreedTerm,
   handleGetUserStudyrooms,
   handleGetUserTodos,
   handleGetUserSpecs,
+  handleGetUserNeighborhoods,
+  handleGetUserMyProfile,
+  handleGetOtherUserProfile,
 };

@@ -5,6 +5,9 @@ const {
   getUserTodoByUserId,
   getUserStudyroomByUserId,
   getUserSpecsByUserId,
+  getUserNeighborhoodsByUserId,
+  getSensitiveUserProfileByUserId,
+  getInsensitiveUserProfileByUserId,
 } = require("../repositories/users.repository");
 
 const getUserAgreedTermsService = async (user_id) => {
@@ -98,9 +101,50 @@ const getUserSpecsByUserIdService = async (userId) => {
   return specs;
 };
 
+const getUserNeighborhoodsByUserIdService = async (userId) => {
+  const userNeighborhoods = await getUserNeighborhoodsByUserId(userId);
+  logger.debug(
+    `[getUserNeighborhoodsByUserIdService] 해당 사용자의 동네를 가져옵니다: ${JSON.stringify(
+      userNeighborhoods,
+      null,
+      2
+    )}`
+  );
+  if (!userNeighborhoods) {
+    throw new NotExistsError("해당 사용자의 동네가 없습니다.");
+  }
+  // Spec 데이터만 추출
+  const neighborhoods = userNeighborhoods
+    .map((un) => un.Area)
+    .filter((area) => area !== null);
+
+  return neighborhoods;
+};
+
+const getUserMyProfileService = async (userId) => {
+  const user = await getSensitiveUserProfileByUserId(userId);
+  if (!user) {
+    throw new NotExistsError("해당 사용자가 없습니다.");
+  }
+
+  return user;
+};
+
+const getOtherUserProfileService = async (otherUserId) => {
+  const user = await getInsensitiveUserProfileByUserId(otherUserId);
+  if (!user) {
+    throw new NotExistsError("해당 사용자가 없습니다.");
+  }
+
+  return user;
+};
+
 module.exports = {
   getUserAgreedTermsService,
   getUserStudyroomService,
   getUserTodoService,
   getUserSpecsByUserIdService,
+  getUserNeighborhoodsByUserIdService,
+  getUserMyProfileService,
+  getOtherUserProfileService,
 };

@@ -6,6 +6,12 @@ const jwt = require("jsonwebtoken");
 const { encrypt62 } = require("../../services/encrypt.service");
 
 // createAccessTokenService("1", "kw", "admin");
+const createBearerToken = (user_id) => {
+  const at = createAccessTokenService(user_id, "kw", "admin");
+  return `Bearer ${at}`;
+};
+
+console.log(createBearerToken(1));
 
 const createRefreshTokenWithoutWritingToDb = async (user_id) => {
   const payload = {
@@ -19,4 +25,4 @@ const createRefreshTokenWithoutWritingToDb = async (user_id) => {
   return result;
 };
 
-console.log(createRefreshTokenWithoutWritingToDb(6));
+// console.log(createRefreshTokenWithoutWritingToDb(6));

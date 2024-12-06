@@ -8,7 +8,7 @@ const {
 const passportGetUserByUserIdService = async (userId) => {
   const user = await getUserByUserId(userId);
   if (!user) {
-    logger.fatal(`[FATAL_SECURITY] JWT SECRET GOT LEAKED`);
+    logger.error(`[FATAL_SECURITY] JWT SECRET GOT LEAKED`);
     throw new InvalidInputError("HOW?");
   }
   const ret = {

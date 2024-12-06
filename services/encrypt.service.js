@@ -37,7 +37,7 @@ if (key.length !== 32) {
 const encrypt62 = (text) => {
   try {
     if (typeof text === "number") {
-      logger.fatal(
+      logger.error(
         `[encrypt62] int값을 암호화하려 시도했습니다. string으로 수정하는 것을 권고합니다. text: ${text}`
       );
       text = text.toString();

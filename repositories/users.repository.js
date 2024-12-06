@@ -6,6 +6,9 @@ const {
   TodoMember,
   UserSpec,
   Spec,
+  UserArea,
+  Area,
+  User,
 } = require("../models");
 
 const getAgreedTermsByUserId = async (userId) => {
@@ -75,9 +78,64 @@ const getUserSpecsByUserId = async (userId) => {
   return userSpecs;
 };
 
+const getUserNeighborhoodsByUserId = async (userId) => {
+  const userNeighborhoods = await UserArea.findAll({
+    where: {
+      user_id: userId,
+    },
+    attributes: [],
+    include: [
+      {
+        model: Area,
+        attributes: ["area_id", "name", "location", "legal_areacode"],
+        required: false,
+      },
+    ],
+  });
+
+  return userNeighborhoods;
+};
+
+const getSensitiveUserProfileByUserId = async (userId) => {
+  const profile = await User.findByPk(userId, {
+    attributes: [
+      "user_id",
+      "name",
+      "nickname",
+      "birthdate",
+      "phone_number",
+      "email",
+      "profile_image",
+      "spec_level",
+      "manner_score",
+      "created_at",
+    ],
+  });
+
+  return profile;
+};
+
+const getInsensitiveUserProfileByUserId = async (userId) => {
+  const profile = await User.findByPk(userId, {
+    attributes: [
+      "user_id",
+      "nickname",
+      "profile_image",
+      "spec_level",
+      "manner_score",
+      "created_at",
+    ],
+  });
+
+  return profile;
+};
+
 module.exports = {
   getAgreedTermsByUserId,
   getUserStudyroomByUserId,
   getUserTodoByUserId,
   getUserSpecsByUserId,
+  getUserNeighborhoodsByUserId,
+  getSensitiveUserProfileByUserId,
+  getInsensitiveUserProfileByUserId,
 };
