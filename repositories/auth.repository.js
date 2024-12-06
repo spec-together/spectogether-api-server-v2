@@ -124,6 +124,23 @@ const removeRefreshTokenFromDatabaseByTokenString = async (tokenString) => {
   return result;
 };
 
+const checkIfRefreshTokenExistsByTokenString = async (tokenString) => {
+  const token = await UserRefreshToken.findOne({
+    where: {
+      refresh_token: tokenString,
+    },
+  });
+  logger.debug(
+    `[checkRefreshTokenExists] 리프레시 토큰이 존재하는지 확인합니다: ${JSON.stringify(
+      token,
+      null,
+      2
+    )}`
+  );
+
+  return token;
+};
+
 module.exports = {
   createNewUser,
   createNewCalendar,
@@ -134,4 +151,5 @@ module.exports = {
   getUserByPhoneNumber,
   removeRefreshTokenFromDatabaseByUserId,
   removeRefreshTokenFromDatabaseByTokenString,
+  checkIfRefreshTokenExistsByTokenString,
 };

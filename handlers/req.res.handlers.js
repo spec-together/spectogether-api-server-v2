@@ -40,8 +40,8 @@ const errorHandler = (err, req, res, next) => {
     errorCode: err.errorCode || "UNHANDLED_ERROR",
     reason: err.reason || err.message || null,
     data: err.data || null,
-    stack: err.stack || null,
-    name: err.name || null,
+    // 여기에 아무리 추가해봤자 위에 error에 정의를 안해놔서 의미없음
+    // 그래서 지워버렸습니당 ~
   });
 };
 

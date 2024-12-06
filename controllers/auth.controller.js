@@ -8,6 +8,7 @@ const {
   getUserInfoService,
   checkIfTokenIsValidService,
   removeRefreshTokenFromDatabaseByTokenStringService,
+  checkIfRefreshTokenExistsByTokenStringService,
 } = require("../services/auth.service");
 const logger = require("../logger");
 const {
@@ -256,7 +257,6 @@ const handleKakaoPassportCallback = async (err, user, info, req, res, next) => {
 const handleUserLogout = async (req, res, next) => {
   // FE에서 AT는 직접 지워야 합니다.
   try {
-    console.log(req.cookies);
     const refreshToken = req.cookies.SPECTOGETHER_RT;
     if (!refreshToken) {
       throw new UnauthorizedError("로그인 상태가 아닙니다.");
@@ -293,7 +293,38 @@ const handleUserLogout = async (req, res, next) => {
 };
 
 const handleReissueAccessToken = async (req, res, next) => {
-  // ..
+  /*
+  1. RT가 유효한지 확인
+  2. AT 재발급
+  */
+  try {
+    const refreshToken = req.cookies.SPECTOGETHER_RT;
+    if (!refreshToken) {
+      throw new UnauthorizedError("로그인 상태가 아닙니다.");
+    }
+    const isTokenValid = checkIfTokenIsValidService(refreshToken);
+    if (!isTokenValid.isValid) {
+      throw new NotAllowedError("유효하지 않은 토큰입니다.");
+    }
+    const isRefreshTokenExists =
+      await checkIfRefreshTokenExistsByTokenStringService(refreshToken);
+    if (!isRefreshTokenExists) {
+      throw new NotExistsError("존재하지 않는 RT 입니다.");
+    }
+    const { user_id, name, nickname } = isTokenValid.decoded;
+    const newAccessToken = createAccessTokenService(user_id, name, nickname);
+
+    return res.status(201).success({ access_token: newAccessToken });
+  } catch (error) {
+    logger.error(
+      `[handleReissueAccessToken]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
 };
 
 module.exports = {

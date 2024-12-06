@@ -12,6 +12,7 @@ const {
   getUserByPhoneNumber,
   removeRefreshTokenFromDatabaseByUserId,
   removeRefreshTokenFromDatabaseByTokenString,
+  checkIfRefreshTokenExistsByTokenString,
 } = require("../repositories/auth.repository");
 const logger = require("../logger");
 const { NotExistsError } = require("../errors");
@@ -145,6 +146,12 @@ const removeRefreshTokenFromDatabaseByTokenStringService = async (token) => {
   return result;
 };
 
+const checkIfRefreshTokenExistsByTokenStringService = async (token) => {
+  const result = await checkIfRefreshTokenExistsByTokenString(token);
+
+  return result;
+};
+
 module.exports = {
   validateRegisterInputService,
   validateLoginInputService,
@@ -157,6 +164,7 @@ module.exports = {
   checkIfTokenIsValidService,
   removeRefreshTokenFromDatabaseByUserIdService,
   removeRefreshTokenFromDatabaseByTokenStringService,
+  checkIfRefreshTokenExistsByTokenStringService,
 };
 
 /*
