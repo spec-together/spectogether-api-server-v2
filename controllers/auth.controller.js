@@ -1,4 +1,3 @@
-const { DatabaseError } = require("sequelize");
 const {
   createTestUserService,
   validateRegisterInputService,
@@ -7,6 +6,8 @@ const {
   createCalendarForNewUserService,
   validateLoginInputService,
   getUserInfoService,
+  checkIfTokenIsValidService,
+  removeRefreshTokenFromDatabaseByTokenStringService,
 } = require("../services/auth.service");
 const logger = require("../logger");
 const {
@@ -14,6 +15,9 @@ const {
   AlreadyExistsError,
   NotAllowedError,
   RelatedServiceUnavailableError,
+  UnauthorizedError,
+  DatabaseError,
+  NotExistsError,
 } = require("../errors");
 const { decrypt62, comparePassword } = require("../services/encrypt.service");
 const {
@@ -23,7 +27,10 @@ const {
   createAccessTokenService,
   createRefreshTokenService,
 } = require("../services/auth.token.service");
-const { refreshTokenCookieOptions } = require("../options");
+const {
+  refreshTokenCookieOptions,
+  logoutCookieOptions,
+} = require("../options");
 const passport = require("passport");
 const { FRONTEND_URL } = require("../config.json").SERVER;
 
@@ -247,11 +254,46 @@ const handleKakaoPassportCallback = async (err, user, info, req, res, next) => {
 };
 
 const handleUserLogout = async (req, res, next) => {
-  // ...
+  // FE에서 AT는 직접 지워야 합니다.
+  try {
+    console.log(req.cookies);
+    const refreshToken = req.cookies.SPECTOGETHER_RT;
+    if (!refreshToken) {
+      throw new UnauthorizedError("로그인 상태가 아닙니다.");
+    }
+    const isTokenValid = checkIfTokenIsValidService(refreshToken);
+    if (!isTokenValid.isValid) {
+      throw new NotAllowedError("유효하지 않은 토큰입니다.");
+    }
+    // const { user_id } = isTokenValid.decoded;
+    // DB에 저장된 RT 삭제
+    const deleteResult =
+      await removeRefreshTokenFromDatabaseByTokenStringService(refreshToken);
+    if (deleteResult === 0) {
+      throw new NotExistsError("존재하지 않는 RT 입니다.");
+    }
+    logger.debug(
+      `[handleUserLogout] 로그아웃 성공, ${deleteResult}개의 refresh token이 삭제되었습니다.`
+    );
+
+    return res
+      .status(200)
+      .cookie("SPECTOGETHER_RT", "", logoutCookieOptions)
+      .success({ message: "로그아웃 되었습니다." });
+  } catch (error) {
+    logger.error(
+      `[handleUserLogout]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
 };
 
 const handleReissueAccessToken = async (req, res, next) => {
-  // ...
+  // ..
 };
 
 module.exports = {

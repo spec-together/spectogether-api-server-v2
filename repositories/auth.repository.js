@@ -6,6 +6,7 @@ const {
   Sequelize,
   EmailVerificationCode,
   UserCalendar,
+  UserRefreshToken,
 } = require("../models");
 
 // ** 중요 **
@@ -97,6 +98,32 @@ const getEmailByEmailVerificationId = async (id) => {
   return result;
 };
 
+const removeRefreshTokenFromDatabaseByUserId = async (userId) => {
+  const result = await UserRefreshToken.destroy({
+    where: {
+      user_id: userId,
+    },
+  });
+  logger.debug(
+    `[removeRefreshTokenFromDatabaseByUserId] 사용자의 리프레시 토큰을 삭제합니다: ${result} 개 삭제되었습니다.`
+  );
+
+  return result;
+};
+
+const removeRefreshTokenFromDatabaseByTokenString = async (tokenString) => {
+  const result = await UserRefreshToken.destroy({
+    where: {
+      refresh_token: tokenString,
+    },
+  });
+  logger.debug(
+    `[removeRefreshTokenFromDatabaseByTokenString] 사용자의 리프레시 토큰을 삭제합니다: ${result}개 삭제되었습니다.`
+  );
+
+  return result;
+};
+
 module.exports = {
   createNewUser,
   createNewCalendar,
@@ -105,4 +132,6 @@ module.exports = {
   getUserByEmailOrPhoneNumber,
   getEmailByEmailVerificationId,
   getUserByPhoneNumber,
+  removeRefreshTokenFromDatabaseByUserId,
+  removeRefreshTokenFromDatabaseByTokenString,
 };

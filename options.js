@@ -18,8 +18,16 @@ const refreshTokenCookieOptions = {
   secure: true,
 };
 
+const logoutCookieOptions = {
+  maxAge: 0,
+  httpOnly: true,
+  sameSite: "none",
+  secure: true,
+};
+
 module.exports = {
   corsOptions,
   // sslOptions,
   refreshTokenCookieOptions,
+  logoutCookieOptions,
 };

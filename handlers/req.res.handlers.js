@@ -32,13 +32,16 @@ const errorHandler = (err, req, res, next) => {
       \nNAME ${err.name}\
       \nREASON ${JSON.stringify(err.reason, null, 2)}\
       \nMESSAGE ${JSON.stringify(err.message, null, 2)}\
-      \nSTACK ${err.stack}`
+      \nSTACK ${err.stack}\
+      \nDATA ${JSON.stringify(err.data, null, 2)}\
+      \n`
   );
   res.status(err.statusCode || 500).error({
     errorCode: err.errorCode || "UNHANDLED_ERROR",
-    reason: err.name || err.reason || err.message || null,
+    reason: err.reason || err.message || null,
     data: err.data || null,
     stack: err.stack || null,
+    name: err.name || null,
   });
 };
 

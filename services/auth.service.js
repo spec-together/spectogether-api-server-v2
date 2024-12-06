@@ -10,10 +10,14 @@ const {
   createNewCalendar,
   connectUserWithCalendar,
   getUserByPhoneNumber,
+  removeRefreshTokenFromDatabaseByUserId,
+  removeRefreshTokenFromDatabaseByTokenString,
 } = require("../repositories/auth.repository");
 const logger = require("../logger");
 const { NotExistsError } = require("../errors");
 const { saveKakaoUserInfo } = require("../repositories/passport.repository");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../config.json").SERVER;
 
 const validateRegisterInputService = (data) => {
   const valid = validateNewUserInputSchema(data);
@@ -120,6 +124,27 @@ const saveKakaoUserInfoService = async (kakaoUserInfo) => {
   return result;
 };
 
+const checkIfTokenIsValidService = (token) => {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    return { isValid: true, decoded };
+  } catch (error) {
+    return { isValid: false, error: error.message };
+  }
+};
+
+const removeRefreshTokenFromDatabaseByUserIdService = async (userId) => {
+  const result = await removeRefreshTokenFromDatabaseByUserId(userId);
+
+  return result;
+};
+
+const removeRefreshTokenFromDatabaseByTokenStringService = async (token) => {
+  const result = await removeRefreshTokenFromDatabaseByTokenString(token);
+
+  return result;
+};
+
 module.exports = {
   validateRegisterInputService,
   validateLoginInputService,
@@ -129,6 +154,9 @@ module.exports = {
   createCalendarForNewUserService,
   getUserInfoService,
   saveKakaoUserInfoService,
+  checkIfTokenIsValidService,
+  removeRefreshTokenFromDatabaseByUserIdService,
+  removeRefreshTokenFromDatabaseByTokenStringService,
 };
 
 /*
