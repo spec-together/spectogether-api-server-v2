@@ -22,6 +22,7 @@ const {
   DatabaseError,
   AlreadyExistsError,
   InvalidInputError,
+  UnauthorizedError,
 } = require("../errors");
 const { saveKakaoUserInfo } = require("../repositories/passport.repository");
 const jwt = require("jsonwebtoken");

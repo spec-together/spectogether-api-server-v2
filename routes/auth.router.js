@@ -125,6 +125,25 @@ router.get("/login/kakao/callback", handleKakaoCallback);
  */
 router.get("/logout", handleUserLogout);
 // AT 재발급
+
+/**
+ * @swagger
+ * /auth/token/reissue:
+ *   get:
+ *     summary: Access Token 재발급 API
+ *     tags: [Auth Controller]
+ *     responses:
+ *       201:
+ *         description: AT 재발급 성공
+ *       401:
+ *         description: 로그인 상태가 아님
+ *       403:
+ *         description: 유효하지 않은 토큰임
+ *       404:
+ *         description: 토큰은 유효하나, 저장되어 있는 토큰이 아님
+ *       500:
+ *         description: 서버 오류
+ */
 router.get("/token/reissue", handleReissueAccessToken);
 
 router.get("/teapot", (req, res) => res.status(418).send("I'm a teapot"));
