@@ -4,6 +4,7 @@ const {
   getAgreedTermsByUserId,
   getUserTodoByUserId,
   getUserStudyroomByUserId,
+  getUserSpecsByUserId,
 } = require("../repositories/users.repository");
 
 const getUserAgreedTermsService = async (user_id) => {
@@ -79,8 +80,27 @@ const getUserTodoService = async (userId) => {
   return ret;
 };
 
+const getUserSpecsByUserIdService = async (userId) => {
+  const userSpecs = await getUserSpecsByUserId(userId);
+  logger.debug(
+    `[getUserSpecsByUserIdService] 해당 사용자의 스펙을 가져옵니다: ${JSON.stringify(
+      userSpecs,
+      null,
+      2
+    )}`
+  );
+  if (!userSpecs) {
+    throw new NotExistsError("해당 사용자의 스펙이 없습니다.");
+  }
+  // Spec 데이터만 추출
+  const specs = userSpecs.map((us) => us.Spec).filter((spec) => spec !== null);
+
+  return specs;
+};
+
 module.exports = {
   getUserAgreedTermsService,
   getUserStudyroomService,
   getUserTodoService,
+  getUserSpecsByUserIdService,
 };

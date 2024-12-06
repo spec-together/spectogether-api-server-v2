@@ -1,5 +1,12 @@
 const logger = require("../logger");
-const { UserTerm, UserStudyroom, Todo, TodoMember } = require("../models");
+const {
+  UserTerm,
+  UserStudyroom,
+  Todo,
+  TodoMember,
+  UserSpec,
+  Spec,
+} = require("../models");
 
 const getAgreedTermsByUserId = async (userId) => {
   const terms = await UserTerm.findAll({
@@ -52,8 +59,25 @@ const getUserTodoByUserId = async (userId) => {
   return todos;
 };
 
+const getUserSpecsByUserId = async (userId) => {
+  const userSpecs = await UserSpec.findAll({
+    where: { user_id: userId },
+    attributes: [],
+    include: [
+      {
+        model: Spec,
+        attributes: ["spec_id", "title"],
+        required: false, // LEFT OUTER JOIN 수행
+      },
+    ],
+  });
+
+  return userSpecs;
+};
+
 module.exports = {
   getAgreedTermsByUserId,
   getUserStudyroomByUserId,
   getUserTodoByUserId,
+  getUserSpecsByUserId,
 };

@@ -2,6 +2,8 @@ const logger = require("../logger");
 const {
   getUserAgreedTermsService,
   getUserTodoService,
+  getUserStudyroomService,
+  getUserSpecsByUserIdService,
 } = require("../services/users.service");
 
 const handleGetUsersAgreedTerm = async (req, res, next) => {
@@ -70,8 +72,31 @@ const handleGetUserTodos = async (req, res, next) => {
   }
 };
 
+const handleGetUserSpecs = async (req, res, next) => {
+  try {
+    logger.info(
+      `[handleGetUserSpecs] req.user : ${JSON.stringify(req.user, null, 2)}`
+    );
+    const { user_id } = req.user;
+    const userSpecs = await getUserSpecsByUserIdService(user_id);
+    return res.status(200).success({
+      specs: userSpecs,
+    });
+  } catch (error) {
+    logger.error(
+      `[handleGetUserSpecs]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
+};
+
 module.exports = {
   handleGetUsersAgreedTerm,
   handleGetUserStudyrooms,
   handleGetUserTodos,
+  handleGetUserSpecs,
 };

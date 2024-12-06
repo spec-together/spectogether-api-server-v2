@@ -3,6 +3,7 @@ const {
   handleGetUsersAgreedTerm,
   handleGetUserStudyrooms,
   handleGetUserTodos,
+  handleGetUserSpecs,
 } = require("../controllers/users.controller");
 const { authenticateAccessToken } = require("../middleware/authenticate.jwt");
 const router = express.Router();
@@ -11,7 +12,7 @@ router.get("/terms", authenticateAccessToken, handleGetUsersAgreedTerm);
 
 router.get("/studyrooms", authenticateAccessToken, handleGetUserStudyrooms);
 router.get("/todos", authenticateAccessToken, handleGetUserTodos);
-router.get("/specs");
+router.get("/specs", authenticateAccessToken, handleGetUserSpecs);
 router.get("/neighborhoods");
 router.get("/profile");
 router.get("/:user_id/profile");
@@ -35,6 +36,10 @@ module.exports = router;
  *     responses:
  *       200:
  *         description: 동의한 약관 목록을 성공적으로 가져왔습니다.
+ *         content:
+ *          application/json:
+ *           schema:
+ *            $ref: '#/components/schemas/getUsersTermsResponseSchema'
  *       401:
  *         description: 인증이 필요합니다.
  *       500:
@@ -47,6 +52,10 @@ module.exports = router;
  *     responses:
  *       200:
  *         description: 스터디룸 목록을 성공적으로 가져왔습니다.
+ *         content:
+ *          application/json:
+ *           schema:
+ *            $ref: '#/components/schemas/getUsersStudyroomsResponseSchema'
  *       500:
  *         description: 서버 오류
  *
@@ -77,6 +86,10 @@ module.exports = router;
  *     responses:
  *       200:
  *         description: 사용자 사양을 성공적으로 가져왔습니다.
+ *         content:
+ *          application/json:
+ *           schema:
+ *            $ref: '#/components/schemas/getUsersSpecsResponseSchema'
  *       401:
  *         description: 인증이 필요합니다.
  *       500:

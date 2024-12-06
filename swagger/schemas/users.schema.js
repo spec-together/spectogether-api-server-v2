@@ -1,3 +1,46 @@
+const getUsersTermsResponseSchema = {
+  type: "object",
+  properties: {
+    resultType: {
+      type: "string",
+      example: "SUCCESS",
+    },
+    error: {
+      type: ["object", "null"],
+      example: null,
+    },
+    success: {
+      type: "object",
+      properties: {
+        terms: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              term_id: {
+                type: "integer",
+                example: 1,
+              },
+              is_agreed: {
+                type: "boolean",
+                example: true,
+              },
+              last_agreed_at: {
+                type: "string",
+                format: "date-time",
+                example: "2024-12-06T13:49:59.611Z",
+              },
+            },
+            required: ["term_id", "is_agreed", "last_agreed_at"],
+          },
+        },
+      },
+      required: ["terms"],
+    },
+  },
+  required: ["resultType", "error", "success"],
+};
+
 const getUsersTodosResponseSchema = {
   type: "object",
   properties: {
@@ -82,4 +125,86 @@ const getUsersTodosResponseSchema = {
   required: ["resultType", "error", "success"],
 };
 
-module.exports = { getUsersTodosResponseSchema };
+const getUsersStudyroomsResponseSchema = {
+  type: "object",
+  properties: {
+    resultType: {
+      type: "string",
+      example: "SUCCESS",
+    },
+    error: {
+      type: ["object", "null"],
+      example: null,
+    },
+    success: {
+      type: "object",
+      properties: {
+        studyrooms: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              studyroom_id: {
+                type: "integer",
+                example: 1,
+              },
+              created_at: {
+                type: "string",
+                format: "date-time",
+                example: "2024-12-06T13:49:59.596Z",
+              },
+            },
+            required: ["studyroom_id", "created_at"],
+          },
+        },
+      },
+      required: ["studyrooms"],
+    },
+  },
+  required: ["resultType", "error", "success"],
+};
+
+const getUsersSpecsResponseSchema = {
+  type: "object",
+  properties: {
+    resultType: {
+      type: "string",
+      example: "SUCCESS",
+    },
+    error: {
+      type: ["object", "null"],
+      example: null,
+    },
+    success: {
+      type: "object",
+      properties: {
+        specs: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              spec_id: {
+                type: "integer",
+                example: 1,
+              },
+              title: {
+                type: "string",
+                example: "영어 능통",
+              },
+            },
+            required: ["spec_id", "title"],
+          },
+        },
+      },
+      required: ["specs"],
+    },
+  },
+  required: ["resultType", "error", "success"],
+};
+
+module.exports = {
+  getUsersTermsResponseSchema,
+  getUsersTodosResponseSchema,
+  getUsersStudyroomsResponseSchema,
+  getUsersSpecsResponseSchema,
+};
