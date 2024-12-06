@@ -12,8 +12,25 @@ const {
 } = require("../controllers/auth.controller");
 const passport = require("passport");
 
+// Route Definitions
+router.post("/register", handleUserRegister);
+router.post("/register/test", handleCreateTestUser);
+router.post("/login/local", handleUserLocalLogin);
+router.get("/login/kakao", passport.authenticate("kakao", { session: false }));
+router.get("/login/kakao/callback", handleKakaoCallback);
+router.get("/logout", handleUserLogout);
+router.get("/token/reissue", handleReissueAccessToken);
+router.get("/teapot", (req, res) => res.status(418).send("I'm a teapot"));
+
+module.exports = router;
+
+// Swagger Documentation - Auth Controller
 /**
  * @swagger
+ * tags:
+ *   name: Auth Controller
+ *   description: 인증 관련 API 엔드포인트
+ *
  * /auth/register:
  *   post:
  *     summary: 새로운 사용자를 생성합니다.
@@ -27,13 +44,11 @@ const passport = require("passport");
  *     responses:
  *       201:
  *         description: 사용자가 성공적으로 생성되었습니다.
- *       ELSE:
- *        description: 에러 객체를 참조하세요.
- */
-router.post("/register", handleUserRegister);
-
-/**
- * @swagger
+ *       400:
+ *         description: 잘못된 요청 데이터
+ *       500:
+ *         description: 서버 오류
+ *
  * /auth/register/test:
  *   post:
  *     summary: 테스트 유저를 생성합니다.
@@ -49,11 +64,7 @@ router.post("/register", handleUserRegister);
  *         description: 테스트 유저 생성에 성공했습니다.
  *       500:
  *         description: 서버 오류
- */
-router.post("/register/test", handleCreateTestUser);
-
-/**
- * @swagger
+ *
  * /auth/login/local:
  *   post:
  *     summary: 로컬 로그인을 수행합니다.
@@ -75,20 +86,17 @@ router.post("/register/test", handleCreateTestUser);
  *         description: 존재하지 않는 사용자에 대한 로그인 시도
  *       500:
  *         description: 서버 오류
- */
-router.post("/login/local", handleUserLocalLogin);
-
-/**
- * @swagger
+ *
  * /auth/login/kakao:
  *   get:
  *     summary: 카카오 로그인을 수행합니다.
  *     tags: [Auth Controller]
- */
-router.get("/login/kakao", passport.authenticate("kakao", { session: false }));
-
-/**
- * @swagger
+ *     responses:
+ *       302:
+ *         description: 카카오 인증 페이지로 리다이렉트
+ *       500:
+ *         description: 서버 오류
+ *
  * /auth/login/kakao/callback:
  *   get:
  *     summary: 카카오 로그인 콜백을 수행합니다.
@@ -102,15 +110,13 @@ router.get("/login/kakao", passport.authenticate("kakao", { session: false }));
  *         description: 서버 오류
  *       503:
  *         description: 연결된 서비스 오류
- */
-router.get("/login/kakao/callback", handleKakaoCallback);
-
-/**
- * @swagger
+ *
  * /auth/logout:
  *   get:
  *     summary: 로그아웃 API
  *     tags: [Auth Controller]
+ *     security:
+ *       - RefreshToken_Cookie: []
  *     responses:
  *       200:
  *         description: 로그아웃 성공
@@ -122,12 +128,7 @@ router.get("/login/kakao/callback", handleKakaoCallback);
  *         description: 토큰은 유효하나, 저장되어 있는 토큰이 아님
  *       500:
  *         description: 서버 오류
- */
-router.get("/logout", handleUserLogout);
-// AT 재발급
-
-/**
- * @swagger
+ *
  * /auth/token/reissue:
  *   get:
  *     summary: Access Token 재발급 API
@@ -143,9 +144,12 @@ router.get("/logout", handleUserLogout);
  *         description: 토큰은 유효하나, 저장되어 있는 토큰이 아님
  *       500:
  *         description: 서버 오류
+ *
+ * /auth/teapot:
+ *   get:
+ *     summary: 테스트용 티팟 엔드포인트
+ *     tags: [Auth Controller]
+ *     responses:
+ *       418:
+ *         description: 재미있는 응답
  */
-router.get("/token/reissue", handleReissueAccessToken);
-
-router.get("/teapot", (req, res) => res.status(418).send("I'm a teapot"));
-
-module.exports = router;

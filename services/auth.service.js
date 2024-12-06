@@ -14,6 +14,7 @@ const {
   removeRefreshTokenFromDatabaseByTokenString,
   checkIfRefreshTokenExistsByTokenString,
   getEmailByEmailVerificationId,
+  putUserAgreedTerms,
 } = require("../repositories/auth.repository");
 const logger = require("../logger");
 const {
@@ -119,7 +120,7 @@ const checkDuplicateUserService = async (email, phoneNumber) => {
   if (result) {
     throw new AlreadyExistsError({
       message: "이미 존재하는 사용자입니다.",
-      data: result,
+      data: result, // TODO: production에서는 지워야 합니다?
     });
   }
 
@@ -203,6 +204,16 @@ const checkAndReturnRefreshTokenIfExistsInRequestCookie = (req) => {
   return refreshToken;
 };
 
+const createUserAgreedTermsToDatabaseService = async (userId, terms) => {
+  for (const term of terms) {
+    const result = await putUserAgreedTerms(userId, term.term_id, term.agreed);
+    if (!result) {
+      throw new DatabaseError("약관 동의 정보 저장에 실패했습니다.");
+    }
+  }
+  return;
+};
+
 module.exports = {
   validateRegisterInputService,
   validateLoginInputService,
@@ -217,6 +228,7 @@ module.exports = {
   checkIfRefreshTokenExistsByTokenStringService,
   checkAndReturnRefreshTokenIfExistsInRequestCookie,
   getEmailByEmailVerificationIdService,
+  createUserAgreedTermsToDatabaseService,
 };
 
 /*

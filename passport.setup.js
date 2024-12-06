@@ -20,6 +20,7 @@ const {
   passportGetUserByEmailService,
 } = require("./services/passport.service");
 const { saveKakaoUserInfoService } = require("./services/auth.service");
+const { decrypt62 } = require("./services/encrypt.service");
 
 // 샘플 삼아 추가한 쿠키에서 JWT를 파싱하는 전략입니다.
 const parseJwtFromCookie = {
@@ -58,8 +59,9 @@ const AccessTokenStrategy = new JWTStrategy(
     try {
       // Payload를 바탕으로 사용자 정보를 가져와서, 넘길 필요가 있습니다.
       // done(error, user, info) 입니다. error가 null이 아니면 인증 실패로 간주됩니다.
+      const paylaodUserIdDecrypted = decrypt62(jwt_payload.user_id);
       const userInfoByToken = passportGetUserByUserIdService(
-        jwt_payload.user_id
+        paylaodUserIdDecrypted
       );
       return done(null, userInfoByToken, null);
     } catch (error) {
