@@ -13,9 +13,16 @@ const {
   removeRefreshTokenFromDatabaseByUserId,
   removeRefreshTokenFromDatabaseByTokenString,
   checkIfRefreshTokenExistsByTokenString,
+  getEmailByEmailVerificationId,
 } = require("../repositories/auth.repository");
 const logger = require("../logger");
-const { NotExistsError, NotAllowedError } = require("../errors");
+const {
+  NotExistsError,
+  NotAllowedError,
+  DatabaseError,
+  AlreadyExistsError,
+  InvalidInputError,
+} = require("../errors");
 const { saveKakaoUserInfo } = require("../repositories/passport.repository");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config.json").SERVER;
@@ -23,10 +30,14 @@ const { JWT_SECRET } = require("../config.json").SERVER;
 const validateRegisterInputService = (data) => {
   const valid = validateNewUserInputSchema(data);
   if (!valid) {
-    return {
-      isValid: false,
+    throw new InvalidInputError({
       errors: validateNewUserInputSchema.errors,
-    };
+      message: "입력값이 올바르지 않습니다.",
+    });
+    // return {
+    //   isValid: false,
+    //   errors: validateNewUserInputSchema.errors,
+    // };
   }
   return {
     isValid: true,
@@ -37,15 +48,27 @@ const validateRegisterInputService = (data) => {
 const validateLoginInputService = (data) => {
   const valid = validateLoginInputSchema(data);
   if (!valid) {
-    return {
-      isValid: false,
+    throw new InvalidInputError({
       errors: validateLoginInputSchema.errors,
-    };
+      message: "입력값이 올바르지 않습니다.",
+    });
+    // return {
+    //   isValid: false,
+    //   errors: validateLoginInputSchema.errors,
+    // };
   }
   return {
     isValid: true,
     errors: null,
   };
+};
+
+const getEmailByEmailVerificationIdService = async (emailVerificationId) => {
+  const email = await getEmailByEmailVerificationId(emailVerificationId);
+  if (!email) {
+    throw new InvalidInputError("인증된 이메일이 아닙니다.");
+  }
+  return email;
 };
 
 const createNewUserService = async (user) => {
@@ -84,12 +107,20 @@ const createTestUserService = async (name, email, phoneNumber) => {
   };
   user.password = await generateHashedPassword(user.password);
   const newUser = await User.create(user);
+  if (!newUser) throw new DatabaseError("테스트 유저 생성에 실패했습니다.");
 
   return newUser;
 };
 
 const checkDuplicateUserService = async (email, phoneNumber) => {
   const result = await getUserByEmailOrPhoneNumber(email, phoneNumber);
+
+  if (result) {
+    throw new AlreadyExistsError({
+      message: "이미 존재하는 사용자입니다.",
+      data: result,
+    });
+  }
 
   return result;
 };
@@ -184,6 +215,7 @@ module.exports = {
   removeRefreshTokenFromDatabaseByTokenStringService,
   checkIfRefreshTokenExistsByTokenStringService,
   checkAndReturnRefreshTokenIfExistsInRequestCookie,
+  getEmailByEmailVerificationIdService,
 };
 
 /*

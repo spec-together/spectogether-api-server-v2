@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const baseX = require("base-x").default;
 const { SALT_ROUNDS, CIPHER_SECRET_KEY } = require("../config.json").SERVER;
 const logger = require("../logger"); // Ensure correct path
+const { NotAllowedError } = require("../errors");
 
 // Base62 문자 집합 정의
 const BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -105,7 +106,10 @@ const generateHashedPassword = async (password) => {
  */
 const comparePassword = async (password, hashedPassword) => {
   try {
-    return await bcrypt.compare(password, hashedPassword);
+    const checkresult = await bcrypt.compare(password, hashedPassword);
+    if (!checkresult) {
+      throw new NotAllowedError("비밀번호가 일치하지 않습니다.");
+    }
   } catch (err) {
     logger.error(`비밀번호 비교 오류: ${err.message}`, { stack: err.stack });
     throw err;

@@ -10,17 +10,10 @@ const {
   removeRefreshTokenFromDatabaseByTokenStringService,
   checkIfRefreshTokenExistsByTokenStringService,
   checkAndReturnRefreshTokenIfExistsInRequestCookie,
+  getEmailByEmailVerificationIdService,
 } = require("../services/auth.service");
 const logger = require("../logger");
-const {
-  InvalidInputError,
-  AlreadyExistsError,
-  NotAllowedError,
-  RelatedServiceUnavailableError,
-  UnauthorizedError,
-  DatabaseError,
-  NotExistsError,
-} = require("../errors");
+const { RelatedServiceUnavailableError } = require("../errors");
 const { decrypt62, comparePassword } = require("../services/encrypt.service");
 const {
   getEmailByEmailVerificationId,
@@ -49,39 +42,22 @@ const handleUserRegister = async (req, res, next) => {
     const newUserData = req.body;
     // 데이터 검증
     logger.debug(`[handleUserRegister] 데이터 검증`);
-    const validation = validateRegisterInputService(newUserData);
-    if (!validation.isValid) {
-      throw new InvalidInputError({
-        error: validation.errors,
-        message: "입력값이 올바르지 않습니다.",
-      });
-    }
+    validateRegisterInputService(newUserData);
     // 카카오 회원가입일 경우에 user_oauth에 데이터 추가하기
     if (newUserData.user_register_type === "kakao") {
-      // ...
+      // TODO : 카카오 회원가입일 경우에 user_oauth에 데이터 추가하기
     }
 
     // 중복 사용자 확인
     logger.debug(`[handleUserRegister] 중복 사용자 확인`);
-    const isDuplicateUser = await checkDuplicateUserService(
+    await checkDuplicateUserService(
       newUserData.email,
       newUserData.phone_number
     );
-    if (isDuplicateUser) {
-      throw new AlreadyExistsError({
-        message: "이미 존재하는 사용자입니다.",
-        data: isDuplicateUser,
-      });
-    }
     // email verification id 확인
     logger.debug(`[handleUserRegister] email verification id 확인`);
     const emailVerifyId = decrypt62(newUserData.email_verification_id);
-    const isVerifiedEmail = await getEmailByEmailVerificationId(emailVerifyId);
-    if (!isVerifiedEmail) {
-      throw new InvalidInputError({
-        message: "인증된 이메일이 아닙니다.",
-      });
-    }
+    await getEmailByEmailVerificationIdService(emailVerifyId);
 
     // 사용자 생성
     logger.debug(`[handleUserRegister] 사용자 생성`);
@@ -89,7 +65,7 @@ const handleUserRegister = async (req, res, next) => {
 
     // 캘린더 생성 및 user_calendar에 연결
     logger.debug(`[handleUserRegister] 캘린더 생성 및 user_calendar에 연결`);
-    const newCalendar = await createCalendarForNewUserService(newUser.user_id);
+    await createCalendarForNewUserService(newUser.user_id);
 
     return res.status(201).success({
       message: "사용자 생성에 성공했습니다.",
@@ -112,7 +88,6 @@ const handleCreateTestUser = async (req, res, next) => {
   try {
     const { name, email, phone_number } = req.body;
     const newUser = await createTestUserService(name, email, phone_number);
-    if (!newUser) throw new DatabaseError("테스트 유저 생성에 실패했습니다.");
     res.status(201).success({
       created_user: newUser,
       message: "테스트 유저 생성에 성공했습니다.",
@@ -141,23 +116,12 @@ const handleUserLocalLogin = async (req, res, next) => {
     // 데이터 검증
     const reqBody = req.body;
     const { login_id, password } = reqBody;
-    const validation = validateLoginInputService(reqBody);
-    if (!validation.isValid) {
-      throw new InvalidInputError({
-        error: validation.errors,
-        message: "입력값이 올바르지 않습니다.",
-      });
-    }
+    validateLoginInputService(reqBody);
 
     // 사용자 조회 후 사용자 정보 받아오기
     logger.debug(`[handleUserLocalLogin] 사용자 조회`);
     const user = await getUserInfoService(login_id);
-    const passwordCheck = await comparePassword(password, user.password);
-    if (!passwordCheck) {
-      throw new NotAllowedError({
-        message: "비밀번호가 일치하지 않습니다.",
-      });
-    }
+    await comparePassword(password, user.password);
 
     // JWT 토큰 발급
     const { user_id, name, nickname } = user;
@@ -259,7 +223,7 @@ const handleUserLogout = async (req, res, next) => {
   // FE에서 AT는 직접 지워야 합니다.
   try {
     const refreshToken = checkAndReturnRefreshTokenIfExistsInRequestCookie(req);
-    const isTokenValid = checkIfTokenIsValidService(refreshToken);
+    checkIfTokenIsValidService(refreshToken);
     // const { user_id } = isTokenValid.decoded;
     // DB에 저장된 RT 삭제
     await removeRefreshTokenFromDatabaseByTokenStringService(refreshToken);
