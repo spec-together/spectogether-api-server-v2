@@ -13,6 +13,7 @@ const {
 } = require("../repositories/auth.repository");
 const logger = require("../logger");
 const { NotExistsError } = require("../errors");
+const { saveKakaoUserInfo } = require("../repositories/passport.repository");
 
 const validateRegisterInputService = (data) => {
   const valid = validateNewUserInputSchema(data);
@@ -106,6 +107,19 @@ const getUserInfoService = async (loginId, password) => {
   return user;
 };
 
+const saveKakaoUserInfoService = async (kakaoUserInfo) => {
+  const { kakao_id, email, nickname, profile_image } = kakaoUserInfo;
+
+  const result = await saveKakaoUserInfo({
+    kakao_id,
+    email,
+    nickname,
+    profile_image,
+  });
+
+  return result;
+};
+
 module.exports = {
   validateRegisterInputService,
   validateLoginInputService,
@@ -114,6 +128,7 @@ module.exports = {
   createNewUserService,
   createCalendarForNewUserService,
   getUserInfoService,
+  saveKakaoUserInfoService,
 };
 
 /*

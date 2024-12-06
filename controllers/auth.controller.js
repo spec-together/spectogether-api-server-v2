@@ -13,6 +13,7 @@ const {
   InvalidInputError,
   AlreadyExistsError,
   NotAllowedError,
+  RelatedServiceUnavailableError,
 } = require("../errors");
 const { decrypt62, comparePassword } = require("../services/encrypt.service");
 const {
@@ -22,10 +23,13 @@ const {
   createAccessTokenService,
   createRefreshTokenService,
 } = require("../services/auth.token.service");
+const { refreshTokenCookieOptions } = require("../options");
+const passport = require("passport");
+const { FRONTEND_URL } = require("../config.json").SERVER;
 
 const handleUserRegister = async (req, res, next) => {
   /*
-  1. 데이터 검증
+  1. 데이터 검증, 카카오로 회원가입 시에는 user_oauth에도 집어넣기
   2. 이미 존재하는 사용자인지 확인 ( key = email )
   3. email verification id에 등록된 email과 일치하는지 확인
   4. spec_level, manner_level, role, is_active 는 default로 생성
@@ -43,6 +47,11 @@ const handleUserRegister = async (req, res, next) => {
         message: "입력값이 올바르지 않습니다.",
       });
     }
+    // 카카오 회원가입일 경우에 user_oauth에 데이터 추가하기
+    if (newUserData.user_register_type === "kakao") {
+      // ...
+    }
+
     // 중복 사용자 확인
     logger.debug(`[handleUserRegister] 중복 사용자 확인`);
     const isDuplicateUser = await checkDuplicateUserService(
@@ -150,16 +159,10 @@ const handleUserLocalLogin = async (req, res, next) => {
       \nAT : ${accessToken}\
       \nRT : ${refreshToken}`
     );
-    const cookieOptions = {
-      maxAge: 1000 * 60 * 60 * 24 * 7, // ms * s * m * h * d 7일
-      httpOnly: true,
-      sameSite: "none",
-      secure: true,
-    };
 
     return res
       .status(200)
-      .cookie("SPECTOGETHER_RT", refreshToken, cookieOptions)
+      .cookie("SPECTOGETHER_RT", refreshToken, refreshTokenCookieOptions)
       .success({
         access_token: accessToken,
       });
@@ -175,12 +178,72 @@ const handleUserLocalLogin = async (req, res, next) => {
   }
 };
 
-const handleKakaoLogin = async (req, res, next) => {
-  // ...
+const handleKakaoCallback = (req, res, next) => {
+  passport.authenticate("kakao", { session: false }, (err, user, info) => {
+    handleKakaoPassportCallback(err, user, info, req, res, next);
+  })(req, res, next);
 };
 
-const handleKakaoCallback = async (req, res, next) => {
-  // ...
+const handleKakaoPassportCallback = async (err, user, info, req, res, next) => {
+  try {
+    // 이건 진짜 에러 났을 때
+    if (err) {
+      logger.error(`[handleKakaoCallback 1] Error: ${err.message}`, {
+        stack: err.stack,
+      });
+      throw err;
+    }
+
+    // 회원가입된 사용자가 아닐 떄
+    if (!user) {
+      const email = info?.user?.email;
+      if (!email) {
+        logger.fatal(
+          `[handleKakaoCallback 2] 카카오 서버에서 받아온 정보가 올바르지 않습니다. ${JSON.stringify(info, null, 2)}`
+        );
+        throw new RelatedServiceUnavailableError({
+          info,
+          message: "카카오 서버에서 받아온 정보가 올바르지 않습니다.",
+        });
+      }
+
+      logger.info(
+        `[handleKakaoCallback 2-1] 가입되어 있지 않은 사용자입니다. info : ${JSON.stringify(info, null, 2)}`
+      );
+      return res.status(202).success(`
+          <script>\
+            window.opener.postMessage({ not_registered_user: ${JSON.stringify({ email })} }, '${FRONTEND_URL}');\
+            window.close();\
+          </script>
+        `);
+    }
+    logger.debug(
+      `[handleKakaoCallback 3] 217' User : ${JSON.stringify(user, null, 2)}`
+    );
+    const { user_id, name, nickname } = user;
+    const accessToken = createAccessTokenService(user_id, name, nickname);
+    const refreshToken = await createRefreshTokenService(user_id);
+
+    logger.info(
+      `[handleKakaoCallback 3-1] 로그인된 사용자 : ${JSON.stringify(user, null, 2)}`
+    );
+
+    return res
+      .status(200)
+      .cookie("SPECTOGETHER_RT", refreshToken, refreshTokenCookieOptions)
+      .success(`
+          <script>\
+            window.opener.postMessage(${JSON.stringify({ token: accessToken, user_id, name, nickname })}, '${FRONTEND_URL}');\
+            window.close();\
+          </script>
+        `);
+  } catch (error) {
+    logger.error(`[handleKakaoCallback 4] Error: ${error.message}`, {
+      stack: error.stack,
+    });
+    // throw error;
+    next(error);
+  }
 };
 
 const handleUserLogout = async (req, res, next) => {
@@ -194,9 +257,9 @@ const handleReissueAccessToken = async (req, res, next) => {
 module.exports = {
   handleUserRegister,
   handleUserLocalLogin,
-  handleKakaoLogin,
   handleKakaoCallback,
   handleUserLogout,
   handleReissueAccessToken,
   handleCreateTestUser,
+  handleKakaoPassportCallback,
 };

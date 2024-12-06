@@ -4,12 +4,13 @@ const router = express.Router();
 const {
   handleUserRegister,
   handleUserLocalLogin,
-  handleKakaoLogin,
   handleKakaoCallback,
   handleUserLogout,
   handleReissueAccessToken,
   handleCreateTestUser,
+  handleKakaoPassportCallback,
 } = require("../controllers/auth.controller");
+const passport = require("passport");
 
 /**
  * @swagger
@@ -77,11 +78,27 @@ router.post("/register/test", handleCreateTestUser);
  */
 router.post("/login/local", handleUserLocalLogin);
 // OAuth2 : 카카오 로그인
-router.get("/login/kakao", handleKakaoLogin);
+/**
+ * @swagger
+ * /auth/login/kakao:
+ *   get:
+ *     summary: 카카오 로그인을 수행합니다.
+ *     tags: [auth]
+ */
+router.get("/login/kakao", passport.authenticate("kakao", { session: false }));
+/**
+ * @swagger
+ * /auth/login/kakao/callback:
+ *   get:
+ *     summary: 카카오 로그인 콜백을 수행합니다.
+ *     tags: [auth]
+ */
 router.get("/login/kakao/callback", handleKakaoCallback);
 // 로그아웃
 router.get("/logout", handleUserLogout);
 // AT 재발급
 router.get("/token/reissue", handleReissueAccessToken);
+
+router.get("/teapot", (req, res) => res.status(418).send("I'm a teapot"));
 
 module.exports = router;

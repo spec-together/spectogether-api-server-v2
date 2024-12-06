@@ -18,7 +18,7 @@ const {
 
 const { PORT } = require("./config.json").SERVER;
 
-const { AccessTokenStrategy } = require("./passport.setup");
+const { AccessTokenStrategy, KakaoOAuthStrategy } = require("./passport.setup");
 const {
   errorHandler,
   responseHandler,
@@ -46,6 +46,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(passport.initialize());
 // Passport Strategy 설정
 passport.use("accessToken", AccessTokenStrategy);
+passport.use("kakao", KakaoOAuthStrategy);
 
 // Swagger 설정
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(specs));

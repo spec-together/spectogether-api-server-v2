@@ -11,7 +11,15 @@ const corsOptions = {
 //   cert: fs.readFileSync("localhost-cert.pem"), // 인증서 파일
 // };
 
+const refreshTokenCookieOptions = {
+  maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+  httpOnly: true,
+  sameSite: "none",
+  secure: true,
+};
+
 module.exports = {
   corsOptions,
   // sslOptions,
+  refreshTokenCookieOptions,
 };

@@ -37,6 +37,7 @@ const Inquiry = require("./define/inquiry");
 const InquiryAnswer = require("./define/inquiry_answer");
 const StudyroomVideocallMember = require("./define/studyroom_videocall_member");
 const StudyroomChat = require("./define/studyroom_chat");
+const KakaoUserInfo = require("./define/kakao_user_info");
 
 // Sequelize 인스턴스 생성
 const sequelize = new Sequelize(MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD, {
@@ -88,6 +89,7 @@ const models = {
   InquiryAnswer: InquiryAnswer.init(sequelize),
   StudyroomVideocallMember: StudyroomVideocallMember.init(sequelize),
   StudyroomChat: StudyroomChat.init(sequelize),
+  KakaoUserInfo: KakaoUserInfo.init(sequelize),
   Sequelize,
   sequelize,
 };
