@@ -7,6 +7,7 @@ const {
   handleGetUserNeighborhoods,
   handleGetUserMyProfile,
   handleGetOtherUserProfile,
+  handleEditUserInfo,
 } = require("../controllers/users.controller");
 const { authenticateAccessToken } = require("../middleware/authenticate.jwt");
 const router = express.Router();
@@ -27,7 +28,7 @@ router.get(
   authenticateAccessToken,
   handleGetOtherUserProfile
 );
-router.patch("/");
+router.patch("/", authenticateAccessToken, handleEditUserInfo);
 
 module.exports = router;
 

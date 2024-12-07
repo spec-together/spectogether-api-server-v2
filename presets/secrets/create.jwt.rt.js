@@ -1,17 +1,19 @@
 const {
   createAccessTokenService,
+  createTestUserTokenService,
 } = require("../../services/auth.token.service");
+
 const { JWT_SECRET } = require("../../config.json").SERVER;
 const jwt = require("jsonwebtoken");
 const { encrypt62 } = require("../../services/encrypt.service");
 
 // createAccessTokenService("1", "kw", "admin");
 const createBearerToken = (user_id) => {
-  const at = createAccessTokenService(user_id, "kw", "admin");
+  const at = createTestUserTokenService(user_id, "kw", "admin");
   return `Bearer ${at}`;
 };
 
-console.log(createBearerToken(1));
+console.log(createBearerToken(124214));
 
 const createRefreshTokenWithoutWritingToDb = async (user_id) => {
   const payload = {

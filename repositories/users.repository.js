@@ -130,6 +130,30 @@ const getInsensitiveUserProfileByUserId = async (userId) => {
   return profile;
 };
 
+const updateUserProfileImageByUserId = async (userId, profileImage) => {
+  const [affectedRows] = await User.update(
+    { profile_image: profileImage },
+    { where: { user_id: userId } }
+  );
+
+  return affectedRows;
+};
+
+const updateUserNicknameByUserId = async (userId, nickname) => {
+  const [affectedRows] = await User.update(
+    { nickname: nickname },
+    { where: { user_id: userId } }
+  );
+
+  return affectedRows;
+};
+
+const checkIfUserExistsByUserId = async (userId) => {
+  const user = await User.findByPk(userId, { attributes: ["user_id"] });
+
+  return user;
+};
+
 module.exports = {
   getAgreedTermsByUserId,
   getUserStudyroomByUserId,
@@ -138,4 +162,7 @@ module.exports = {
   getUserNeighborhoodsByUserId,
   getSensitiveUserProfileByUserId,
   getInsensitiveUserProfileByUserId,
+  updateUserProfileImageByUserId,
+  updateUserNicknameByUserId,
+  checkIfUserExistsByUserId,
 };

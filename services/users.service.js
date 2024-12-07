@@ -1,4 +1,4 @@
-const { NotExistsError } = require("../errors");
+const { NotExistsError, DatabaseError } = require("../errors");
 const logger = require("../logger");
 const {
   getAgreedTermsByUserId,
@@ -8,6 +8,9 @@ const {
   getUserNeighborhoodsByUserId,
   getSensitiveUserProfileByUserId,
   getInsensitiveUserProfileByUserId,
+  updateUserProfileImageByUserId,
+  updateUserNicknameByUserId,
+  checkIfUserExistsByUserId,
 } = require("../repositories/users.repository");
 
 const getUserAgreedTermsService = async (user_id) => {
@@ -139,6 +142,40 @@ const getOtherUserProfileService = async (otherUserId) => {
   return user;
 };
 
+const editUserInfoService = async (userId, type, content) => {
+  logger.debug(
+    `[editUserInfoService] userId: ${userId}, type: ${type}, content: ${content}`
+  );
+  if (type === "profile_image") {
+    const updatedUser = await updateUserProfileImageByUserId(userId, content);
+    if (updatedUser === 0) {
+      throw new DatabaseError("기존값과 동일해 정보가 수정되지 않았습니다.");
+    }
+
+    return updatedUser;
+  } else if (type === "nickname") {
+    const updatedUser = await updateUserNicknameByUserId(userId, content);
+    if (updatedUser === 0) {
+      throw new DatabaseError("기존값과 동일해 정보가 수정되지 않았습니다.");
+    }
+
+    return updatedUser;
+  }
+  return result;
+};
+
+const checkIfUserExistsByUserIdService = async (userId) => {
+  const user = await checkIfUserExistsByUserId(userId);
+  logger.debug(
+    `[checkIfUserExistsByUserIdService] user: ${JSON.stringify(user, null, 2)}`
+  );
+  if (!user) {
+    throw new NotExistsError("해당 사용자가 존재하지 않습니다.");
+  }
+
+  return user;
+};
+
 module.exports = {
   getUserAgreedTermsService,
   getUserStudyroomService,
@@ -147,4 +184,6 @@ module.exports = {
   getUserNeighborhoodsByUserIdService,
   getUserMyProfileService,
   getOtherUserProfileService,
+  editUserInfoService,
+  checkIfUserExistsByUserIdService,
 };

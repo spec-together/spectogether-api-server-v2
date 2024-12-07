@@ -16,6 +16,19 @@ const createAccessTokenService = (user_id, name, nickname) => {
   return jwt.sign(payload, JWT_SECRET, options);
 };
 
+const createTestUserTokenService = (user_id, name, nickname) => {
+  const encryptedUserId = encrypt62(user_id.toString());
+  const payload = {
+    user_id: encryptedUserId,
+    name,
+    nickname,
+  };
+  const options = {
+    expiresIn: "1y",
+  };
+  return jwt.sign(payload, JWT_SECRET, options);
+};
+
 const createRefreshTokenService = async (user_id) => {
   const encryptedUserId = encrypt62(user_id.toString());
   const payload = {
@@ -36,5 +49,6 @@ const createRefreshTokenService = async (user_id) => {
 
 module.exports = {
   createAccessTokenService,
+  createTestUserTokenService,
   createRefreshTokenService,
 };

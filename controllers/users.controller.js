@@ -1,4 +1,8 @@
 const logger = require("../logger");
+const {
+  updateUserNicknameByUserId,
+  checkIfUserExistsByUserId,
+} = require("../repositories/users.repository");
 const { encrypt62, decrypt62 } = require("../services/encrypt.service");
 const {
   getUserAgreedTermsService,
@@ -8,7 +12,12 @@ const {
   getUserNeighborhoodsByUserIdService,
   getUserMyProfileService,
   getOtherUserProfileService,
+  editUserInfoService,
+  checkIfUserExistsByUserIdService,
 } = require("../services/users.service");
+const {
+  validateEditUserInfoSchemaService,
+} = require("../services/users.validation.service");
 
 const handleGetUsersAgreedTerm = async (req, res, next) => {
   try {
@@ -127,6 +136,7 @@ const handleGetUserMyProfile = async (req, res, next) => {
       `[handleGetUserMyProfile] req.user : ${JSON.stringify(req.user, null, 2)}`
     );
     const { user_id } = req.user;
+    await checkIfUserExistsByUserIdService(user_id);
     const user = await getUserMyProfileService(user_id);
     const neighborhoods = await getUserNeighborhoodsByUserIdService(user_id);
     user.dataValues.neighborhoods = neighborhoods;
@@ -152,6 +162,7 @@ const handleGetOtherUserProfile = async (req, res, next) => {
       `[handleGetOtherUserProfile] req.params : ${JSON.stringify(req.params, null, 2)}`
     );
     const { user_id } = req.params;
+    await checkIfUserExistsByUserIdService(user_id);
     const user = await getOtherUserProfileService(decrypt62(user_id));
     return res.status(200).success({
       user,
@@ -159,6 +170,31 @@ const handleGetOtherUserProfile = async (req, res, next) => {
   } catch (error) {
     logger.error(
       `[handleGetOtherUserProfile]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
+};
+
+const handleEditUserInfo = async (req, res, next) => {
+  try {
+    logger.info(
+      `[handleEditUserInfo] req.user : ${JSON.stringify(req.user, null, 2)}`
+    );
+    const { user_id } = req.user;
+    await checkIfUserExistsByUserIdService(user_id);
+    validateEditUserInfoSchemaService(req.body);
+    const { type, content } = req.body;
+    await editUserInfoService(user_id, type, content);
+    return res.status(200).success({
+      message: "정보가 성공적으로 수정되었습니다.",
+    });
+  } catch (error) {
+    logger.error(
+      `[handleEditUserInfo]\
       \nNAME ${error.name}\
       \nREASON ${JSON.stringify(error.reason, null, 2)}\
       \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
@@ -176,4 +212,5 @@ module.exports = {
   handleGetUserNeighborhoods,
   handleGetUserMyProfile,
   handleGetOtherUserProfile,
+  handleEditUserInfo,
 };
