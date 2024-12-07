@@ -14,40 +14,42 @@ const { where } = require("sequelize");
 
 const getAllInquiries = async (page, limit, status) => {
   // TODO : const getAllInquiries = async (userId, page, limit, status) => {
-  try {
-    const offset = (page - 1) * limit;
+  // try {
+  const offset = (page - 1) * limit;
 
-    const whereClause = {};
-    // const whereClause = { user_id: userId };
+  const whereClause = {};
+  // const whereClause = { user_id: userId };
 
-    if (status) {
-      whereClause.status = status;
-    }
-    const { rows, count } = await Inquiry.findAndCountAll({
-      where: whereClause,
-      limit: limit,
-      offset: offset,
-      order: [["created_at", "DESC"]],
-      include: [
-        {
-          model: InquiryAnswer,
-          as: "inquiryAnswers", // 모델에서 정의한 별칭과 일치
-          required: false, // 답변이 없어도 문의를 포함
-        },
-      ],
-    });
-    return {
-      inquiries: rows,
-      total: count,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
-    };
-  } catch (error) {
-    logger.error(
-      `inquiry.repository.js - Error fetching inquiries: ${error.message}`
-    );
-    throw new Error("문의 데이터를 불러오는 중 오류가 발생했습니다.");
+  if (status) {
+    whereClause.status = status;
   }
+  const { rows, count } = await Inquiry.findAndCountAll({
+    where: whereClause,
+    limit: limit,
+    offset: offset,
+    order: [["created_at", "DESC"]],
+    include: [
+      {
+        model: InquiryAnswer,
+        as: "inquiryAnswers", // 모델에서 정의한 별칭과 일치
+        required: false, // 답변이 없어도 문의를 포함
+      },
+    ],
+  });
+  return {
+    inquiries: rows,
+    pagination: {
+      total_items: count,
+      total_pages: Math.ceil(count / limit),
+      page: page, // current page
+    },
+  };
+  // } catch (error) {
+  //   logger.error(
+  //     `inquiry.repository.js - Error fetching inquiries: ${error.message}`
+  //   );
+  //   throw new Error("문의 데이터를 불러오는 중 오류가 발생했습니다.");
+  // }
 };
 
 // 추가적인 리포지토리 필요 시 주석 해제 및 구현

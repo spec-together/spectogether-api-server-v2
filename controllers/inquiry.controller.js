@@ -8,7 +8,7 @@ const logger = require("../logger");
  * @route   GET /inquiries?page=1&limit=10
  * @access  Private
  */
-const handleGetInquiries = async (req, res) => {
+const handleGetInquiries = async (req, res, next) => {
   try {
     // const userId = req.user.user_id;
     const page = parseInt(req.query.page, 10) || 1;
@@ -17,19 +17,29 @@ const handleGetInquiries = async (req, res) => {
 
     const result = await inquiryService.getAllInquiries(page, limit, status);
     // const result = await inquiryService.getAllInquiries(userId, page, limit, status);
-    res.status(200).json({
-      data: result.inquiries,
-      meta: {
-        total: result.total,
-        totalPages: result.totalPages,
-        currentPage: result.currentPage,
+    const { inquiries, pagination } = result;
+    return res.status(200).success({
+      inquiries: inquiries,
+      pagination: {
+        // page_size: pagination.limit,
+        // page: pagination.page, // current page
+        // total_items: pagination.total_items,
+        // total_pages: pagination.total_pages,
+        ...pagination,
+        next:
+          pagination.page < pagination.total_pages
+            ? `/inquiries?page=${pagination.page + 1}`
+            : null,
+        previous:
+          pagination.page > 1 ? `/inquiries?page=${pagination.page - 1}` : null,
       },
     });
   } catch (error) {
     logger.error(`문의 목록 조회 중 오류 발생: ${error.message}`);
-    res
-      .status(500)
-      .json({ message: "Error fetching inquiries", error: error.message });
+    next(error);
+    // res
+    //   .status(500)
+    //   .json({ message: "Error fetching inquiries", error: error.message });
   }
 };
 
