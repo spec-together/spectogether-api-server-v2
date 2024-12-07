@@ -29,6 +29,7 @@ const { swaggerUi, specs } = require("./swagger/swagger");
 // Routers는 이 주석 아래에 import 해주시면 됩니다.
 // ex) const exampleRouter = require("./routers/example.router");
 const authRouter = require("./routes/auth.router");
+const inquiryRouter = require("./routes/inquiry.router");
 
 // ** 중요 ** 미들웨어 순서를 변경할 때는 신경써서 작업해 주세요.
 const app = express();
@@ -38,9 +39,11 @@ app.use(responseHandler);
 app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(morgan("combined"));
+// app.use(morgan("dev"));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use("/static", express.static("public")); // 정적 파일 제공. public 폴더 안에 있는 파일들을 /static 경로를 통해 접근 가능
 
 // Passport 초기화
 app.use(passport.initialize());
@@ -54,6 +57,7 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(specs));
 // 이 주석 하단에 Router들을 use 해주시면 됩니다.
 // ex) app.use("/example", exampleRouter);
 app.use("/auth", authRouter);
+app.use("/inquiries", inquiryRouter);
 
 // 에러 핸들러는 최하단에 위치해야 하는 미들웨어입니다. 절대 순서를 변경하지 마세요.
 app.use(errorHandler);

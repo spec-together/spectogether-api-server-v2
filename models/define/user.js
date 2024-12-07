@@ -88,7 +88,7 @@ class User extends Model {
     User.hasMany(models.ContestAnswer, { foreignKey: "answer_id" });
     User.hasMany(models.Board, { foreignKey: "author" });
     User.hasMany(models.Inquiry, { foreignKey: "user_id" });
-    User.hasMany(models.InquiryAnswer, { foreignKey: "admin_id" });
+    // User.hasMany(models.InquiryAnswer, { foreignKey: "admin_id" }); // 관리자 table, model 미구현 상태
     User.hasMany(models.StudyroomVideocallMember, { foreignKey: "member_id" });
     User.hasMany(models.StudyroomChat, { foreignKey: "sender_id" });
   }

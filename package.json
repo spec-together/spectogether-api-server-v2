@@ -12,8 +12,9 @@
   "license": "MIT",
   "description": "backend server for spectogether",
   "devDependencies": {
+    "@faker-js/faker": "^9.3.0",
     "nodemon": "^3.1.7",
-    "prettier": "3.3.3",
+    "prettier": "^3.3.3",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },
