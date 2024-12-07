@@ -17,6 +17,18 @@ const newUserInputSchema = {
     email_verification_id: { type: "string" },
     profile_image: { type: "string" },
     password: { type: "string" },
+    terms: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          term_id: { type: "integer" },
+          agreed: { type: "boolean" },
+        },
+        required: ["term_id", "agreed"],
+        additionalProperties: false,
+      },
+    },
   },
   required: [
     "user_register_type",
@@ -28,6 +40,7 @@ const newUserInputSchema = {
     "email",
     "email_verification_id",
     "password",
+    "terms",
   ],
   additionalProperties: false,
 };

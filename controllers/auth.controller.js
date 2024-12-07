@@ -11,6 +11,7 @@ const {
   checkIfRefreshTokenExistsByTokenStringService,
   checkAndReturnRefreshTokenIfExistsInRequestCookie,
   getEmailByEmailVerificationIdService,
+  createUserAgreedTermsToDatabaseService,
 } = require("../services/auth.service");
 const logger = require("../logger");
 const { RelatedServiceUnavailableError } = require("../errors");
@@ -35,6 +36,7 @@ const handleUserRegister = async (req, res, next) => {
   2. 이미 존재하는 사용자인지 확인 ( key = email )
   3. email verification id에 등록된 email과 일치하는지 확인
   4. spec_level, manner_level, role, is_active 는 default로 생성
+  4-1. user_terms 에 연결
   5. calendar 생성, user_calendar 연결
   6. todo는 나중에 테이블에 쿼리 떄릴거임
   */
@@ -62,6 +64,13 @@ const handleUserRegister = async (req, res, next) => {
     // 사용자 생성
     logger.debug(`[handleUserRegister] 사용자 생성`);
     const newUser = await createNewUserService(newUserData);
+
+    // user_terms 연결
+    // TODO : 모든 약관에 대한 동의여부를 보냈는지 확인하기
+    await createUserAgreedTermsToDatabaseService(
+      newUser.user_id,
+      newUserData.terms
+    );
 
     // 캘린더 생성 및 user_calendar에 연결
     logger.debug(`[handleUserRegister] 캘린더 생성 및 user_calendar에 연결`);
@@ -171,7 +180,7 @@ const handleKakaoPassportCallback = async (err, user, info, req, res, next) => {
     if (!user) {
       const email = info?.user?.email;
       if (!email) {
-        logger.fatal(
+        logger.error(
           `[handleKakaoCallback 2] 카카오 서버에서 받아온 정보가 올바르지 않습니다. ${JSON.stringify(info, null, 2)}`
         );
         throw new RelatedServiceUnavailableError({

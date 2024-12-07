@@ -7,6 +7,7 @@ const {
   EmailVerificationCode,
   UserCalendar,
   UserRefreshToken,
+  UserTerm,
 } = require("../models");
 
 // ** 중요 **
@@ -59,6 +60,7 @@ const getUserByEmailOrPhoneNumber = async (email, phoneNumber) => {
     `[getUserByEmailOrPhoneNumber] email: ${email}, phoneNumber: ${phoneNumber}`
   );
   const user = await User.findOne({
+    attributes: ["user_id"],
     where: {
       [Sequelize.Op.or]: [{ email }, { phone_number: phoneNumber }],
     },
@@ -141,6 +143,24 @@ const checkIfRefreshTokenExistsByTokenString = async (tokenString) => {
   return token;
 };
 
+const putUserAgreedTerms = (userId, termId, isAgreed) => {
+  const result = UserTerm.create({
+    term_id: termId,
+    user_id: userId,
+    is_agreed: isAgreed,
+  });
+
+  logger.debug(
+    `[putUserAgreedTerms] 사용자가 약관에 동의했습니다: ${JSON.stringify(
+      result,
+      null,
+      2
+    )}`
+  );
+
+  return result;
+};
+
 module.exports = {
   createNewUser,
   createNewCalendar,
@@ -152,4 +172,5 @@ module.exports = {
   removeRefreshTokenFromDatabaseByUserId,
   removeRefreshTokenFromDatabaseByTokenString,
   checkIfRefreshTokenExistsByTokenString,
+  putUserAgreedTerms,
 };

@@ -45,6 +45,17 @@ const RegisterUserSchema = {
       type: "string",
       description: "The password of the user",
     },
+    terms: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          term_id: { type: "integer" },
+          agreed: { type: "boolean" },
+        },
+        required: ["term_id", "agreed"],
+      },
+    },
   },
   required: [
     "userRegisterType",
@@ -56,6 +67,7 @@ const RegisterUserSchema = {
     "email",
     "emailVerificationId",
     "password",
+    "terms",
   ],
 };
 
