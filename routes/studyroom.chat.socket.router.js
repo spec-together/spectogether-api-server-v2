@@ -1,5 +1,8 @@
 const {
-  handleOnInitialMessage,
+  handleOnUserEnterStudyroomMessage,
+  handleOnJoinChatroom,
+  handleOnLeave,
+  handleOnMessage,
 } = require("../controllers/studyroom.chat.socket.controller");
 const logger = require("../logger");
 const {
@@ -13,9 +16,17 @@ const socketRouter = (io) => {
 
   io.on("connection", (socket) => {
     socket.on(
-      "initial-message",
-      async (data) => await handleOnInitialMessage(socket, data)
+      "user-entered",
+      async (data) => await handleOnUserEnterStudyroomMessage(socket, data)
     );
+    socket.on(
+      "user-join",
+      async (data) => await handleOnJoinChatroom(socket, data)
+    );
+    socket.on("user-leave", async (data) => await handleOnLeave(socket, data));
+    socket.on("message", async (data) => await handleOnMessage(socket, data));
+    // socket.on("reconnect");
+    // socket.on("disconnect");
   });
 };
 

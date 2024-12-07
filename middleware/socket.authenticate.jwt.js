@@ -24,6 +24,7 @@ const socketAuthenticateAccessToken = (socket, next) => {
             jwt_message: err.message,
           })
         );
+        return;
       }
 
       let { user_id, name, nickname } = user;

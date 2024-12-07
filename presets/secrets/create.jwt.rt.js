@@ -9,11 +9,11 @@ const { encrypt62 } = require("../../services/encrypt.service");
 
 // createAccessTokenService("1", "kw", "admin");
 const createBearerToken = (user_id) => {
-  const at = createTestUserTokenService(user_id, "kw", "admin");
+  const at = createTestUserTokenService(user_id, "kw2", "admin2");
   return `Bearer ${at}`;
 };
 
-console.log(createBearerToken(124214));
+console.log(createBearerToken(1));
 
 const createRefreshTokenWithoutWritingToDb = async (user_id) => {
   const payload = {
