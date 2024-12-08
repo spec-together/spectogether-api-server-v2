@@ -2,6 +2,7 @@
 
 const corsOptions = {
   origin: ["http://localhost:5173", "http://192.168.0.24:5173"], // CORS domain 설정
+  // origin: "*", // CORS domain 설정
   credentials: true,
 };
 
