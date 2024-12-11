@@ -34,19 +34,19 @@ router.delete(
 );
 
 module.exports = router;
-// Swagger Documentation - Inquiries Controller
+// Swagger Documentation - Inquiries
 /**
  * @swagger
  * tags:
- *   name: Inquiries Controller
+ *   name: Inquiries
  *   description: 문의 관련 API 엔드포인트
  *
  * /inquiries:
  *   get:
  *     summary: 문의 목록을 조회합니다.
- *     tags: [Inquiries Controller]
+ *     tags: [Inquiries]
  *     security:
- *       - bearerAuth: []
+ *       - AccessToken_Bearer: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -82,9 +82,9 @@ module.exports = router;
  * /inquiries/{id}:
  *   get:
  *     summary: 특정 문의를 조회합니다.
- *     tags: [Inquiries Controller]
+ *     tags: [Inquiries]
  *     security:
- *       - bearerAuth: []
+ *       - AccessToken_Bearer: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -110,9 +110,9 @@ module.exports = router;
  *
  *   put:
  *     summary: 특정 문의를 수정합니다.
- *     tags: [Inquiries Controller]
+ *     tags: [Inquiries]
  *     security:
- *       - bearerAuth: []
+ *       - AccessToken_Bearer: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -144,9 +144,9 @@ module.exports = router;
  *
  *   delete:
  *     summary: 문의를 삭제합니다.
- *     tags: [Inquiries Controller]
+ *     tags: [Inquiries]
  *     security:
- *       - bearerAuth: []
+ *       - AccessToken_Bearer: []
  *     parameters:
  *       - in: path
  *         name: id
