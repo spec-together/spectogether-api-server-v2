@@ -1,7 +1,15 @@
-const { StudyroomChat, Studyroom, StudyroomMember } = require("../models");
+const logger = require("../logger");
+const { StudyroomChat, StudyroomMember, User } = require("../models");
 
 const getStudyroomChatByStudyroomId = async (studyroomId) => {
   const chats = await StudyroomChat.findAll({
+    include: [
+      {
+        model: User,
+        attributes: ["name", "nickname", "profile_image"],
+        required: false,
+      },
+    ],
     attributes: [
       "studyroom_chat_id",
       "studyroom_id",
@@ -14,6 +22,14 @@ const getStudyroomChatByStudyroomId = async (studyroomId) => {
       studyroom_id: studyroomId,
     },
   });
+
+  logger.debug(
+    `[getStudyroomChatByStudyroomId] studyroomId: ${studyroomId}, chats: ${JSON.stringify(
+      chats,
+      null,
+      2
+    )}`
+  );
 
   return chats;
 };

@@ -12,6 +12,7 @@ const {
   updateUserNicknameByUserId,
   checkIfUserExistsByUserId,
 } = require("../repositories/users.repository");
+const { encrypt62 } = require("./encrypt.service");
 
 const getUserAgreedTermsService = async (user_id) => {
   const userAgreedTerms = await getAgreedTermsByUserId(user_id);
@@ -49,14 +50,24 @@ const getUserStudyroomService = async (userId) => {
   let ret = [];
   for (const studyroom of studyrooms) {
     ret.push({
-      studyroom_id: studyroom.studyroom_id,
-      title: studyroom.title,
-      description: studyroom.description,
-      status: studyroom.status,
-      created_at: studyroom.created_at,
+      studyroom_id: encrypt62(studyroom.Studyroom.studyroom_id),
+      title: studyroom.Studyroom.title,
+      subtitle: studyroom.Studyroom.subtitle,
+      area_id: studyroom.Studyroom.area_id,
+      profile_image: studyroom.Studyroom.profile_image,
+      target_type: studyroom.Studyroom.target_type,
+      target_id: studyroom.Studyroom.target_id,
+      status: studyroom.Studyroom.status,
+      created_at: studyroom.Studyroom.created_at,
     });
   }
-
+  logger.debug(
+    `[getUserStudyroomService] 해당 사용자의 스터디룸: ${JSON.stringify(
+      ret,
+      null,
+      2
+    )}`
+  );
   return ret;
 };
 
@@ -99,8 +110,21 @@ const getUserSpecsByUserIdService = async (userId) => {
     throw new NotExistsError("해당 사용자의 스펙이 없습니다.");
   }
   // Spec 데이터만 추출
-  const specs = userSpecs.map((us) => us.Spec).filter((spec) => spec !== null);
-
+  const specs = userSpecs
+    .filter((us) => us.Spec !== null)
+    .map((us) => ({
+      ...us.Spec.dataValues,
+      created_at: us.created_at,
+      rank: Math.floor(Math.random() * 4) + 1,
+    }));
+  logger.debug(
+    `[getUserSpecsByUserIdService] 파싱된 스펙: ${JSON.stringify(
+      specs,
+      null,
+      2
+    )}`
+  );
+  // TODO : 이거 좀 더 깔끔하게 수정..
   return specs;
 };
 

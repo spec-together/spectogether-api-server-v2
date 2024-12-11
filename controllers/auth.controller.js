@@ -16,7 +16,11 @@ const {
 } = require("../services/auth.service");
 const logger = require("../logger");
 const { RelatedServiceUnavailableError } = require("../errors");
-const { decrypt62, comparePassword } = require("../services/encrypt.service");
+const {
+  decrypt62,
+  comparePassword,
+  encrypt62,
+} = require("../services/encrypt.service");
 const {
   getEmailByEmailVerificationId,
 } = require("../repositories/auth.repository");
@@ -144,11 +148,13 @@ const handleUserLocalLogin = async (req, res, next) => {
       \nAT : ${accessToken}\
       \nRT : ${refreshToken}`
     );
+    const encryptedUserId = encrypt62(user_id);
 
     return res
       .status(200)
       .cookie("SPECTOGETHER_RT", refreshToken, refreshTokenCookieOptions)
       .success({
+        user: { user_id: encryptedUserId, name, nickname },
         access_token: accessToken,
       });
   } catch (error) {
@@ -208,6 +214,7 @@ const handleKakaoPassportCallback = async (err, user, info, req, res, next) => {
     const { user_id, name, nickname } = user;
     const accessToken = createAccessTokenService(user_id, name, nickname);
     const refreshToken = await createRefreshTokenService(user_id);
+    const encryptedUserId = encrypt62(user_id);
 
     logger.info(
       `[handleKakaoCallback 3-1] 로그인된 사용자 : ${JSON.stringify(user, null, 2)}`
@@ -217,7 +224,7 @@ const handleKakaoPassportCallback = async (err, user, info, req, res, next) => {
       .status(200)
       .cookie("SPECTOGETHER_RT", refreshToken, refreshTokenCookieOptions).send(`
           <script>
-            window.opener.postMessage(${JSON.stringify({ token: accessToken, user_id, name, nickname })}, '${FRONTEND_URL}');
+            window.opener.postMessage(${JSON.stringify({ token: accessToken, user_id: encryptedUserId, name, nickname })}, '${FRONTEND_URL}');
             window.close();
           </script>
         `);

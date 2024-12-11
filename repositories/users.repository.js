@@ -2,6 +2,7 @@ const logger = require("../logger");
 const {
   UserTerm,
   UserStudyroom,
+  Studyroom,
   Todo,
   TodoMember,
   UserSpec,
@@ -26,7 +27,32 @@ const getUserStudyroomByUserId = async (userId) => {
     where: {
       user_id: userId,
     },
+    include: [
+      {
+        model: Studyroom,
+        attributes: [
+          "studyroom_id",
+          "title",
+          "subtitle",
+          "area_id",
+          "profile_image",
+          "target_type",
+          "target_id",
+          "status",
+          "created_at",
+        ],
+        required: false,
+      },
+    ],
   });
+
+  logger.debug(
+    `[getUserStudyroomByUserId] userId: ${userId}, userStudyroom: ${JSON.stringify(
+      userStudyroom,
+      null,
+      2
+    )}`
+  );
 
   return userStudyroom;
 };
@@ -65,7 +91,7 @@ const getUserTodoByUserId = async (userId) => {
 const getUserSpecsByUserId = async (userId) => {
   const userSpecs = await UserSpec.findAll({
     where: { user_id: userId },
-    attributes: [],
+    attributes: ["created_at"],
     include: [
       {
         model: Spec,

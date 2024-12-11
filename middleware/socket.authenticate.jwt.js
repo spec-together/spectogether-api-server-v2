@@ -8,7 +8,11 @@ const { decrypt62 } = require("../services/encrypt.service");
  * Bearer 토큰을 추출하고 검증하는 미들웨어
  */
 const socketAuthenticateAccessToken = (socket, next) => {
-  const authHeader = socket.request.headers.authorization;
+  // const authHeader = socket.request.headers.authorization;
+  const authHeader = socket.handshake.auth.token;
+  logger.debug(
+    `[socketAuthenticateAccessToken] Authorization Header: ${authHeader}`
+  );
 
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.split(" ")[1];
