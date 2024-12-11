@@ -1,6 +1,4 @@
 const inquiryService = require("../services/inquiry.service.js");
-const logger = require("../logger");
-const path = require("node:path");
 
 exports.handleGetInquiries = async (req, res, next) => {
   try {
@@ -39,7 +37,7 @@ exports.handlePostInquiry = async (req, res, next) => {
       content,
       image_url,
     });
-    return res.status(201).success(newInquiry); // TODO : 사용하지 않는 내용은 반환하지 않도록 수정
+    return res.status(201).success({ inquiry: newInquiry }); // TODO : 사용하지 않는 내용은 반환하지 않도록 수정, 응답 형태 통일시키기
   } catch (error) {
     next(error);
   }
@@ -50,23 +48,9 @@ exports.handleGetInquiryById = async (req, res, next) => {
     const userId = req.user.user_id;
     const inquiryId = parseInt(req.params.id, 10);
 
-    // if (isNaN(inquiryId)) {
-    //   return res.status(400).error({
-    //     errorCode: "INVALID_ID",
-    //     reason: "유효한 문의 ID를 입력해주세요.",
-    //   }); // TODO : 오류 처리 위치 변경 고려, 형태 통일
-    // }
-
     const inquiry = await inquiryService.getInquiryById(userId, inquiryId);
 
-    // if (!inquiry) {
-    //   return res.status(404).error({
-    //     errorCode: "NOT_FOUND",
-    //     reason: "문의가 존재하지 않습니다.",
-    //   }); // TODO : 오류 처리 위치 변경 고려, 형태 통일
-    // }
-
-    return res.status(200).success(inquiry);
+    return res.status(200).success({ inquiry: inquiry });
   } catch (error) {
     next(error);
   }
@@ -93,7 +77,7 @@ exports.handlePutInquiry = async (req, res, next) => {
       inquiryId,
       updateData
     );
-    return res.status(200).success(updatedInquiry); // TODO : 사용하지 않는 내용은 반환하지 않도록 수정
+    return res.status(200).success({ inquiry: updatedInquiry }); // TODO : 사용하지 않는 내용은 반환하지 않도록 수정
   } catch (error) {
     next(error);
   }

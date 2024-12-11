@@ -69,14 +69,21 @@ class Contest extends Model {
   }
 
   static associate(models) {
-    Contest.belongsToMany(models.Calendar, {
-      through: models.ContestCalendar,
-      foreignKey: "contest_id",
-      otherKey: "calendar_id",
+    Contest.hasOne(models.ContestBoard, {
+      foreignKey: "contest_id", // contest_id는 ContestBoard의 foreign key
+      // as: "contestBoard", onDelete: "CASCADE",
     });
+    Contest.hasOne(models.ContestCalendar, {
+      foreignKey: "contest_id", // contest_id는 ContestCalendar의 foreign key
+      // as: "contestCalendar", onDelete: "CASCADE",
+    });
+    // Contest.belongsTo(models.Calendar, {
+    //   through: models.ContestCalendar,
+    //   foreignKey: "contest_id",
+    //   otherKey: "calendar_id",
+    // });
     Contest.hasMany(models.ContestQuestion, { foreignKey: "contest_id" });
     Contest.hasMany(models.ContestSchedule, { foreignKey: "contest_id" });
-    Contest.hasMany(models.ContestBoard, { foreignKey: "contest_id" });
   }
 }
 

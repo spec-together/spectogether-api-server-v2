@@ -38,6 +38,7 @@ const usersRouter = require("./routes/users.router");
 const studyroomChatSocketRouter = require("./routes/socket/studyroom.chat.socket.router");
 const videoSocketRouter = require("./routes/socket/video.socket.router");
 const inquiryRouter = require("./routes/inquiry.router");
+const contestRouter = require("./routes/contest.router");
 
 // ** 중요 ** 미들웨어 순서를 변경할 때는 신경써서 작업해 주세요.
 const app = express();
@@ -50,7 +51,7 @@ app.use(morgan("combined"));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use("/static", express.static("public")); // 정적 파일 제공. public 폴더 안에 있는 파일들을 /static 경로를 통해 접근 가능
+// app.use("/static", express.static("public")); // 정적 파일 제공. public 폴더 안에 있는 파일들을 /static 경로를 통해 접근 가능
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Passport 초기화
@@ -67,6 +68,7 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(specs));
 app.use("/auth", authRouter);
 app.use("/users", usersRouter);
 app.use("/inquiries", inquiryRouter);
+app.use("/contests", contestRouter);
 
 // 에러 핸들러는 최하단에 위치해야 하는 미들웨어입니다. 절대 순서를 변경하지 마세요.
 app.use(errorHandler);

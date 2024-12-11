@@ -40,11 +40,15 @@ class Calendar extends Model {
       foreignKey: "calendar_id",
       otherKey: "studyroom_id",
     });
-    Calendar.belongsToMany(models.Contest, {
-      through: models.ContestCalendar,
+    Calendar.hasOne(models.ContestCalendar, {
       foreignKey: "calendar_id",
-      otherKey: "contest_id",
+      // as: "contestCalendar", onDelete: "CASCADE",
     });
+    // Calendar.belongsToMany(models.Contest, {
+    //   through: models.ContestCalendar,
+    //   foreignKey: "calendar_id",
+    //   otherKey: "contest_id",
+    // });
   }
 }
 
