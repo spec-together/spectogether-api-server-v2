@@ -122,9 +122,11 @@ const InquirySchema = {
   Pagination: {
     type: "object",
     properties: {
-      currentPage: { type: "integer", example: 1 },
-      totalPages: { type: "integer", example: 5 },
-      totalItems: { type: "integer", example: 50 },
+      total_pages: { type: "integer", example: 5 },
+      total_items: { type: "integer", example: 50 },
+      page: { type: "integer", example: 1 },
+      prev: {},
+      next: {},
     },
     required: ["currentPage", "totalPages", "totalItems"],
   },
@@ -149,21 +151,45 @@ const InquirySchema = {
     required: ["success", "data"],
   },
 
-  // CreateInquiryResponse: {
-  //   type: "object",
-  //   properties: {
-  //     success: { type: "boolean", example: true },
-  //     data: {
-  //       type: "object",
-  //       properties: {
-  //         message: { type: "string", example: "문의가 성공적으로 생성되었습니다." },
-  //         inquiry: { $ref: "#/components/schemas/Inquiry" }
-  //       }
-  //     }
-  //   },
-  //   required: ["success", "data"]
-  // },
+  CreateInquirySchema: {
+    type: "object",
+    properties: {
+      title: {
+        type: "string",
+        description: "문의 제목",
+        example: "문의 제목 예시",
+      },
+      content: {
+        type: "string",
+        description: "문의 내용",
+        example: "문의 내용 예시",
+      },
+      image: {
+        type: "string",
+        format: "binary",
+        description: "문의에 첨부된 이미지 파일",
+      },
+    },
+    required: ["title", "content"],
+  },
 
+  CreateInquiryResponse: {
+    type: "object",
+    properties: {
+      success: { type: "boolean", example: true },
+      data: {
+        type: "object",
+        properties: {
+          message: {
+            type: "string",
+            example: "문의가 성공적으로 생성되었습니다.",
+          }, // ?
+          inquiry: { $ref: "#/components/schemas/Inquiry" },
+        },
+      },
+    },
+    required: ["success", "data"],
+  },
   // UpdateInquiryResponse: {
   //   type: "object",
   //   properties: {

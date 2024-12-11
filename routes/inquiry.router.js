@@ -7,8 +7,30 @@ const { authenticateAccessToken } = require("../middleware/authenticate.jwt"); /
 router.get("/", authenticateAccessToken, inquiryController.handleGetInquiries); // ?page=1&limit=10
 
 // 추가적인 엔드포인트 필요 시 주석 해제 및 구현
+const multer = require("multer");
+const path = require("path");
+
+// TODO : 경로 없으면 생성하는 코드 추가
+// 이미지 저장 설정
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/inquiries/");
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+const upload = multer({ storage: storage });
+
+router.post(
+  "/",
+  authenticateAccessToken,
+  upload.single("image"),
+  inquiryController.handlePostInquiry
+);
+
 // router.get(':id', inquiryController.handleGetInquiryById)
-// router.post('/', inquiryController.handlePostInquiry)
 // router.put('/:id', inquiryController.handlePutInquiry)
 // router.delete('/:id', inquiryController.handleDeleteInquiry)
 
@@ -57,6 +79,36 @@ module.exports = router;
  *         description: 서버 오류
  */
 
+// 추가적인 엔드포인트 필요 시 주석 해제 및 구현
+/**
+ * @swagger
+ * /inquiries:
+ *   post:
+ *     summary: 새로운 문의를 생성합니다.
+ *     tags: [Inquiries]
+ *     security:
+ *       - AccessToken_Bearer: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateInquiry'
+ *     responses:
+ *       201:
+ *         description: 문의가 성공적으로 생성되었습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CreateInquiryResponse'
+ *       400:
+ *         description: 잘못된 요청 데이터
+ *       401:
+ *         description: 인증이 필요합니다.
+ *       500:
+ *         description: 서버 오류
+ */
+
 /**
 //  * @swagger
  * /inquiries/{id}:
@@ -86,33 +138,6 @@ module.exports = router;
  *       500:
  *         description: 서버 오류
  */
-
-// 추가적인 엔드포인트 필요 시 주석 해제 및 구현
-/**
-//  * @swagger
- * /inquiries:
- *   post:
- *     summary: 새로운 문의를 생성합니다.
- *     tags: [Inquiries]
- *     security:
- *       - AccessToken_Bearer: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/CreateInquiry'
- *     responses:
- *       201:
- *         description: 문의가 성공적으로 생성되었습니다.
- *       400:
- *         description: 잘못된 요청 데이터
- *       401:
- *         description: 인증이 필요합니다.
- *       500:
- *         description: 서버 오류
- */
-// router.post('/', authenticateAccessToken, inquiryController.handlePostInquiry);
 
 /**
 //  * @swagger

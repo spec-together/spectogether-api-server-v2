@@ -2,6 +2,7 @@
 const inquiryService = require("../services/inquiry.service.js");
 const logger = require("../logger");
 // TODO : req.user.user_id로 본인 문의글만 조회하도록 수정
+const path = require("node:path");
 
 /**
  * @desc    문의 목록 조회 핸들러
@@ -39,6 +40,25 @@ exports.handleGetInquiries = async (req, res, next) => {
 };
 
 // 추가적인 핸들러 필요 시 주석 해제 및 구현
+exports.handlePostInquiry = async (req, res, next) => {
+  try {
+    const userId = req.user.user_id;
+    const { title, content } = req.body;
+    let image_url = null;
+    if (req.file) {
+      image_url = `${req.protocol}://${req.get("host")}/uploads/inquiries/${req.file.filename}`;
+    }
+    // const newInquiry = await inquiryService.createInquiry( userId, title, content, image_url );
+    const newInquiry = await inquiryService.createInquiry(userId, {
+      title,
+      content,
+      image_url,
+    });
+    return res.status(201).success(newInquiry);
+  } catch (error) {
+    next(error);
+  }
+};
 // const handleGetInquiryById = async (req, res) => { /* ... */ };
 // const handlePostInquiry = async (req, res) => { /* ... */ };
 // const handlePutInquiry = async (req, res) => { /* ... */ };

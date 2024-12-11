@@ -1,6 +1,4 @@
 const { Inquiry, InquiryAnswer } = require("../models");
-const logger = require("../logger");
-const { where } = require("sequelize");
 // TODO : @param   {number} userId - 현재 사용자 ID 추가
 
 /**
@@ -29,6 +27,10 @@ exports.findInquiries = async (whereClause, limit, offset) => {
 };
 
 // 추가적인 리포지토리 필요 시 주석 해제 및 구현
+exports.createInquiry = async (inquiryData) => {
+  const newInquiry = await Inquiry.create(inquiryData);
+  return newInquiry;
+};
 // const getInquiryById = async (id) => { /* ... */ };
 // const createInquiry = async (data) => { /* ... */ };
 // const updateInquiry = async (id, data) => { /* ... */ };

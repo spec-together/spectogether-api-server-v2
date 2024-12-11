@@ -9,6 +9,8 @@ const cookieParser = require("cookie-parser");
 const { Server } = require("socket.io");
 // const https = require("https"); // https를 사용해야 하는 경우 사용하면 됩니다.
 const http = require("http");
+const path = require("node:path");
+
 // 로컬 파일들 import, 기능별로 구분해주세요.
 const logger = require("./logger");
 const {
@@ -45,11 +47,11 @@ app.use(responseHandler);
 app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(morgan("combined"));
-// app.use(morgan("dev"));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/static", express.static("public")); // 정적 파일 제공. public 폴더 안에 있는 파일들을 /static 경로를 통해 접근 가능
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Passport 초기화
 app.use(passport.initialize());

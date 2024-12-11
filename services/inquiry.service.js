@@ -1,7 +1,6 @@
 const inquiryRepository = require("../repositories/inquiry.repository");
-const logger = require("../logger");
 const { DatabaseError } = require("../errors");
-// TODO : @param   {number} userId - 현재 사용자 ID 추가
+// const { validateCreateInquiry } = require("../validators/inquiry.validation.service.js"); // inquiry.validator.js ?
 
 /**
  * @desc    문의 목록 조회 서비스
@@ -46,6 +45,12 @@ exports.getAllInquiries = async (userId, page, limit, status) => {
 };
 
 // 추가적인 서비스 필요 시 주석 해제 및 구현
+
+// exports.createInquiry = async (userId, title, content, imageUrl) => {}
+exports.createInquiry = async (userId, data) => {
+  // validateCreateInquiry(data);
+  return await inquiryRepository.createInquiry({ user_id: userId, ...data });
+};
 // const getInquiryById = async (id) => { /* ... */ };
 // const createInquiry = async (data) => { /* ... */ };
 // const updateInquiry = async (id, data) => { /* ... */ };
