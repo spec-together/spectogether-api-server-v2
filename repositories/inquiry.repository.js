@@ -1,3 +1,4 @@
+const { NotExistsError } = require("../errors");
 const { Inquiry, InquiryAnswer } = require("../models");
 
 exports.findInquiries = async (whereClause, limit, offset) => {
@@ -22,6 +23,19 @@ exports.createInquiry = async (inquiryData) => {
   return newInquiry;
 };
 
+exports.updateInquiry = async (id, data) => {
+  const [updatedRows] = await Inquiry.update(data, {
+    where: { inquiry_id: id },
+  });
+
+  if (updatedRows === 0) {
+    throw new NotExistsError("문의가 존재하지 않습니다.");
+  }
+
+  const updatedInquiry = await Inquiry.findOne({ where: { inquiry_id: id } });
+  return updatedInquiry;
+};
+
 exports.findInquiryById = async (userId, inquiryId) => {
   const inquiry = await Inquiry.findOne({
     where: {
@@ -39,6 +53,12 @@ exports.findInquiryById = async (userId, inquiryId) => {
   return inquiry;
 };
 
-// 추가적인 리포지토리 필요 시 주석 해제 및 구현
-// const updateInquiry = async (id, data) => { /* ... */ };
-// const deleteInquiry = async (id) => { /* ... */ };
+exports.deleteInquiry = async (inquiryId) => {
+  const deletedRows = await Inquiry.destroy({
+    where: { inquiry_id: inquiryId },
+  });
+
+  if (deletedRows === 0) {
+    throw new NotExistsError("문의가 존재하지 않습니다.");
+  }
+};

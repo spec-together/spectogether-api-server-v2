@@ -39,7 +39,7 @@ exports.handlePostInquiry = async (req, res, next) => {
       content,
       image_url,
     });
-    return res.status(201).success(newInquiry);
+    return res.status(201).success(newInquiry); // TODO : 사용하지 않는 내용은 반환하지 않도록 수정
   } catch (error) {
     next(error);
   }
@@ -72,7 +72,41 @@ exports.handleGetInquiryById = async (req, res, next) => {
   }
 };
 
-// 추가적인 핸들러 필요 시 주석 해제 및 구현
+exports.handlePutInquiry = async (req, res, next) => {
+  try {
+    const userId = req.user.user_id;
+    const inquiryId = parseInt(req.params.id, 10);
+    const { title, content } = req.body;
+    let image_url = null;
 
-// const handlePutInquiry = async (req, res) => { /* ... */ };
-// const handleDeleteInquiry = async (req, res) => { /* ... */ };
+    if (req.file) {
+      image_url = `${req.protocol}://${req.get("host")}/uploads/inquiries/${req.file.filename}`;
+    }
+
+    const updateData = { title, content };
+    if (image_url) {
+      updateData.image_url = image_url;
+    }
+
+    const updatedInquiry = await inquiryService.updateInquiry(
+      userId,
+      inquiryId,
+      updateData
+    );
+    return res.status(200).success(updatedInquiry); // TODO : 사용하지 않는 내용은 반환하지 않도록 수정
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.handleDeleteInquiry = async (req, res, next) => {
+  try {
+    const userId = req.user.user_id;
+    const inquiryId = parseInt(req.params.id, 10);
+
+    await inquiryService.deleteInquiry(userId, inquiryId);
+    return res.status(204).send(); // TODO : 형태 통일 필요한지 고려
+  } catch (error) {
+    next(error);
+  }
+};

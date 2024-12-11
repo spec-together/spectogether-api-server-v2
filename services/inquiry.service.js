@@ -64,6 +64,38 @@ exports.getInquiryById = async (userId, inquiryId) => {
   }
 };
 
-// 추가적인 서비스 필요 시 주석 해제 및 구현
-// const updateInquiry = async (id, data) => { /* ... */ };
-// const deleteInquiry = async (id) => { /* ... */ };
+exports.updateInquiry = async (userId, inquiryId, updateData) => {
+  if (isNaN(inquiryId)) {
+    throw new InvalidInputError("유효한 문의 ID를 입력해주세요.");
+  }
+
+  // 추가적인 유효성 검사 로직이 필요하면 여기에 작성
+
+  const inquiry = await inquiryRepository.findInquiryById(userId, inquiryId);
+  if (!inquiry) {
+    throw new NotExistsError("문의가 존재하지 않습니다.");
+  }
+
+  const updatedInquiry = await inquiryRepository.updateInquiry(
+    inquiryId,
+    updateData
+  );
+  return updatedInquiry;
+};
+
+exports.deleteInquiry = async (userId, inquiryId) => {
+  if (isNaN(inquiryId)) {
+    throw new InvalidInputError("유효한 문의 ID를 입력해주세요.");
+  }
+
+  try {
+    const inquiry = await inquiryRepository.findInquiryById(userId, inquiryId);
+    if (!inquiry) {
+      throw new NotExistsError("해당 문의가 존재하지 않습니다.");
+    }
+
+    await inquiryRepository.deleteInquiry(inquiryId);
+  } catch (error) {
+    throw new DatabaseError("문의를 삭제하는 중 오류가 발생했습니다.");
+  }
+};
