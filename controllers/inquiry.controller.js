@@ -10,13 +10,17 @@ const logger = require("../logger");
  */
 exports.handleGetInquiries = async (req, res, next) => {
   try {
-    // const userId = req.user.user_id;
+    const userId = req.user.user_id;
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const status = req.query.status || null;
 
-    const result = await inquiryService.getAllInquiries(page, limit, status);
-    // const result = await inquiryService.getAllInquiries(userId, page, limit, status);
+    const result = await inquiryService.getAllInquiries(
+      userId,
+      page,
+      limit,
+      status
+    );
     const { inquiries, pagination } = result;
     return res.status(200).success({
       inquiries,

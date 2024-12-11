@@ -5,16 +5,19 @@ const { DatabaseError } = require("../errors");
 
 /**
  * @desc    문의 목록 조회 서비스
+ * @param   {number} userId - 현재 사용자 ID
  * @param   {number} page - 현재 페이지 번호
  * @param   {number} limit - 페이지당 항목 수
  * @param   {string|null} status - 문의 상태 필터링
  * @returns {object} - 문의 목록 및 페이징 정보
  */
 
-exports.getAllInquiries = async (page, limit, status) => {
+exports.getAllInquiries = async (userId, page, limit, status) => {
   const offset = (page - 1) * limit;
 
-  const whereClause = {};
+  const whereClause = {
+    user_id: userId, // 사용자 ID로 필터링
+  };
   if (status) {
     whereClause.status = status;
   }
