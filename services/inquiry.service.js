@@ -48,10 +48,21 @@ exports.getAllInquiries = async (userId, page, limit, status) => {
 
 // exports.createInquiry = async (userId, title, content, imageUrl) => {}
 exports.createInquiry = async (userId, data) => {
-  // validateCreateInquiry(data);
-  return await inquiryRepository.createInquiry({ user_id: userId, ...data });
+  try {
+    // validateCreateInquiry(data);
+    return await inquiryRepository.createInquiry({ user_id: userId, ...data });
+  } catch (error) {
+    throw new DatabaseError("문의를 생성하는 중 오류가 발생했습니다.");
+  }
 };
-// const getInquiryById = async (id) => { /* ... */ };
+exports.getInquiryById = async (userId, inquiryId) => {
+  try {
+    const inquiry = await inquiryRepository.findInquiryById(userId, inquiryId);
+    return inquiry;
+  } catch (error) {
+    throw new DatabaseError("문의를 불러오는 중 오류가 발생했습니다.");
+  }
+};
 // const createInquiry = async (data) => { /* ... */ };
 // const updateInquiry = async (id, data) => { /* ... */ };
 // const deleteInquiry = async (id) => { /* ... */ };

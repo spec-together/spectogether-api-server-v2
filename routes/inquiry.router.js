@@ -10,7 +10,9 @@ router.get("/", authenticateAccessToken, inquiryController.handleGetInquiries); 
 const multer = require("multer");
 const path = require("path");
 
+// TODO : 업로드 기능 분리하기
 // TODO : 경로 없으면 생성하는 코드 추가
+// TODO : 용량 제한 기능 추가
 // 이미지 저장 설정
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -30,7 +32,11 @@ router.post(
   inquiryController.handlePostInquiry
 );
 
-// router.get(':id', inquiryController.handleGetInquiryById)
+router.get(
+  "/:id",
+  authenticateAccessToken,
+  inquiryController.handleGetInquiryById
+);
 // router.put('/:id', inquiryController.handlePutInquiry)
 // router.delete('/:id', inquiryController.handleDeleteInquiry)
 
@@ -110,7 +116,7 @@ module.exports = router;
  */
 
 /**
-//  * @swagger
+ * @swagger
  * /inquiries/{id}:
  *   get:
  *     summary: 특정 문의를 조회합니다.
@@ -130,7 +136,7 @@ module.exports = router;
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Inquiry'
+ *               $ref: '#/components/schemas/GetInquiryResponse'
  *       401:
  *         description: 인증이 필요합니다.
  *       404:

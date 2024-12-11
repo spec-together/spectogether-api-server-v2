@@ -152,6 +152,7 @@ const InquirySchema = {
   },
 
   CreateInquirySchema: {
+    // 스키마 빼기? 아니면 모두 추가?
     type: "object",
     properties: {
       title: {
@@ -189,6 +190,15 @@ const InquirySchema = {
       },
     },
     required: ["success", "data"],
+  },
+
+  GetInquiryResponseSchema: {
+    type: "object",
+    properties: {
+      success: { $ref: "#/components/schemas/Inquiry" },
+    },
+    required: ["success"],
+    additionalProperties: false,
   },
   // UpdateInquiryResponse: {
   //   type: "object",

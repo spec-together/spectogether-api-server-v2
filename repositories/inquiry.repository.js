@@ -31,6 +31,29 @@ exports.createInquiry = async (inquiryData) => {
   const newInquiry = await Inquiry.create(inquiryData);
   return newInquiry;
 };
+/**
+ * @desc    특정 문의 조회
+ * @param   {number} userId - 현재 사용자 ID
+ * @param   {number} inquiryId - 조회할 문의 ID
+ * @returns {object|null} - 문의 상세 정보 또는 null
+ */
+exports.findInquiryById = async (userId, inquiryId) => {
+  const inquiry = await Inquiry.findOne({
+    where: {
+      inquiry_id: inquiryId,
+      user_id: userId,
+    },
+    include: [
+      {
+        model: InquiryAnswer,
+        as: "inquiryAnswers",
+        required: false,
+      },
+    ],
+  });
+
+  return inquiry;
+};
 // const getInquiryById = async (id) => { /* ... */ };
 // const createInquiry = async (data) => { /* ... */ };
 // const updateInquiry = async (id, data) => { /* ... */ };
