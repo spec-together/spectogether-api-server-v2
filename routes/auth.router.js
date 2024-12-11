@@ -9,10 +9,12 @@ const {
   handleReissueAccessToken,
   handleCreateTestUser,
   handleKakaoPassportCallback,
+  handleGetTerms,
 } = require("../controllers/auth.controller");
 const passport = require("passport");
 
 // Route Definitions
+router.get("/terms", handleGetTerms);
 router.post("/register", handleUserRegister);
 router.post("/register/test", handleCreateTestUser);
 router.post("/login/local", handleUserLocalLogin);

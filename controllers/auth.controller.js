@@ -12,6 +12,7 @@ const {
   checkAndReturnRefreshTokenIfExistsInRequestCookie,
   getEmailByEmailVerificationIdService,
   createUserAgreedTermsToDatabaseService,
+  getCurrentTermsService,
 } = require("../services/auth.service");
 const logger = require("../logger");
 const { RelatedServiceUnavailableError } = require("../errors");
@@ -57,9 +58,11 @@ const handleUserRegister = async (req, res, next) => {
       newUserData.phone_number
     );
     // email verification id 확인
-    logger.debug(`[handleUserRegister] email verification id 확인`);
-    const emailVerifyId = decrypt62(newUserData.email_verification_id);
-    await getEmailByEmailVerificationIdService(emailVerifyId);
+    // TODO : 편리성을 위해서 우선 비활성화 ... 추후에 핸드폰 번호 인증과 함께 활성화 필요
+
+    // logger.debug(`[handleUserRegister] email verification id 확인`);
+    // const emailVerifyId = decrypt62(newUserData.email_verification_id);
+    // await getEmailByEmailVerificationIdService(emailVerifyId);
 
     // 사용자 생성
     logger.debug(`[handleUserRegister] 사용자 생성`);
@@ -277,6 +280,26 @@ const handleReissueAccessToken = async (req, res, next) => {
   }
 };
 
+const handleGetTerms = async (req, res, next) => {
+  try {
+    // TODO : 약관들을 가져오는 로직
+    const result = await getCurrentTermsService();
+    logger.debug(
+      `[handleGetTerms] 약관들을 가져왔습니다 : ${JSON.stringify(result, null, 2)}`
+    );
+    return res.status(200).success(result);
+  } catch (error) {
+    logger.error(
+      `[handleGetTerms]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
+};
+
 module.exports = {
   handleUserRegister,
   handleUserLocalLogin,
@@ -285,4 +308,5 @@ module.exports = {
   handleReissueAccessToken,
   handleCreateTestUser,
   handleKakaoPassportCallback,
+  handleGetTerms,
 };

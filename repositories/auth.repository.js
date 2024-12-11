@@ -8,6 +8,7 @@ const {
   UserCalendar,
   UserRefreshToken,
   UserTerm,
+  Term,
 } = require("../models");
 
 // ** 중요 **
@@ -161,6 +162,25 @@ const putUserAgreedTerms = (userId, termId, isAgreed) => {
   return result;
 };
 
+const getCurrentTerms = async (userId) => {
+  const result = await Term.findAll({
+    attributes: ["term_id", "name", "description", "is_required"],
+    where: {
+      status: "active",
+    },
+  });
+
+  logger.debug(
+    `[getCurrentTerms] 사용자의 현재 약관 동의 상태를 가져옵니다: ${JSON.stringify(
+      result,
+      null,
+      2
+    )}`
+  );
+
+  return result;
+};
+
 module.exports = {
   createNewUser,
   createNewCalendar,
@@ -173,4 +193,5 @@ module.exports = {
   removeRefreshTokenFromDatabaseByTokenString,
   checkIfRefreshTokenExistsByTokenString,
   putUserAgreedTerms,
+  getCurrentTerms,
 };
