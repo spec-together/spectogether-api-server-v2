@@ -1,10 +1,10 @@
-const { NotAllowedError } = require("../errors");
-const logger = require("../logger");
+const { NotAllowedError } = require("../../errors");
+const logger = require("../../logger");
 const {
   getStudyroomChatByStudyroomId,
   checkIfUserInStudyroom,
   saveChatToDatabase,
-} = require("../repositories/studyroom.chat.socket.repository");
+} = require("../../repositories/studyroom.chat.socket.repository");
 
 const getStudyroomChatByStudyroomIdService = async (studyroomId) => {
   const chats = await getStudyroomChatByStudyroomId(studyroomId);

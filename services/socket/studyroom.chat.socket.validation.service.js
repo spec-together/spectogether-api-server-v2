@@ -1,9 +1,6 @@
 const Ajv = require("ajv");
 const addFormats = require("ajv-formats");
-const { InvalidInputError } = require("../errors");
-const {
-  saveChatToDatabase,
-} = require("../repositories/studyroom.chat.socket.repository");
+const { InvalidInputError } = require("../../errors");
 
 const ajv = new Ajv({ allErrors: true });
 addFormats(ajv);
