@@ -1,34 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const inquiryController = require("../controllers/inquiry.controller");
-// TODO : 인증 미들웨어 가져와서 req.user 에 {user_id, name, nickname} 추가하기
-const { authenticateAccessToken } = require("../middleware/authenticate.jwt"); // 인증 미들웨어 가져오기
+const { authenticateAccessToken } = require("../middleware/authenticate.jwt");
+const uploadController = require("../controllers/upload.controller");
 
 router.get("/", authenticateAccessToken, inquiryController.handleGetInquiries); // ?page=1&limit=10
 
-// 추가적인 엔드포인트 필요 시 주석 해제 및 구현
-const multer = require("multer");
-const path = require("path");
-
-// TODO : 업로드 기능 분리하기
+// TODO : 업로드 기능 분리하기 // ING...
 // TODO : 경로 없으면 생성하는 코드 추가
 // TODO : 용량 제한 기능 추가
-// 이미지 저장 설정
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/inquiries/");
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
-});
-const upload = multer({ storage: storage });
+
+const inquiryUploadPath = "uploads/inquiries/";
 
 router.post(
   "/",
   authenticateAccessToken,
-  upload.single("image"),
+  uploadController.handleUpload(inquiryUploadPath),
   inquiryController.handlePostInquiry
 );
 
@@ -37,10 +24,12 @@ router.get(
   authenticateAccessToken,
   inquiryController.handleGetInquiryById
 );
-// router.put('/:id', inquiryController.handlePutInquiry)
-// router.delete('/:id', inquiryController.handleDeleteInquiry)
 
 module.exports = router;
+
+// 추가적인 엔드포인트 필요 시 주석 해제 및 구현
+// router.put('/:id', inquiryController.handlePutInquiry)
+// router.delete('/:id', inquiryController.handleDeleteInquiry)
 
 /**
  * @swagger
