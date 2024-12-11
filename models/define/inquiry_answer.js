@@ -16,6 +16,7 @@ class InquiryAnswer extends Model {
         admin_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
+          defaultValue: 0, // 관리자 id 값 hardcoding
         },
         title: {
           type: DataTypes.STRING(255),
@@ -27,7 +28,7 @@ class InquiryAnswer extends Model {
         },
         image_url: {
           type: DataTypes.STRING(255),
-          allowNull: false,
+          allowNull: true,
         },
         created_at: {
           type: DataTypes.DATE(6),
@@ -49,8 +50,11 @@ class InquiryAnswer extends Model {
   }
 
   static associate(models) {
-    InquiryAnswer.belongsTo(models.Inquiry, { foreignKey: "inquiry_id" });
-    InquiryAnswer.belongsTo(models.User, { foreignKey: "admin_id" });
+    InquiryAnswer.belongsTo(models.Inquiry, {
+      foreignKey: "inquiry_id",
+      // as: "inquiry",
+    });
+    // InquiryAnswer.belongsTo(models.User, { foreignKey: "admin_id", as : "admin"}); // 관리자 table, model 미구현 상태
   }
 }
 

@@ -23,19 +23,20 @@ class Inquiry extends Model {
         },
         image_url: {
           type: DataTypes.STRING(255),
-          allowNull: false,
+          allowNull: true,
         },
         read_at: {
           type: DataTypes.DATE,
-          allowNull: false,
+          allowNull: true,
         },
         answered_at: {
           type: DataTypes.DATE,
-          allowNull: false,
+          allowNull: true,
         },
         status: {
           type: DataTypes.STRING(50),
           allowNull: false,
+          defaultValue: "pending",
         },
         created_at: {
           type: DataTypes.DATE(6),
@@ -57,8 +58,11 @@ class Inquiry extends Model {
   }
 
   static associate(models) {
+    Inquiry.hasMany(models.InquiryAnswer, {
+      foreignKey: "inquiry_id",
+      as: "inquiryAnswers",
+    });
     Inquiry.belongsTo(models.User, { foreignKey: "user_id" });
-    Inquiry.hasMany(models.InquiryAnswer, { foreignKey: "inquiry_id" });
   }
 }
 
