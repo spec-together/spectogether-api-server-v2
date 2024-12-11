@@ -4,29 +4,18 @@ const { where } = require("sequelize");
 // TODO : @param   {number} userId - 현재 사용자 ID 추가
 
 /**
- * @desc    문의 목록 조회 리포지토리
- *
- * @param   {number} page  - 현재 페이지 번호
- * @param   {number} limit - 페이지당 항목 수
- * @param   {string|null} status - 문의 상태 필터링
- * @returns {object}       - 문의 목록 및 메타 정보
+ * @desc    모든 문의 조회
+ * @param   {object} whereClause - 조회 조건
+ * @param   {number} limit - 한 페이지당 항목 수
+ * @param   {number} offset - 데이터 오프셋
+ * @returns {object} - 문의 목록과 총 개수
  */
 
-const getAllInquiries = async (page, limit, status) => {
-  // TODO : const getAllInquiries = async (userId, page, limit, status) => {
-  // try {
-  const offset = (page - 1) * limit;
-
-  const whereClause = {};
-  // const whereClause = { user_id: userId };
-
-  if (status) {
-    whereClause.status = status;
-  }
+exports.findInquiries = async (whereClause, limit, offset) => {
   const { rows, count } = await Inquiry.findAndCountAll({
     where: whereClause,
-    limit: limit,
-    offset: offset,
+    limit,
+    offset,
     order: [["created_at", "DESC"]],
     include: [
       {
@@ -36,20 +25,7 @@ const getAllInquiries = async (page, limit, status) => {
       },
     ],
   });
-  return {
-    inquiries: rows,
-    pagination: {
-      total_items: count,
-      total_pages: Math.ceil(count / limit),
-      page: page, // current page
-    },
-  };
-  // } catch (error) {
-  //   logger.error(
-  //     `inquiry.repository.js - Error fetching inquiries: ${error.message}`
-  //   );
-  //   throw new Error("문의 데이터를 불러오는 중 오류가 발생했습니다.");
-  // }
+  return { inquiries: rows, totalItems: count };
 };
 
 // 추가적인 리포지토리 필요 시 주석 해제 및 구현
@@ -58,6 +34,6 @@ const getAllInquiries = async (page, limit, status) => {
 // const updateInquiry = async (id, data) => { /* ... */ };
 // const deleteInquiry = async (id) => { /* ... */ };
 
-module.exports = {
-  getAllInquiries,
-};
+// module.exports = {
+//   findInquiries,
+// };
