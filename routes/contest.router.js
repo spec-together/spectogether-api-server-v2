@@ -61,6 +61,10 @@ router.post(
  *     responses:
  *       201:
  *         description: 공모전 생성 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CreateContestResponseSchema'
  *       400:
  *         description: 잘못된 입력값
  *       401:

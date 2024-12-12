@@ -63,6 +63,10 @@ exports.createContestWithAssociations = async (req, res, next) => {
       end_date,
     };
 
+    if (contestData.application_url === "") {
+      contestData.application_url = null;
+    }
+
     let image_url = null;
 
     if (req.file) {

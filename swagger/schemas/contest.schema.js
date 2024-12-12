@@ -1,6 +1,12 @@
+const { format } = require("morgan");
+
 const CreateContestRequestSchema = {
   type: "object",
   properties: {
+    application_url: {
+      type: "string",
+      format: "uri",
+    },
     image: {
       type: "string",
       format: "binary",
@@ -77,6 +83,7 @@ const CreateContestResponseSchema = {
         contest: {
           type: "object",
           properties: {
+            application_url: { type: "string", format: "uri" },
             contest_id: { type: "integer" },
             title: { type: "string" },
             subtitle: { type: "string" },

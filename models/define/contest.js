@@ -63,6 +63,10 @@ class Contest extends Model {
           type: DataTypes.STRING(255),
           allowNull: true,
         },
+        application_url: {
+          type: DataTypes.STRING(255),
+          allowNull: true,
+        },
       },
       {
         sequelize,
