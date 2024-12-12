@@ -1,6 +1,6 @@
 config.json
 *.pem
-# uploads/
+uploads/
 
 # Created by https://www.toptal.com/developers/gitignore/api/windows,macos,linux,node,dotenv
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,macos,linux,node,dotenv
