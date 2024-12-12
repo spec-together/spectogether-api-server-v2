@@ -15,7 +15,7 @@ class ContestBoard extends Model {
         },
         board_id: {
           type: DataTypes.BIGINT,
-          allowNull: false,
+          allowNull: false, // TODO : true ? contest 생성 시에는 없을 수 있겠다 싶은데. 일단 초기값 넣어 주는 형태로 구현
         },
         created_at: {
           type: DataTypes.DATE(6),

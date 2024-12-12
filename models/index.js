@@ -8,7 +8,7 @@ const sequelize = new Sequelize(MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD, {
   host: MYSQL_HOST,
   port: MYSQL_PORT,
   dialect: "mysql",
-  logging: (msg) => logger.info(`[Sequelize Log]: ${msg}`),
+  logging: (msg) => logger.info(`[Sequelize Log]: ${msg} ✨`),
   timezone: "+09:00",
   pool: {
     max: 10, // 최대 연결 수
