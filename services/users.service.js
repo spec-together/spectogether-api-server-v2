@@ -11,6 +11,8 @@ const {
   updateUserProfileImageByUserId,
   updateUserNicknameByUserId,
   checkIfUserExistsByUserId,
+  getTodoInfo,
+  getAssignedMemberByTodoId,
 } = require("../repositories/users.repository");
 const { encrypt62 } = require("./encrypt.service");
 
@@ -85,16 +87,37 @@ const getUserTodoService = async (userId) => {
       title: todo.title,
       subtitle: todo.subtitle,
       content: todo.content,
-      creater_id: todo.creater_id,
+      creater_id: encrypt62(todo.creater_id),
       deadline: todo.deadline,
       status: todo.status,
       created_at: todo.created_at,
-      assigned_user_id: userId,
+      assigned_user_id: encrypt62(userId),
       assigned_status: todo.TodoMembers[0]?.status,
     });
   }
 
   return ret;
+};
+
+const getTodoInfoService = async (todoId) => {
+  const todo = await getTodoInfo(todoId);
+  if (!todo) {
+    throw new NotExistsError("해당 할 일이 없습니다.");
+  }
+
+  return todo;
+};
+
+const getTodoAssignedUserNumberService = async (todoId) => {
+  const todo = await getAssignedMemberByTodoId(todoId);
+  if (!todo) {
+    throw new NotExistsError("해당 todo에 배정된 사용자가 존재하지 않습니다.");
+  }
+  logger.debug(
+    `[getTodoAssignedUserNumberService] 해당 할 일에 배정된 사용자 수: ${todo.length}`
+  );
+
+  return todo;
 };
 
 const getUserSpecsByUserIdService = async (userId) => {
@@ -210,4 +233,6 @@ module.exports = {
   getOtherUserProfileService,
   editUserInfoService,
   checkIfUserExistsByUserIdService,
+  getTodoInfoService,
+  getTodoAssignedUserNumberService,
 };

@@ -8,6 +8,7 @@ const {
   handleGetUserMyProfile,
   handleGetOtherUserProfile,
   handleEditUserInfo,
+  handleGetTodoInfo,
 } = require("../controllers/users.controller");
 const { authenticateAccessToken } = require("../middleware/authenticate.jwt");
 const router = express.Router();
@@ -16,6 +17,7 @@ router.get("/terms", authenticateAccessToken, handleGetUsersAgreedTerm);
 
 router.get("/studyrooms", authenticateAccessToken, handleGetUserStudyrooms);
 router.get("/todos", authenticateAccessToken, handleGetUserTodos);
+router.get("/todos/:todo_id", authenticateAccessToken, handleGetTodoInfo);
 router.get("/specs", authenticateAccessToken, handleGetUserSpecs);
 router.get(
   "/neighborhoods",

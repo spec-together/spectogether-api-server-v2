@@ -88,6 +88,38 @@ const getUserTodoByUserId = async (userId) => {
   return todos;
 };
 
+const getTodoInfo = async (todoId) => {
+  const todo = await Todo.findByPk(todoId, {
+    attributes: [
+      "todo_id",
+      "title",
+      "subtitle",
+      "content",
+      "creater_id",
+      "deadline",
+      "status",
+      "created_at",
+    ],
+    // include: [
+    //   {
+    //     model: TodoMember,
+    //     attributes: ["status"],
+    //   },
+    // ],
+  });
+
+  return todo;
+};
+
+const getAssignedMemberByTodoId = async (todoId) => {
+  const members = await TodoMember.findAll({
+    where: { todo_id: todoId },
+    attributes: ["assigned_user_id", "status"],
+  });
+
+  return members;
+};
+
 const getUserSpecsByUserId = async (userId) => {
   const userSpecs = await UserSpec.findAll({
     where: { user_id: userId },
@@ -191,4 +223,6 @@ module.exports = {
   updateUserProfileImageByUserId,
   updateUserNicknameByUserId,
   checkIfUserExistsByUserId,
+  getTodoInfo,
+  getAssignedMemberByTodoId,
 };
