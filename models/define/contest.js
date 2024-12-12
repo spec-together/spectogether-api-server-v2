@@ -59,6 +59,10 @@ class Contest extends Model {
           defaultValue: DataTypes.NOW,
           allowNull: false,
         },
+        image_url: {
+          type: DataTypes.STRING(255),
+          allowNull: true,
+        },
       },
       {
         sequelize,
