@@ -3,12 +3,13 @@ const {
   User,
   Calendar,
   Todo,
-  Sequelize,
   EmailVerificationCode,
   UserCalendar,
   UserRefreshToken,
   UserTerm,
+  Term,
 } = require("../models");
+const Sequelize = require("sequelize");
 
 // ** 중요 **
 // 데이터 검증은 service 단에서 완료가 되었어야 합니다.
@@ -67,6 +68,38 @@ const getUserByEmailOrPhoneNumber = async (email, phoneNumber) => {
   });
   logger.debug(
     `[getUserByEmailOrPhoneNumber] found user: ${JSON.stringify(user, null, 2)}`
+  );
+
+  return user;
+};
+
+const checkIfUserExistsByEmail = async (email) => {
+  logger.debug(`[checkIfUserExistsByEmail] email: ${email}`);
+  const user = await User.findOne({
+    attributes: ["user_id"],
+    where: {
+      email,
+    },
+  });
+
+  logger.debug(
+    `[checkIfUserExistsByEmail] found user: ${JSON.stringify(user, null, 2)}`
+  );
+
+  return user;
+};
+
+const checkIfUserExistsByPhoneNumber = async (phoneNumber) => {
+  logger.debug(`[checkIfUserExistsByPhoneNumber] phoneNumber: ${phoneNumber}`);
+  const user = await User.findOne({
+    attributes: ["user_id"],
+    where: {
+      phone_number: phoneNumber,
+    },
+  });
+
+  logger.debug(
+    `[checkIfUserExistsByPhoneNumber] found user: ${JSON.stringify(user, null, 2)}`
   );
 
   return user;
@@ -161,6 +194,25 @@ const putUserAgreedTerms = (userId, termId, isAgreed) => {
   return result;
 };
 
+const getCurrentTerms = async (userId) => {
+  const result = await Term.findAll({
+    attributes: ["term_id", "name", "description", "is_required"],
+    where: {
+      status: "active",
+    },
+  });
+
+  logger.debug(
+    `[getCurrentTerms] 사용자의 현재 약관 동의 상태를 가져옵니다: ${JSON.stringify(
+      result,
+      null,
+      2
+    )}`
+  );
+
+  return result;
+};
+
 module.exports = {
   createNewUser,
   createNewCalendar,
@@ -173,4 +225,7 @@ module.exports = {
   removeRefreshTokenFromDatabaseByTokenString,
   checkIfRefreshTokenExistsByTokenString,
   putUserAgreedTerms,
+  getCurrentTerms,
+  checkIfUserExistsByEmail,
+  checkIfUserExistsByPhoneNumber,
 };

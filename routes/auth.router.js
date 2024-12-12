@@ -8,11 +8,19 @@ const {
   handleUserLogout,
   handleReissueAccessToken,
   handleCreateTestUser,
-  handleKakaoPassportCallback,
+  handleGetTerms,
 } = require("../controllers/auth.controller");
 const passport = require("passport");
 
+// TODO : 나중에 지워라 컨벤션 심각하게 위반하는거 ..
+const {
+  checkIfUserExistsByEmail,
+  checkIfUserExistsByPhoneNumber,
+} = require("../repositories/auth.repository");
+const { AlreadyExistsError } = require("../errors");
+
 // Route Definitions
+router.get("/terms", handleGetTerms);
 router.post("/register", handleUserRegister);
 router.post("/register/test", handleCreateTestUser);
 router.post("/login/local", handleUserLocalLogin);
@@ -21,6 +29,20 @@ router.get("/login/kakao/callback", handleKakaoCallback);
 router.get("/logout", handleUserLogout);
 router.get("/token/reissue", handleReissueAccessToken);
 router.get("/teapot", (req, res) => res.status(418).send("I'm a teapot"));
+
+router.post("/verification/email/unique", async (req, res, next) => {
+  const { email } = req.body;
+  const result = await checkIfUserExistsByEmail(email);
+  if (result) next(new AlreadyExistsError("이미 존재하는 이메일입니다."));
+  return res.status(200).success("사용 가능한 이메일입니다.");
+});
+
+router.post("/verification/phone/unique", async (req, res, next) => {
+  const { phone_number } = req.body;
+  const result = await checkIfUserExistsByPhoneNumber(phone_number);
+  if (result) next(new AlreadyExistsError("이미 존재하는 전화번호입니다."));
+  return res.status(200).success("사용 가능한 전화번호입니다.");
+});
 
 module.exports = router;
 

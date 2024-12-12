@@ -7,7 +7,7 @@ const {
   saveChatToDatabaseService,
 } = require("../../services/socket/studyroom.chat.socket.service");
 const logger = require("../../logger");
-const { decrypt62 } = require("../../services/encrypt.service");
+const { decrypt62, encrypt62 } = require("../../services/encrypt.service");
 const { socketErrorHandler } = require("../../handlers/socket.handlers");
 
 const handleOnUserEnterStudyroomMessage = async (socket, data) => {
@@ -17,9 +17,12 @@ const handleOnUserEnterStudyroomMessage = async (socket, data) => {
     );
     validateonlyStudyroomIdSchemaService(data);
     const { studyroom_id } = data;
+    const { user_id } = socket.user;
     const decryptedStudyroomId = decrypt62(studyroom_id);
-    const studyroomChat =
-      await getStudyroomChatByStudyroomIdService(decryptedStudyroomId);
+    const studyroomChat = await getStudyroomChatByStudyroomIdService(
+      decryptedStudyroomId,
+      user_id
+    );
     logger.debug(
       `[handleOnUserEnterStudyroomMessage] studyroomChat: ${JSON.stringify(studyroomChat, null, 2)}`
     );
@@ -79,22 +82,54 @@ const handleOnMessage = async (socket, data) => {
     validateStudyroomIdAndContentSchemaService(data);
     const { studyroom_id, type, content } = data;
     const decryptedStudyroomId = decrypt62(studyroom_id);
-    if (type === "text") {
-      socket.broadcast
-        .to(decryptedStudyroomId)
-        .emit("message-text", { user: socket.user, content });
-      socket.emit("message-text", { user: socket.user, content });
-    } else if (type === "image") {
-      socket.broadcast
-        .to(decryptedStudyroomId)
-        .emit("message-image", { user: socket.user, content });
-    }
-    await saveChatToDatabaseService(
+    // const broadcastData = {
+    //   sender_id: encrypt62(socket.user.user_id),
+    //   sender_name: socket.user.name,
+    //   sender_nickname: socket.user.nickname,
+    //   sender_profile_image: socket.user.profile_image,
+    //   type,
+    //   content,
+    //   created_at: new Date(),
+    // };
+    // if (type === "text") {
+    //   socket.broadcast
+    //     .to(decryptedStudyroomId)
+    //     .emit("message-text", { ...broadcastData, is_my_chat: false });
+    //   socket.emit("message-text", { ...broadcastData, is_my_chat: true });
+    // } else if (type === "image") {
+    //   socket.broadcast
+    //     .to(decryptedStudyroomId)
+    //     .emit("message-image", { ...broadcastData, is_my_chat: false });
+    //   socket.emit("message-image", { ...broadcastData, is_my_chat: true });
+    // }
+    const newChat = await saveChatToDatabaseService(
       decryptedStudyroomId,
       socket.user.user_id,
       type,
       content
     );
+    const broadcastData = {
+      studyroom_chat_id: newChat.studyroom_chat_id,
+      studyroom_id: newChat.studyroom_id,
+      sender_id: encrypt62(newChat.sender_id),
+      sender_name: socket.user.name,
+      sender_nickname: socket.user.nickname,
+      sender_profile_image: socket.user.profile_image,
+      type: newChat.type,
+      content: newChat.content,
+      created_at: newChat.created_at,
+    };
+    if (type === "text") {
+      socket.broadcast
+        .to(decryptedStudyroomId)
+        .emit("message-text", { ...broadcastData, is_my_chat: false });
+      socket.emit("message-text", { ...broadcastData, is_my_chat: true });
+    } else if (type === "image") {
+      socket.broadcast
+        .to(decryptedStudyroomId)
+        .emit("message-image", { ...broadcastData, is_my_chat: false });
+      socket.emit("message-image", { ...broadcastData, is_my_chat: true });
+    }
   } catch (error) {
     logger.error(`[handleOnMessage] Error: ${error}`);
     socketErrorHandler(socket, "handleOnMessage", error);

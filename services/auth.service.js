@@ -15,6 +15,7 @@ const {
   checkIfRefreshTokenExistsByTokenString,
   getEmailByEmailVerificationId,
   putUserAgreedTerms,
+  getCurrentTerms,
 } = require("../repositories/auth.repository");
 const logger = require("../logger");
 const {
@@ -214,6 +215,15 @@ const createUserAgreedTermsToDatabaseService = async (userId, terms) => {
   return;
 };
 
+const getCurrentTermsService = async () => {
+  const terms = await getCurrentTerms();
+  if (!terms) {
+    throw new NotExistsError("약관 정보가 없습니다.");
+  }
+
+  return terms;
+};
+
 module.exports = {
   validateRegisterInputService,
   validateLoginInputService,
@@ -229,6 +239,7 @@ module.exports = {
   checkAndReturnRefreshTokenIfExistsInRequestCookie,
   getEmailByEmailVerificationIdService,
   createUserAgreedTermsToDatabaseService,
+  getCurrentTermsService,
 };
 
 /*

@@ -139,7 +139,9 @@ const handleGetUserMyProfile = async (req, res, next) => {
     await checkIfUserExistsByUserIdService(user_id);
     const user = await getUserMyProfileService(user_id);
     const neighborhoods = await getUserNeighborhoodsByUserIdService(user_id);
+    const specs = await getUserSpecsByUserIdService(user_id);
     user.dataValues.neighborhoods = neighborhoods;
+    user.dataValues.specs = specs;
     user.dataValues.user_id = encrypt62(user.dataValues.user_id);
     return res.status(200).success({
       user,

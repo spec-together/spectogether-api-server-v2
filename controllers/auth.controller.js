@@ -12,10 +12,15 @@ const {
   checkAndReturnRefreshTokenIfExistsInRequestCookie,
   getEmailByEmailVerificationIdService,
   createUserAgreedTermsToDatabaseService,
+  getCurrentTermsService,
 } = require("../services/auth.service");
 const logger = require("../logger");
 const { RelatedServiceUnavailableError } = require("../errors");
-const { decrypt62, comparePassword } = require("../services/encrypt.service");
+const {
+  decrypt62,
+  comparePassword,
+  encrypt62,
+} = require("../services/encrypt.service");
 const {
   getEmailByEmailVerificationId,
 } = require("../repositories/auth.repository");
@@ -57,9 +62,11 @@ const handleUserRegister = async (req, res, next) => {
       newUserData.phone_number
     );
     // email verification id 확인
-    logger.debug(`[handleUserRegister] email verification id 확인`);
-    const emailVerifyId = decrypt62(newUserData.email_verification_id);
-    await getEmailByEmailVerificationIdService(emailVerifyId);
+    // TODO : 편리성을 위해서 우선 비활성화 ... 추후에 핸드폰 번호 인증과 함께 활성화 필요
+
+    // logger.debug(`[handleUserRegister] email verification id 확인`);
+    // const emailVerifyId = decrypt62(newUserData.email_verification_id);
+    // await getEmailByEmailVerificationIdService(emailVerifyId);
 
     // 사용자 생성
     logger.debug(`[handleUserRegister] 사용자 생성`);
@@ -141,11 +148,13 @@ const handleUserLocalLogin = async (req, res, next) => {
       \nAT : ${accessToken}\
       \nRT : ${refreshToken}`
     );
+    const encryptedUserId = encrypt62(user_id);
 
     return res
       .status(200)
       .cookie("SPECTOGETHER_RT", refreshToken, refreshTokenCookieOptions)
       .success({
+        user: { user_id: encryptedUserId, name, nickname },
         access_token: accessToken,
       });
   } catch (error) {
@@ -205,6 +214,7 @@ const handleKakaoPassportCallback = async (err, user, info, req, res, next) => {
     const { user_id, name, nickname } = user;
     const accessToken = createAccessTokenService(user_id, name, nickname);
     const refreshToken = await createRefreshTokenService(user_id);
+    const encryptedUserId = encrypt62(user_id);
 
     logger.info(
       `[handleKakaoCallback 3-1] 로그인된 사용자 : ${JSON.stringify(user, null, 2)}`
@@ -214,7 +224,7 @@ const handleKakaoPassportCallback = async (err, user, info, req, res, next) => {
       .status(200)
       .cookie("SPECTOGETHER_RT", refreshToken, refreshTokenCookieOptions).send(`
           <script>
-            window.opener.postMessage(${JSON.stringify({ token: accessToken, user_id, name, nickname })}, '${FRONTEND_URL}');
+            window.opener.postMessage(${JSON.stringify({ token: accessToken, user_id: encryptedUserId, name, nickname })}, '${FRONTEND_URL}');
             window.close();
           </script>
         `);
@@ -277,6 +287,26 @@ const handleReissueAccessToken = async (req, res, next) => {
   }
 };
 
+const handleGetTerms = async (req, res, next) => {
+  try {
+    // TODO : 약관들을 가져오는 로직
+    const result = await getCurrentTermsService();
+    logger.debug(
+      `[handleGetTerms] 약관들을 가져왔습니다 : ${JSON.stringify(result, null, 2)}`
+    );
+    return res.status(200).success(result);
+  } catch (error) {
+    logger.error(
+      `[handleGetTerms]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
+};
+
 module.exports = {
   handleUserRegister,
   handleUserLocalLogin,
@@ -285,4 +315,5 @@ module.exports = {
   handleReissueAccessToken,
   handleCreateTestUser,
   handleKakaoPassportCallback,
+  handleGetTerms,
 };

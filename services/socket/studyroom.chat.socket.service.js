@@ -5,22 +5,27 @@ const {
   checkIfUserInStudyroom,
   saveChatToDatabase,
 } = require("../../repositories/studyroom.chat.socket.repository");
+const { encrypt62 } = require("../encrypt.service");
 
-const getStudyroomChatByStudyroomIdService = async (studyroomId) => {
+const getStudyroomChatByStudyroomIdService = async (studyroomId, userId) => {
   const chats = await getStudyroomChatByStudyroomId(studyroomId);
   if (!chats) {
     throw new NotExistsError("해당 스터디룸의 채팅이 없습니다.");
   }
-  logger.debug(
-    `[getStudyroomChatByStudyroomIdService] 해당 스터디룸의 채팅을 가져옵니다: ${JSON.stringify(chats, null, 2)}`
-  );
+  // logger.debug(
+  //   `[getStudyroomChatByStudyroomIdService] 해당 스터디룸의 채팅을 가져옵니다: ${JSON.stringify(chats, null, 2)}`
+  // );
 
   let ret = [];
   for (const chat of chats) {
     ret.push({
+      is_my_chat: chat.sender_id === userId,
       studyroom_chat_id: chat.studyroom_chat_id,
       studyroom_id: chat.studyroom_id,
-      sender_id: chat.sender_id,
+      sender_id: encrypt62(chat.sender_id),
+      sender_name: chat.User.name,
+      sender_nickname: chat.User.nickname,
+      sender_profile_image: chat.User.profile_image,
       type: chat.type,
       content: chat.content,
       created_at: chat.created_at,
