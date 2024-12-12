@@ -1,4 +1,5 @@
 const { EmailVerificationCode, User } = require("../models/index.js");
+const { InvalidTokenError } = require("../errors.js");
 
 const findUserByEmail = async (email) => {
   const exUser = await User.findOne({
@@ -27,10 +28,11 @@ const findByEmailAndCode = async (email, code) => {
 };
 
 const deleteEmailVerificationCode = async (code) => {
-  const emailVerificationCode = await EmailVerificationCode.destroy({
-    where: { code },
-  });
-  return emailVerificationCode; // TODO : check
+  if (!code) {
+    throw new InvalidTokenError("code parameter is required");
+  }
+  await EmailVerificationCode.destroy({ where: { code } });
+  return true;
 };
 
 module.exports = {

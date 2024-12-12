@@ -39,7 +39,10 @@ const verifyToken = async (email, code) => {
   }
   await emailVerificationRepo.deleteEmailVerificationCode(code);
   // TODO : 지금은 유효하면 바로 삭제처리하고 FE에 인증 여부를 반환값으로 간접 제공. 인증 정보를 DB에 저장하는 방안도 고려해보자.
-  return record.email;
+  return {
+    email_verification_code_id: record.email_verification_code_id,
+    email: record.email,
+  };
 
   // TODO: 만료 시간 검증 추가
   // const now = Date.now();

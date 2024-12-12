@@ -1,4 +1,5 @@
 const emailVerificationService = require("../services/email.verification.service.js");
+const { encrypt62 } = require("../services/encrypt.service.js");
 
 const handleCheckEmailUnique = async (req, res, next) => {
   try {
@@ -35,7 +36,9 @@ const handleVerifyEmail = async (req, res, next) => {
     );
 
     res.status(200).success({
-      email: verifiedEmail,
+      email_verification_code_id: encrypt62(
+        verifiedEmail.email_verification_code_id
+      ),
       message: "이메일 인증이 완료되었습니다.",
     });
   } catch (error) {

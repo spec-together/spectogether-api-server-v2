@@ -51,6 +51,10 @@ module.exports = router;
  *     responses:
  *       200:
  *         description: 인증 메일 발송됨
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SendVerificationResponse'
  *       500:
  *         description: 서버 오류
  *
@@ -67,6 +71,10 @@ module.exports = router;
  *     responses:
  *       200:
  *         description: 이메일 인증 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/VerifyEmailResponse'
  *       400:
  *         description: 유효하지 않은 인증 코드
  *       500:

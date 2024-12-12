@@ -23,6 +23,16 @@ const EmailVerificationSchema = {
     required: ["email"],
   },
 
+  SendVerificationResponse: {
+    type: "object",
+    properties: {
+      message: {
+        type: "string",
+        example: "인증 이메일이 발송되었습니다.",
+      },
+    },
+  },
+
   VerifyEmail: {
     type: "object",
     properties: {
@@ -37,6 +47,21 @@ const EmailVerificationSchema = {
       },
     },
     required: ["email", "code"],
+  },
+
+  // 응답 스키마 추가
+  VerifyEmailResponse: {
+    type: "object",
+    properties: {
+      email_verification_id: {
+        type: "string",
+        description: "암호화된 이메일 인증 코드 ID",
+      },
+      message: {
+        type: "string",
+        example: "이메일 인증이 완료되었습니다.",
+      },
+    },
   },
 };
 
