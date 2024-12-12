@@ -93,6 +93,14 @@ class KakaoUserNotRegisteredError extends Error {
   }
 }
 
+class InvalidTokenError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "InvalidTokenError";
+    this.status = 400;
+  }
+}
+
 /*
 사용할 땐 아래와 같이 사용하면 됩니다.
 throw new SampleError("그냥 냈음", { data: "sample data" });
@@ -108,4 +116,5 @@ module.exports = {
   UnauthorizedError,
   KakaoUserNotRegisteredError,
   RelatedServiceUnavailableError,
+  InvalidTokenError,
 };
