@@ -1,5 +1,5 @@
 const contestService = require("../services/contest.service.js");
-// const { successResponse, errorResponse } = require("../utils/response");
+const logger = require("../logger");
 
 exports.getAllContests = async (req, res, next) => {
   try {
@@ -7,12 +7,12 @@ exports.getAllContests = async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 10;
     // const { page = 1, limit = 10 } = req.query;
     const result = await contestService.getAllContests(page, limit);
-    const { contests, pagination } = result;
     return res.status(200).success({
-      contests,
-      pagination,
+      contests: result.contests,
+      pagination: result.pagination,
     });
   } catch (error) {
+    logger.error(`[getAllContests] Error: ${error.stack}`);
     next(error);
   }
 };
@@ -23,23 +23,17 @@ exports.getContestById = async (req, res, next) => {
     const contest = await contestService.getContestById(contestId);
     return res.status(200).success({ contest });
   } catch (error) {
-    console.error(error);
+    logger.error(`[getContestById] Error: ${error.stack}`);
     next(error);
   }
 };
 
-// exports.createContest = async (req, res, next) => {
-//   try {
-//     const data = req.body;
-//     const newContest = await contestService.createContest(data);
-//     return successResponse(res, "대회를 성공적으로 생성했습니다.", newContest);
-//   } catch (error) {
-//     return errorResponse(res, error);
-//   }
-// };
-
 exports.createContestWithAssociations = async (req, res, next) => {
   try {
+    logger.debug(
+      `[createContestWithAssociations] Request body: ${JSON.stringify(req.body)}`
+    );
+
     const {
       title,
       subtitle,
@@ -52,18 +46,40 @@ exports.createContestWithAssociations = async (req, res, next) => {
       start_date,
       end_date,
     } = req.body;
-    const result = await contestService.createContestWithAssociations({
+
+    const locationObj =
+      typeof location === "string" ? JSON.parse(location) : location;
+
+    const contestData = {
       title,
       subtitle,
       description,
       host,
-      location,
+      location: locationObj,
       online_offline_type,
       application_start_date,
       application_end_date,
       start_date,
       end_date,
+    };
+
+    let image_url = null;
+
+    if (req.file) {
+      image_url = `${req.protocol}://${req.get("host")}/uploads/contests/${req.file.filename}`;
+      logger.debug(
+        `[createContestWithAssociations] Image uploaded: ${image_url}`
+      );
+    }
+
+    const result = await contestService.createContestWithAssociations({
+      ...contestData,
+      image_url,
     });
+
+    logger.info(
+      `[createContestWithAssociations] Contest created: ${result.contest.contest_id}`
+    );
     return res.status(201).success({
       contest: result.contest,
       contestCalendar: result.contestCalendar,
@@ -71,7 +87,7 @@ exports.createContestWithAssociations = async (req, res, next) => {
       message: "대회를 성공적으로 생성했습니다.",
     });
   } catch (error) {
-    console.error(error);
+    logger.error(`[createContestWithAssociations] Error: ${error.stack}`);
     next(error);
   }
 };

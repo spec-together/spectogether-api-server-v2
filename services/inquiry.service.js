@@ -4,7 +4,7 @@ const {
   InvalidInputError,
   NotExistsError,
 } = require("../errors");
-// const { validateCreateInquiry } = require("../validators/inquiry.validation.service.js"); // inquiry.validator.js ?
+const { validateInquiryAnswerInput } = require("./inquiry.validator.js");
 
 exports.getAllInquiries = async (userId, page, limit, status) => {
   const offset = (page - 1) * limit;
@@ -99,3 +99,28 @@ exports.deleteInquiry = async (userId, inquiryId) => {
     throw new DatabaseError("문의를 삭제하는 중 오류가 발생했습니다.");
   }
 };
+
+// TODO : 답변 생성 로직 추가. 아래 코드는 미완성입니다.
+// exports.createInquiryAnswer = async (inquiryId, answerData) => {
+//   try {
+//     // 입력 데이터 검증
+//     validateInquiryAnswerInput(answerData);
+
+//     const inquiry = await inquiryRepository.findInquiryById(null, inquiryId);
+//     if (!inquiry) {
+//       throw new NotExistsError("해당 문의가 존재하지 않습니다.");
+//     }
+
+//     const answer = await inquiryRepository.createInquiryAnswer({
+//       inquiry_id: inquiryId,
+//       ...answerData,
+//     });
+
+//     return answer;
+//   } catch (error) {
+//     if (error instanceof InvalidInputError) {
+//       throw error;
+//     }
+//     throw new DatabaseError("답변을 생성하는 중 오류가 발생했습니다.");
+//   }
+// };
