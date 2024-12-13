@@ -55,6 +55,7 @@ class Todo extends Model {
   static associate(models) {
     Todo.belongsTo(models.User, { foreignKey: "creater_id" });
     Todo.hasMany(models.TodoMember, { foreignKey: "todo_id" });
+    Todo.hasMany(models.StudyroomTodo, { foreignKey: "todo_id" });
   }
 }
 
