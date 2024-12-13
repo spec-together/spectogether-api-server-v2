@@ -1,90 +1,90 @@
-// swagger/schemas/todo.schema.js
-const TodoSchema = {
+const todoSchema = {
   Todo: {
     type: "object",
     properties: {
       todo_id: {
         type: "integer",
-        example: 1,
+        example: 10,
+      },
+      deadline: {
+        type: "string",
+        format: "date-time",
+        example: "2024-12-31T23:59:59Z",
       },
       title: {
         type: "string",
-        example: "할 일 제목",
+        example: "프로젝트 마감",
       },
-      description: {
+      subtitle: {
         type: "string",
-        example: "할 일에 대한 상세 설명",
+        example: "최종 보고서 제출",
+      },
+      content: {
+        type: "string",
+        example: "최종 보고서를 작성하여 제출해야 합니다.",
+      },
+      creater_id: {
+        type: "integer",
+        example: 5,
       },
       status: {
         type: "string",
-        enum: ["pending", "in_progress", "completed"],
         example: "pending",
       },
       created_at: {
         type: "string",
         format: "date-time",
-        example: "2023-10-10T10:00:00Z",
+        example: "2024-04-27T12:34:56Z",
       },
       updated_at: {
         type: "string",
         format: "date-time",
-        example: "2023-10-10T12:00:00Z",
+        example: "2024-04-27T12:34:56Z",
       },
-      TodoMembers: {
+      studyrooms: {
         type: "array",
         items: {
-          $ref: "#/components/schemas/TodoMember",
+          $ref: "#/components/schemas/Studyroom",
         },
-      },
-      StudyroomTodos: {
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/StudyroomTodo",
-        },
+        description: "연결된 스터디룸 리스트",
       },
     },
-    required: ["title", "status"],
+    required: [
+      "deadline",
+      "title",
+      "subtitle",
+      "content",
+      "creater_id",
+      "status",
+    ],
   },
-  TodoMember: {
+  TodoRequest: {
     type: "object",
+    required: ["deadline", "title", "subtitle", "content", "studyroom_id"],
     properties: {
-      todo_member_id: {
-        type: "integer",
-        example: 1,
-      },
-      todo_id: {
-        type: "integer",
-        example: 1,
-      },
-      user_id: {
-        type: "integer",
-        example: 2,
-      },
-      role: {
+      deadline: {
         type: "string",
-        example: "assignee",
+        format: "date-time",
+        example: "2024-12-31T23:59:59Z",
       },
-    },
-    required: ["todo_id", "user_id"],
-  },
-  StudyroomTodo: {
-    type: "object",
-    properties: {
-      studyroom_todo_id: {
-        type: "integer",
-        example: 1,
+      title: {
+        type: "string",
+        example: "프로젝트 마감",
       },
-      todo_id: {
-        type: "integer",
-        example: 1,
+      subtitle: {
+        type: "string",
+        example: "최종 보고서 제출",
+      },
+      content: {
+        type: "string",
+        example: "최종 보고서를 작성하여 제출해야 합니다.",
       },
       studyroom_id: {
         type: "integer",
-        example: 3,
+        example: 1,
       },
     },
-    required: ["todo_id", "studyroom_id"],
   },
 };
 
-module.exports = TodoSchema;
+module.exports = todoSchema;

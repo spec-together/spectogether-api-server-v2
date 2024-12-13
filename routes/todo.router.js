@@ -4,6 +4,9 @@ const router = express.Router();
 const todoController = require("../controllers/todo.controller");
 const authenticateMiddleware = require("../middleware/authenticate.jwt");
 
+// 로그인 사용자만 접근 가능
+// TODO : 본인 여부, 참여자 여부 확인 기능 추가
+
 // Create Todo
 router.post(
   "/",
@@ -12,19 +15,34 @@ router.post(
 );
 
 // Get All Todos
-router.get("/", todoController.handleGetAllTodos);
+router.get(
+  "/",
+  authenticateMiddleware.authenticateAccessToken,
+  todoController.handleGetAllTodos
+);
 
 // Get Todo by ID
-router.get("/:id", todoController.handleGetTodoById);
+router.get(
+  "/:id",
+  authenticateMiddleware.authenticateAccessToken,
+  todoController.handleGetTodoById
+);
 
 // Update Todo
-router.put("/:id", todoController.handleUpdateTodo);
+router.put(
+  "/:id",
+  authenticateMiddleware.authenticateAccessToken,
+  todoController.handleUpdateTodo
+);
 
 // Delete Todo
-router.delete("/:id", todoController.handleDeleteTodo);
+router.delete(
+  "/:id",
+  authenticateMiddleware.authenticateAccessToken,
+  todoController.handleDeleteTodo
+);
 
 module.exports = router;
-
 /**
  * @swagger
  * tags:
@@ -36,8 +54,10 @@ module.exports = router;
  * @swagger
  * /todos:
  *   post:
- *     summary: 새로운 Todo를 생성합니다.
+ *     summary: 새로운 Todo를 생성합니다
  *     tags: [Todos]
+ *     security:
+ *       - AccessToken_Bearer: []
  *     requestBody:
  *       required: true
  *       content:
@@ -45,39 +65,28 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - title
- *               - status
  *               - deadline
+ *               - title
  *               - subtitle
  *               - content
+ *               - studyroom_id
  *             properties:
- *               title:
- *                 type: string
- *                 example: "새로운 할 일 제목"
- *               status:
- *                 type: string
- *                 enum: ["pending", "in_progress", "completed"]
- *                 example: "pending"
  *               deadline:
  *                 type: string
- *                 format: date
- *                 example: "2024-12-31"
+ *                 format: date-time
+ *                 example: "2024-12-31T23:59:59Z"
+ *               title:
+ *                 type: string
+ *                 example: "프로젝트 완료하기"
  *               subtitle:
  *                 type: string
- *                 example: "할 일 부제목"
+ *                 example: "최종 제출"
  *               content:
  *                 type: string
- *                 example: "할 일에 대한 상세 설명"
- *               members:
- *                 type: array
- *                 items:
- *                   type: integer
- *                 example: [2, 3]
- *               studyrooms:
- *                 type: array
- *                 items:
- *                   type: integer
- *                 example: [1, 4]
+ *                 example: "프로젝트 마무리 작업 진행"
+ *               studyroom_id:
+ *                 type: integer
+ *                 example: 1
  *     responses:
  *       201:
  *         description: Todo 생성 성공
@@ -89,19 +98,19 @@ module.exports = router;
  *                 todo:
  *                   $ref: '#/components/schemas/Todo'
  *       400:
- *         description: 필수 필드 누락
+ *         description: 잘못된 입력값
  *       401:
  *         description: 인증 필요
+ *       404:
+ *         description: 스터디룸을 찾을 수 없음
  *       500:
  *         description: 서버 오류
- */
-
-/**
- * @swagger
- * /todos:
+ *
  *   get:
- *     summary: 모든 Todo 목록을 조회합니다.
+ *     summary: Todo 목록을 조회합니다
  *     tags: [Todos]
+ *     security:
+ *       - AccessToken_Bearer: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -114,7 +123,12 @@ module.exports = router;
  *         schema:
  *           type: integer
  *           default: 10
- *         description: 페이지 당 항목 수
+ *         description: 페이지당 항목 수
+ *       - in: query
+ *         name: studyroom_id
+ *         schema:
+ *           type: integer
+ *         description: 특정 스터디룸의 Todo만 조회하고 싶을 때 사용
  *     responses:
  *       200:
  *         description: Todo 목록 조회 성공
@@ -130,13 +144,13 @@ module.exports = router;
  *                 pagination:
  *                   type: object
  *                   properties:
- *                     totalItems:
+ *                     total_items:
  *                       type: integer
  *                       example: 50
- *                     totalPages:
+ *                     total_pages:
  *                       type: integer
  *                       example: 5
- *                     currentPage:
+ *                     page:
  *                       type: integer
  *                       example: 1
  *                     limit:
@@ -149,29 +163,30 @@ module.exports = router;
  *                     previous:
  *                       type: string
  *                       nullable: true
- *                       example: "/todos?page=1"
+ *                       example: null
  *       400:
  *         description: 잘못된 요청 데이터
+ *       401:
+ *         description: 인증이 필요합니다
  *       500:
  *         description: 서버 오류
- */
-
-/**
- * @swagger
+ *
  * /todos/{id}:
  *   get:
- *     summary: 특정 Todo의 상세 정보를 조회합니다.
+ *     summary: 특정 Todo를 조회합니다
  *     tags: [Todos]
+ *     security:
+ *       - AccessToken_Bearer: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: 조회할 Todo의 ID
+ *         description: 조회할 Todo ID
  *     responses:
  *       200:
- *         description: Todo 상세 정보 조회 성공
+ *         description: Todo 조회 성공
  *         content:
  *           application/json:
  *             schema:
@@ -183,46 +198,56 @@ module.exports = router;
  *         description: Todo를 찾을 수 없음
  *       500:
  *         description: 서버 오류
+ *
  *   put:
- *     summary: 특정 Todo를 업데이트합니다.
+ *     summary: Todo를 수정합니다
  *     tags: [Todos]
+ *     security:
+ *       - AccessToken_Bearer: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: 업데이트할 Todo의 ID
+ *         description: 수정할 Todo ID
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - title
+ *               - status
+ *               - deadline
+ *               - subtitle
+ *               - content
+ *               - studyroom_id
  *             properties:
  *               title:
  *                 type: string
- *                 example: "업데이트된 할 일 제목"
- *               description:
+ *                 example: "수정된 Todo 제목"
+ *               subtitle:
  *                 type: string
- *                 example: "업데이트된 할 일 설명"
+ *                 example: "수정된 Todo 부제목"
+ *               content:
+ *                 type: string
+ *                 example: "수정된 Todo 내용"
  *               status:
  *                 type: string
- *                 enum: ["pending", "in_progress", "completed"]
- *                 example: "completed"
- *               members:
- *                 type: array
- *                 items:
- *                   type: integer
- *                 example: [2, 4]
- *               studyrooms:
- *                 type: array
- *                 items:
- *                   type: integer
- *                 example: [2, 5]
+ *                 enum: [pending, in_progress, completed]
+ *                 example: completed
+ *               deadline:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2024-12-31T23:59:59Z"
+ *               studyroom_id:
+ *                 type: integer
+ *                 example: 1
  *     responses:
  *       200:
- *         description: Todo 업데이트 성공
+ *         description: Todo 수정 성공
  *         content:
  *           application/json:
  *             schema:
@@ -231,24 +256,31 @@ module.exports = router;
  *                 todo:
  *                   $ref: '#/components/schemas/Todo'
  *       400:
- *         description: 잘못된 요청 데이터
+ *         description: 잘못된 입력값
  *       404:
  *         description: Todo를 찾을 수 없음
  *       500:
  *         description: 서버 오류
+ *
  *   delete:
- *     summary: 특정 Todo를 삭제합니다.
+ *     summary: Todo를 삭제합니다
  *     tags: [Todos]
+ *     security:
+ *       - AccessToken_Bearer: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: 삭제할 Todo의 ID
+ *         description: 삭제할 Todo ID
  *     responses:
  *       204:
  *         description: Todo 삭제 성공
+ *       401:
+ *         description: 인증되지 않은 사용자
+ *       403:
+ *         description: Todo 삭제 권한 없음
  *       404:
  *         description: Todo를 찾을 수 없음
  *       500:

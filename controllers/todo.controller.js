@@ -1,23 +1,19 @@
-// controllers/todo.controller.js
 const todoService = require("../services/todo.service");
 
 exports.handleCreateTodo = async (req, res, next) => {
   try {
-    const { deadline, subtitle, content } = req.body;
-    if (!deadline || !subtitle || !content) {
-      return res.status(400).json({ message: "필수 필드가 누락되었습니다." });
-    }
-
-    if (!req.user || !req.user.user_id) {
-      return res.status(401).json({ message: "인증 정보가 필요합니다." });
-    } // TODO : 에러 생성은 서비스 레이어로 이동
-
+    const { deadline, title, subtitle, content, studyroom_id } = req.body;
     const todoData = {
-      ...req.body,
+      deadline,
+      title,
+      subtitle,
+      content,
       creater_id: req.user.user_id,
+      status: "pending", // 기본 상태 설정
+      studyroom_id, // 클라이언트로부터 studyroom_id를 받아 서비스 레이어에 전달해 사용.
     };
-    const newTodo = await todoService.createTodo(todoData);
-    return res.status(201).json({ todo: newTodo });
+    const newTodo = await todoService.createTodoService(todoData);
+    return res.status(201).success({ todo: newTodo });
   } catch (error) {
     next(error);
   }
@@ -27,13 +23,16 @@ exports.handleGetAllTodos = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
+    const studyroomId = req.query.studyroom_id;
 
-    const result = await todoService.getAllTodos(page, limit);
-    const { todos, pagination } = result;
-
+    const result = await todoService.getAllTodosService(
+      page,
+      limit,
+      studyroomId
+    );
     return res.status(200).success({
-      todos,
-      pagination,
+      todos: result.todos,
+      pagination: result.pagination,
     });
   } catch (error) {
     next(error);
@@ -42,9 +41,9 @@ exports.handleGetAllTodos = async (req, res, next) => {
 
 exports.handleGetTodoById = async (req, res, next) => {
   try {
-    const todoId = req.params.id;
-    const todo = await todoService.getTodoById(todoId);
-    return res.status(200).json({ todo });
+    const todoId = parseInt(req.params.id, 10);
+    const todo = await todoService.getTodoByIdService(todoId);
+    return res.status(200).success({ todo });
   } catch (error) {
     next(error);
   }
@@ -52,10 +51,10 @@ exports.handleGetTodoById = async (req, res, next) => {
 
 exports.handleUpdateTodo = async (req, res, next) => {
   try {
-    const todoId = req.params.id;
+    const todoId = parseInt(req.params.id, 10);
     const updateData = req.body;
-    const updatedTodo = await todoService.updateTodo(todoId, updateData);
-    return res.status(200).json({ todo: updatedTodo });
+    const updatedTodo = await todoService.updateTodoService(todoId, updateData);
+    return res.status(200).success({ todo: updatedTodo });
   } catch (error) {
     next(error);
   }
@@ -63,8 +62,8 @@ exports.handleUpdateTodo = async (req, res, next) => {
 
 exports.handleDeleteTodo = async (req, res, next) => {
   try {
-    const todoId = req.params.id;
-    await todoService.deleteTodo(todoId);
+    const todoId = parseInt(req.params.id, 10);
+    await todoService.deleteTodoService(todoId);
     return res.status(204).send();
   } catch (error) {
     next(error);

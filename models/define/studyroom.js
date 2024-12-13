@@ -66,7 +66,13 @@ class Studyroom extends Model {
       otherKey: "calendar_id",
     });
     Studyroom.hasMany(models.StudyroomChat, { foreignKey: "studyroom_id" });
-    Studyroom.hasMany(models.StudyroomTodo, { foreignKey: "studyroom_id" });
+    // Studyroom.hasMany(models.StudyroomTodo, { foreignKey: "studyroom_id" });
+    Studyroom.belongsToMany(models.Todo, {
+      through: models.StudyroomTodo,
+      foreignKey: "studyroom_id",
+      otherKey: "todo_id",
+      // as: "todos",
+    });
   }
 }
 
