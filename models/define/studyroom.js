@@ -25,13 +25,13 @@ class Studyroom extends Model {
           type: DataTypes.STRING(255),
           allowNull: false,
         },
-        target_type: {
-          type: DataTypes.STRING(50),
-          allowNull: false,
-        },
-        target_id: {
+        contest_id: {
           type: DataTypes.BIGINT,
-          allowNull: false,
+          allowNull: true,
+        },
+        spec_id: {
+          type: DataTypes.BIGINT,
+          allowNull: true,
         },
         status: {
           type: DataTypes.STRING(50),
@@ -72,6 +72,14 @@ class Studyroom extends Model {
       foreignKey: "studyroom_id",
       otherKey: "todo_id",
       // as: "todos",
+    });
+    Studyroom.belongsTo(models.Contest, {
+      foreignKey: "contest_id",
+      as: "contest",
+    });
+    Studyroom.belongsTo(models.Spec, {
+      foreignKey: "spec_id",
+      as: "spec",
     });
   }
 }

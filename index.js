@@ -73,6 +73,7 @@ app.use("/inquiries", inquiryRouter);
 app.use("/contests", contestRouter);
 app.use("/verification/email", emailVerificationRouter);
 app.use("/todos", todoRouter);
+app.use("/studyrooms", require("./routes/studyroom.router"));
 
 // 에러 핸들러는 최하단에 위치해야 하는 미들웨어입니다. 절대 순서를 변경하지 마세요.
 app.use(errorHandler);

@@ -34,6 +34,7 @@ class Spec extends Model {
 
   static associate(models) {
     Spec.hasMany(models.UserSpec, { foreignKey: "spec_id" });
+    Spec.hasMany(models.Studyroom, { foreignKey: "spec_id" });
   }
 }
 

@@ -92,6 +92,7 @@ class Contest extends Model {
     // });
     Contest.hasMany(models.ContestQuestion, { foreignKey: "contest_id" });
     Contest.hasMany(models.ContestSchedule, { foreignKey: "contest_id" });
+    Contest.hasMany(models.Studyroom, { foreignKey: "contest_id" });
   }
 }
 
