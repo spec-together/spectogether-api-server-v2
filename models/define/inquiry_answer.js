@@ -1,24 +1,28 @@
-const { Model, DataTypes } = require("sequelize");
+const Sequelize = require("sequelize");
 
-class InquiryAnswer extends Model {
-  static init(sequelize) {
-    super.init(
+class InquiryAnswer extends Sequelize.Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
       {
-        inquiry_answer_id: {
-          type: DataTypes.BIGINT,
-          autoIncrement: true,
-          primaryKey: true,
-        },
         inquiry_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
+          primaryKey: true,
+          references: {
+            model: "inquiry",
+            key: "inquiry_id",
+          },
         },
         admin_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
+          references: {
+            model: "user",
+            key: "user_id",
+          },
         },
         title: {
-          type: DataTypes.STRING(255),
+          type: DataTypes.STRING(512),
           allowNull: false,
         },
         content: {
@@ -26,31 +30,21 @@ class InquiryAnswer extends Model {
           allowNull: false,
         },
         image_url: {
-          type: DataTypes.STRING(255),
-          allowNull: false,
-        },
-        created_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
-        },
-        updated_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
+          type: DataTypes.STRING(2048),
+          allowNull: true,
         },
       },
       {
         sequelize,
         tableName: "inquiry_answer",
-        timestamps: false,
+        timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    InquiryAnswer.belongsTo(models.Inquiry, { foreignKey: "inquiry_id" });
-    InquiryAnswer.belongsTo(models.User, { foreignKey: "admin_id" });
+    // models.InquiryAnswer.belongsTo(models.Inquiry, {foreignKey: "inquiry_id",targetKey: "inquiry_id"});
+    // models.InquiryAnswer.belongsTo(models.User, {foreignKey: "admin_id",targetKey: "user_id"});
   }
 }
 

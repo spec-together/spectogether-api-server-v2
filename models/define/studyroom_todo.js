@@ -1,44 +1,43 @@
-const { Model, DataTypes } = require("sequelize");
+const Sequelize = require("sequelize");
 
-class StudyroomTodo extends Model {
-  static init(sequelize) {
-    super.init(
+class StudyroomTodo extends Sequelize.Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
       {
         studyroom_todo_id: {
-          type: DataTypes.BIGINT,
           autoIncrement: true,
+          type: DataTypes.BIGINT,
+          allowNull: false,
           primaryKey: true,
         },
         studyroom_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
+          references: {
+            model: "studyroom",
+            key: "studyroom_id",
+          },
         },
         todo_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
-        },
-        created_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
-        },
-        updated_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
+          references: {
+            model: "todo",
+            key: "todo_id",
+          },
         },
       },
       {
         sequelize,
         tableName: "studyroom_todo",
-        timestamps: false,
+        timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    StudyroomTodo.belongsTo(models.Studyroom, { foreignKey: "studyroom_id" });
-    StudyroomTodo.belongsTo(models.Todo, { foreignKey: "todo_id" });
+    // models.StudyroomTodo.belongsTo(models.Studyroom, { foreignKey: "studyroom_id", sourceKey: "studyroom_id" });
+    // models.StudyroomTodo.belongsTo(models.Todo, { foreignKey: "todo_id", sourceKey: "todo_id" });
   }
 }
 

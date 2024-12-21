@@ -1,52 +1,47 @@
-const { Model, DataTypes } = require("sequelize");
+const Sequelize = require("sequelize");
 
-class StudyroomChat extends Model {
-  static init(sequelize) {
-    super.init(
+class StudyroomChat extends Sequelize.Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
       {
         studyroom_chat_id: {
-          type: DataTypes.BIGINT,
           autoIncrement: true,
-          primaryKey: true,
-        },
-        sender_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
+          primaryKey: true,
         },
         studyroom_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
+          references: {
+            model: "studyroom",
+            key: "studyroom_id",
+          },
         },
-        type: {
-          type: DataTypes.STRING(50),
+        sender_id: {
+          type: DataTypes.BIGINT,
           allowNull: false,
+          references: {
+            model: "user",
+            key: "user_id",
+          },
         },
         content: {
-          type: DataTypes.TEXT,
-          allowNull: false,
-        },
-        created_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
-        },
-        updated_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
+          type: DataTypes.STRING(2048),
           allowNull: false,
         },
       },
       {
         sequelize,
         tableName: "studyroom_chat",
-        timestamps: false,
+        timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    StudyroomChat.belongsTo(models.User, { foreignKey: "sender_id" });
-    StudyroomChat.belongsTo(models.Studyroom, { foreignKey: "studyroom_id" });
+    // models.StudyroomChat.belongsTo(models.User, { foreignKey: 'sender_id', sourceKey: 'user_id' });
+    // models.StudyroomChat.belongsTo(models.Studyroom, { foreignKey: 'studyroom_id', sourceKey: 'studyroom_id' });
   }
 }
 

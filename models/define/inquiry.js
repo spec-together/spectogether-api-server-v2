@@ -1,64 +1,58 @@
-const { Model, DataTypes } = require("sequelize");
+const Sequelize = require("sequelize");
 
-class Inquiry extends Model {
-  static init(sequelize) {
-    super.init(
+class Inquiry extends Sequelize.Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
       {
         inquiry_id: {
-          type: DataTypes.BIGINT,
           autoIncrement: true,
+          type: DataTypes.BIGINT,
+          allowNull: false,
           primaryKey: true,
         },
         user_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
+          references: {
+            model: "user",
+            key: "user_id",
+          },
         },
         title: {
           type: DataTypes.STRING(255),
           allowNull: false,
         },
         content: {
-          type: DataTypes.TEXT,
+          type: DataTypes.STRING(3000),
           allowNull: false,
         },
         image_url: {
-          type: DataTypes.STRING(255),
-          allowNull: false,
-        },
-        read_at: {
-          type: DataTypes.DATE,
-          allowNull: false,
-        },
-        answered_at: {
-          type: DataTypes.DATE,
-          allowNull: false,
+          type: DataTypes.STRING(2048),
+          allowNull: true,
         },
         status: {
-          type: DataTypes.STRING(50),
+          type: DataTypes.ENUM("open", "processing", "closed"),
           allowNull: false,
         },
-        created_at: {
+        checked_at: {
           type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
+          allowNull: true,
         },
-        updated_at: {
+        closed_at: {
           type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
+          allowNull: true,
         },
       },
       {
         sequelize,
         tableName: "inquiry",
-        timestamps: false,
+        timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    Inquiry.belongsTo(models.User, { foreignKey: "user_id" });
-    Inquiry.hasMany(models.InquiryAnswer, { foreignKey: "inquiry_id" });
+    // models.Inquiry.belongsTo(models.User, { foreignKey: "user_id", sourceKey: "user_id" });
   }
 }
 

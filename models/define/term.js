@@ -1,12 +1,13 @@
-const { Model, DataTypes } = require("sequelize");
+const Sequelize = require("sequelize");
 
-class Term extends Model {
-  static init(sequelize) {
-    super.init(
+class Term extends Sequelize.Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
       {
         term_id: {
-          type: DataTypes.BIGINT,
           autoIncrement: true,
+          type: DataTypes.BIGINT,
+          allowNull: false,
           primaryKey: true,
         },
         name: {
@@ -26,30 +27,20 @@ class Term extends Model {
           allowNull: false,
         },
         status: {
-          type: DataTypes.STRING(50),
-          allowNull: false,
-        },
-        created_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
-        },
-        updated_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
+          type: DataTypes.BOOLEAN,
           allowNull: false,
         },
       },
       {
         sequelize,
         tableName: "term",
-        timestamps: false,
+        timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    Term.hasMany(models.UserTerm, { foreignKey: "term_id" });
+    // models.Term.hasMany(models.User, {foreignKey: "term_id",sourceKey: "term_id"});
   }
 }
 

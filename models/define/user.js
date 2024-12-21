@@ -1,12 +1,13 @@
-const { Model, DataTypes } = require("sequelize");
+const Sequelize = require("sequelize");
 
-class User extends Model {
-  static init(sequelize) {
-    super.init(
+class User extends Sequelize.Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
       {
         user_id: {
-          type: DataTypes.BIGINT,
           autoIncrement: true,
+          type: DataTypes.BIGINT,
+          allowNull: false,
           primaryKey: true,
         },
         name: {
@@ -24,6 +25,7 @@ class User extends Model {
         phone_number: {
           type: DataTypes.STRING(50),
           allowNull: false,
+          unique: "user_pk",
         },
         email: {
           type: DataTypes.STRING(255),
@@ -36,20 +38,12 @@ class User extends Model {
         spec_level: {
           type: DataTypes.INTEGER,
           allowNull: false,
+          defaultValue: 1,
         },
-        manner_level: {
-          type: DataTypes.INTEGER,
+        manner_score: {
+          type: DataTypes.INTEGER.UNSIGNED,
           allowNull: false,
-        },
-        created_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
-        },
-        updated_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
+          defaultValue: 5000,
         },
       },
       {
@@ -61,25 +55,7 @@ class User extends Model {
   }
 
   static associate(models) {
-    User.hasMany(models.UserTerm, { foreignKey: "user_id" });
-    User.hasMany(models.UserSpec, { foreignKey: "user_id" });
-    User.hasMany(models.UserArea, { foreignKey: "user_id" });
-    User.hasMany(models.UserOauth, { foreignKey: "user_id" });
-    User.hasMany(models.UserVerifiedEmail, { foreignKey: "user_id" });
-    User.hasMany(models.UserRefreshToken, { foreignKey: "user_id" });
-    User.hasMany(models.UserStudyroom, { foreignKey: "user_id" });
-    User.hasMany(models.StudyroomMember, { foreignKey: "user_id" });
-    User.hasMany(models.ScheduleParticipant, { foreignKey: "participant_id" });
-    User.hasMany(models.UserCalendar, { foreignKey: "user_id" });
-    User.hasMany(models.Todo, { foreignKey: "creater_id" });
-    User.hasMany(models.TodoMember, { foreignKey: "assigned_user_id" });
-    User.hasMany(models.ContestQuestion, { foreignKey: "user_id" });
-    User.hasMany(models.ContestAnswer, { foreignKey: "answer_id" });
-    User.hasMany(models.Board, { foreignKey: "author" });
-    User.hasMany(models.Inquiry, { foreignKey: "user_id" });
-    User.hasMany(models.InquiryAnswer, { foreignKey: "admin_id" });
-    User.hasMany(models.StudyroomVideocallMember, { foreignKey: "member_id" });
-    User.hasMany(models.StudyroomChat, { foreignKey: "sender_id" });
+    // models.User.hasMany(models.Comment, {foreignKey: "user_id",sourceKey: "user_id"});
   }
 }
 

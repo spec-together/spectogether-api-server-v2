@@ -1,47 +1,42 @@
-const { Model, DataTypes } = require("sequelize");
+const Sequelize = require("sequelize");
 
-class UserOauth extends Model {
-  static init(sequelize) {
-    super.init(
+class UserOauth extends Sequelize.Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
       {
         user_oauth_id: {
-          type: DataTypes.BIGINT,
           autoIncrement: true,
+          type: DataTypes.BIGINT,
+          allowNull: false,
           primaryKey: true,
         },
         user_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
+          references: {
+            model: "user",
+            key: "user_id",
+          },
         },
         oauth_type: {
-          type: DataTypes.STRING(50),
+          type: DataTypes.ENUM("kakao", "github", "naver", "google"),
           allowNull: false,
         },
         oauth_id: {
           type: DataTypes.STRING(255),
           allowNull: false,
         },
-        created_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
-        },
-        updated_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
-        },
       },
       {
         sequelize,
         tableName: "user_oauth",
-        timestamps: false,
+        timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    UserOauth.belongsTo(models.User, { foreignKey: "user_id" });
+    // models.UserOauth.belongsTo(models.User, {foreignKey: "user_id",sourceKey: "user_id"});
   }
 }
 

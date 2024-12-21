@@ -1,52 +1,51 @@
-const { Model, DataTypes } = require("sequelize");
+const Sequelize = require("sequelize");
 
-class StudyroomMember extends Model {
-  static init(sequelize) {
-    super.init(
+class StudyroomMember extends Sequelize.Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
       {
         studyroom_member_id: {
-          type: DataTypes.BIGINT,
           autoIncrement: true,
+          type: DataTypes.BIGINT,
+          allowNull: false,
           primaryKey: true,
         },
         studyroom_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
+          references: {
+            model: "studyroom",
+            key: "studyroom_id",
+          },
         },
         user_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
+          references: {
+            model: "user",
+            key: "user_id",
+          },
         },
         role: {
-          type: DataTypes.STRING(50),
+          type: DataTypes.ENUM("owner", "admin", "member"),
           allowNull: false,
         },
         status: {
-          type: DataTypes.STRING(50),
-          allowNull: false,
-        },
-        created_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
-        },
-        updated_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
+          type: DataTypes.ENUM("active", "blocked"),
           allowNull: false,
         },
       },
       {
         sequelize,
         tableName: "studyroom_member",
-        timestamps: false,
+        timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    StudyroomMember.belongsTo(models.User, { foreignKey: "user_id" });
-    StudyroomMember.belongsTo(models.Studyroom, { foreignKey: "studyroom_id" });
+    // models.StudyroomMember.belongsTo(models.User, { foreignKey: "user_id", sourceKey: "user_id" });
+    // models.StudyroomMember.belongsTo(models.Studyroom, { foreignKey: "studyroom_id", sourceKey: "studyroom_id" });
   }
 }
 
