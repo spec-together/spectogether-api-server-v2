@@ -14,6 +14,8 @@ const {
   getOtherUserProfileService,
   editUserInfoService,
   checkIfUserExistsByUserIdService,
+  getTodoInfoService,
+  getTodoAssignedUserNumberService,
 } = require("../services/users.service");
 const {
   validateEditUserInfoSchemaService,
@@ -32,6 +34,30 @@ const handleGetUsersAgreedTerm = async (req, res, next) => {
   } catch (error) {
     logger.error(
       `[handleGetUsersAgreedTerm]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
+};
+
+const handleGetTodoInfo = async (req, res, next) => {
+  try {
+    logger.info(
+      `[handleGetTodoInfo] req.params : ${JSON.stringify(req.params, null, 2)}`
+    );
+    const { todo_id } = req.params;
+    const todo = await getTodoInfoService(todo_id);
+    const members = await getTodoAssignedUserNumberService(todo_id);
+    return res.status(200).success({
+      info: todo.dataValues,
+      assigned_member: members,
+    });
+  } catch (error) {
+    logger.error(
+      `[handleGetTodoInfo]\
       \nNAME ${error.name}\
       \nREASON ${JSON.stringify(error.reason, null, 2)}\
       \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
@@ -215,4 +241,5 @@ module.exports = {
   handleGetUserMyProfile,
   handleGetOtherUserProfile,
   handleEditUserInfo,
+  handleGetTodoInfo,
 };
