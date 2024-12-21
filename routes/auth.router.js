@@ -9,7 +9,7 @@ const {
   handleReissueAccessToken,
   handleCreateTestUser,
   handleGetTerms,
-} = require("../controllers/auth.controller");
+} = require("../controllers/auth/auth.controller");
 const passport = require("passport");
 
 // TODO : 나중에 지워라 컨벤션 심각하게 위반하는거 ..

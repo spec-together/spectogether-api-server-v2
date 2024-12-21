@@ -20,11 +20,11 @@ const {
 
 const { PORT } = require("./config.json").SERVER;
 
-const { AccessTokenStrategy, KakaoOAuthStrategy } = require("./passport.setup");
+const { AccessTokenStrategy, KakaoOAuthStrategy } = require("./utils/passport.util");
 const {
   errorHandler,
   responseHandler,
-} = require("./handlers/req.res.handlers");
+} = require("./utils/handlers/response.handlers");
 
 const { swaggerUi, specs } = require("./swagger/swagger");
 
