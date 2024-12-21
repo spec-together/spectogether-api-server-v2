@@ -1,14 +1,14 @@
 const {
   validateonlyStudyroomIdSchemaService,
   validateStudyroomIdAndContentSchemaService,
-} = require("../../services/socket/studyroom.chat.socket.validation.service");
+} = require("../../utils/validators/studyroom.chat.socket.validators");
 const {
   getStudyroomChatByStudyroomIdService,
   saveChatToDatabaseService,
 } = require("../../services/socket/studyroom.chat.socket.service");
 const logger = require("../../logger");
-const { decrypt62, encrypt62 } = require("../../services/encrypt.service");
-const { socketErrorHandler } = require("../../handlers/socket.handlers");
+const { decrypt62, encrypt62 } = require("../../utils/encrypt.util");
+const { socketErrorHandler } = require("../../utils/handlers/socket.handlers");
 
 const handleOnUserEnterStudyroomMessage = async (socket, data) => {
   try {

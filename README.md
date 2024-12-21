@@ -1,8 +1,10 @@
-# Node.js Server Project Template
+# spectogether API v2
 
-이 레포지토리는 복잡한 프로젝트 초기 설정에 들어가는 시간을 절약하고자  
-다음과 같은 사항을 미리 작성해두었습니다.
+## How To ?
 
+## Conventions & Template
+
+- GitHub Issue Template
 - Git 전략 : Git Flow, GitHub Flow
 - Code 작성 컨벤션 : 변수, 함수, 파일, 폴더 명명법
 - docker 및 docker-compose 파일 : 빠르고 쉬운 배포
@@ -10,16 +12,17 @@
 - 다양한 기능에 대한 preset : 로그인, 채팅, 게시판
 - .gitignore : `Windows`, `macOS`, `Linux`, `node`, `dotenv` 기준 + `config.json`, `*.pem`
 
-개인적으로 프로젝트나 해커톤에서 활용하기 위해 작성하였기에, 모든 것이 정답은 아닙니다.  
-각자 취향에 맞추어 자유롭게 활용하시되, 도움이 되셨다면 star 한번만 부탁드립니다.  
+대중적인 구조는 있지만, 세부적인 부분은 개발자 개인의 취향입니다.  
+개인적으로 프로젝트나 해커톤에서 활용하기 위해 작성하였기에,  
+제 개인의 취향에 맞게 적용되어 있고, 시간이 지남에 따라 맞다고 생각하는 것이 바뀌며  
+템플릿을 수정할 수 있습니다.
+
+템플릿은 여러분의 취향에 맞게 수정하여 사용해주시고, 도움이 되셨다면 ⭐ 한번만 부탁드립니다.  
 preset 코드에 버그가 있을 경우 issue 생성하시어 남겨주시면 확인 후 반영하겠습니다.
+
 감사합니다.
 
-made and owned by [@kyeoungwoon](https://github.com/kyeoungwoon)
-
-# 이 프로젝트의 변경사항
-
-### 변수명 : Snake Case -> Camel Case 사용
+made and owned by [@kyeoungwoon](https://github.com/kyeoungwoon) | [Naver Blog](https://blog.naver.com/kyeoungwoon)
 
 # Git Convention : Strategy
 
@@ -140,19 +143,20 @@ made and owned by [@kyeoungwoon](https://github.com/kyeoungwoon)
 - Camel Case를 사용합니다.
   - eg. `getUserByUserId`, `getEventByDateAndUserId`
 - 길이가 길어지더라도 기능을 명확하게 명시해 주세요.
-- 절대로 다른 폴더에서 같은 함수명이 나오지 않도록 해주세요.
-- controllers 폴더는 handle로 함수명이 시작합니다.
-  - `handleUserInput`
-- service 폴더는 service로 함수명이 끝납니다.
-  - `UserIdValidationService`
-- routes 폴더는 router로 함수명이 끝납니다.
+- 함수명은 겹쳐도 됩니다.
+  - 하단에 import/export 관련 컨벤션 설명에서 더 자세히 알 수 있지만, 아래의 간단한 예시를 참고해주세요.
+  - `user.service.js` 에 `createNewUser` 과 `user.repository.js`에 `createNewUser`이 동시에 존재하여도 됩니다.
+  - service에서 사용 시에는 `userRepository.createNewUser`
+  - controller에서 사용할 떄는 `userController.createNewUser`와 같이 사용합니다.
+- routes 폴더에서 `express.Router()`로 정의하는 변수명은 해당 파일명과 일치하여야 합니다.
+  - eg. `auth.router.js` 파일의 경우에는 `const authRouter = express.Router();` 와 같이!
   - `authRouter.get("/", handleXX)`, `userRouter.get("/", handleYY)`
 
 ## 변수명
 
 - Snake Case를 사용합니다.
   - eg. `user_id`, `event_id`
-- Camel Case를 선호하신다면, 협의 후 사용 가능합니다.
+- 팀원간 협의 후 Camel Case 또한 사용 가능합니다. 중요한 부분은 컨벤션의 통일입니다.
   - 다만, Database의 컬럼명들이 Snake Case로 작성되었기 때문에 Query문 작성 시 유의가 필요합니다.
 - JSON 객체를 생성할 떄는, `{ user_id : user_id }` **(X)** `{ user_id }` **(O)** 와 같이 작성해주세요.
   - JSON 객체 생성 시 변수명만 입력하면, 자바스크립트는 자동으로 `{ 변수명: 변수값 }` 형태로 객체를 생성하는 점을 이용합니다. (객체 축약 표기법)
@@ -166,6 +170,11 @@ made and owned by [@kyeoungwoon](https://github.com/kyeoungwoon)
 - 여러 단어를 사용해야 하는 경우 . 으로 단어를 구분합니다
 - eg. `user.repository.js`, `chat.service.js`
 
+## 폴더명
+
+- 폴더명은 길어질 경우 `-`를 활용하여 구분합니다. (kebab case)
+- eg. `my-page`, `user-info`
+
 ## Error Handling
 
 - `class CustomError extends Error`와 같이, JavaScript 기본 Error 객체를 extend 하여 Custom Error를 작성하여야 합니다.
@@ -178,7 +187,7 @@ made and owned by [@kyeoungwoon](https://github.com/kyeoungwoon)
   - `error code`
     - `string` 이여야 합니다.
     - `U001`과 같이 따로 정의해두셔도 되고, `ALREADY_EXIST`와 같이 한두 단어 정도로 간략하게 작성해주세요.
-    - `U001`과 같이 코드값으로 관리하실 예정이면, documentation 하여 팀원들 사이에 공유해 중복된 에러가 작성되지 않도록 유의해주세요.
+    - `U001`과 같이 코드값으로 관리하실 예정이면, 문서화 하여 팀원들 사이에 공유해 중복된 에러가 작성되지 않도록 유의해주세요.
   - `status code`
     - http status code 값 입니다.
     - 해당 에러가 발생했을 때 전송할 status code를 입력해주세요.
@@ -201,12 +210,16 @@ class AlreadyExistError extends Error {
 }
 ```
 
-## Database : based on MySQL
+## Database
+
+#### _MySQL을 기준으로 설명합니다._
 
 - 테이블명과 컬럼명 등 모든 변수명은 반드시 snake case를 사용하여야 합니다.
-- PK를 담당하는 id값은 반드시 `{table명}_id` 와 같은 형식이여야 합니다.
+- PK값은 `{table명}_id` 와 같은 형식이여야 합니다.
+  - eg. `user_oauth` 테이블의 PK 컬럼 명은 `user_oauth_id`
+  - `bigint` 자료형을 사용하고, auto increment을 사용하여야 합니다.
+  - 반정규화 (비정규화, denormailzation)로 인해 테이블이 분할된 경우에도, id값을 따로 작성하는 것을 추천합니다.
 - 모든 테이블에는 `created_at`과 `updated_at`이 있어야 합니다.
-  - 아래는 `MySQL` 기준 설명입니다.
   - DataType은 TIMESTAMP(6) 입니다.
   - `created_at`과 `updated_at`은 `default expression`에 `current_timestamp(6)`을 적용해두어야 합니다.
   - `updated_at`은 `on_update`에 `current_timestamp(6)`이 적용되어 있어야 합니다.
@@ -221,25 +234,60 @@ class AlreadyExistError extends Error {
 - `default export`의 사용을 **지양**하고,
 - `named export`의 사용을 **지향**합니다.
 
-특히 함수를 가져올 때 잘 지켜주세요.  
-`userRepository.getUserIdByLoginId(login_id)` 가 아닌,  
-`getUserIdByLoginId(login_id)` 입니다.
-
 ```javascript
-// 지양
-import db from "./define";
+// 지양 : 함수를 직접 import 하여 사용하는 것
+import { createNewUser } from "./user.service";
 
-const sample = db.sequelize;
+const result = createNewUser();
+// user.repository에도 createNewUser 존재할 가능성이 있기에, 충돌할 우려가 있습니다.
 
-// 지향
+// 지향 : 네임스페이스를 사용하여 코드를 구조화 합니다.
+// eg. Java, C++
 
-import { sequelize } from "./define";
+import userService from "./sample.service.js";
 
-const sample = sequelize;
+const result = userService.createNewUser();
 ```
 
-- 리팩토링 시 문제가 생길 여지가 줄어듭니다.
-- 에러 핸들링이 용이해집니다.
+컨벤션을 모두 지킨, router - controller - service - repository 간의 호출구조 예시입니다.
+
+```javascript
+// user.router.js
+import userController from "./user.controller";
+
+const userRouter = express.Router();
+userRouter.get("/", userController.createNewUser);
+
+// user.controller.js
+import userService from "./user.service";
+
+export const createNewUser = async (req, res, next) => {
+  const { id, password } = req.body;
+  // 이렇게도 되고
+  await userService.createNewUser({ id, password }); // RORO
+  // 이렇게 해도 됩니다.
+  const data = { id, password };
+  userService.createNewUser(data);
+
+  return res.status(200).success();
+};
+
+// user.service.js
+import userRepository from "./user.repository";
+
+export const createNewUser = async (data) => {
+  const result = await userRepository.createNewUser(data);
+
+  return { message: "OK", result };
+};
+
+// user.repository.js
+export const createNewUser = async (data) => {
+  const result = await User.create(data);
+
+  return result;
+};
+```
 
 # Project Architecture
 
@@ -276,7 +324,6 @@ const sample = sequelize;
 
 - ORM 사용 시 model 정의를 위한 폴더입니다.
 - sequelize 기준으로, sequelize.define이 아닌 class User Extends Model 과 같은 class 형식으로 작성하여야 합니다.
-- eg.
 
 ```javascript
 class User extends Model {

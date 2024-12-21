@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const contestController = require("../controllers/contest.controller.js");
-const uploadController = require("../controllers/upload.controller");
+const contestController = require("../controllers/event/event.controller.js");
+const uploadController = require("../controllers/upload/upload.controller");
 // const { authenticateAccessToken } = require("../middleware/authenticate.jwt.js")
 
 const contestUploadPath = "uploads/contests/";

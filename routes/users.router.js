@@ -9,7 +9,7 @@ const {
   handleGetOtherUserProfile,
   handleEditUserInfo,
   handleGetTodoInfo,
-} = require("../controllers/users.controller");
+} = require("../controllers/users/users.controller");
 const { authenticateAccessToken } = require("../middleware/authenticate.jwt");
 const router = express.Router();
 

@@ -5,7 +5,7 @@ const {
   checkIfUserInStudyroom,
   saveChatToDatabase,
 } = require("../../repositories/studyroom.chat.socket.repository");
-const { encrypt62 } = require("../encrypt.service");
+const { encrypt62 } = require("../../utils/encrypt.util");
 
 const getStudyroomChatByStudyroomIdService = async (studyroomId, userId) => {
   const chats = await getStudyroomChatByStudyroomId(studyroomId);

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const inquiryController = require("../controllers/inquiry.controller");
-const uploadController = require("../controllers/upload.controller");
+const inquiryController = require("../controllers/inquiry/inquiry.controller");
+const uploadController = require("../controllers/upload/upload.controller");
 const { authenticateAccessToken } = require("../middleware/authenticate.jwt");
 
 // TODO : 사용하지 않는 반환값은 제거하기
