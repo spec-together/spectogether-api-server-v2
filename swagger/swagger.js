@@ -6,6 +6,9 @@ const responseSchema = require("./schemas/response.schema");
 const usersSchema = require("./schemas/users.schema");
 const inquirySchema = require("./schemas/inquiry.schema");
 const contestSchema = require("./schemas/contest.schema.js");
+const emailVerificationSchema = require("./schemas/email.verification.schema.js");
+const todoSchema = require("./schemas/todo.schema");
+const studyroomSchema = require("./schemas/studyroom.schema");
 
 // Swagger 옵션 설정
 const options = {
@@ -47,6 +50,9 @@ const options = {
         ...usersSchema,
         ...inquirySchema,
         ...contestSchema,
+        ...emailVerificationSchema,
+        ...todoSchema,
+        ...studyroomSchema,
       },
     },
     security: [

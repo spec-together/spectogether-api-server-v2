@@ -1,43 +1,44 @@
 const Sequelize = require("sequelize");
 
-class UserOauth extends Sequelize.Model {
+class NoticeImage extends Sequelize.Model {
   static init(sequelize, DataTypes) {
     return super.init(
       {
-        user_oauth_id: {
+        notice_image_id: {
           autoIncrement: true,
           type: DataTypes.BIGINT,
           allowNull: false,
           primaryKey: true,
         },
-        user_id: {
+        notice_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
           references: {
-            model: "user",
-            key: "user_id",
+            model: "notice",
+            key: "notice_id",
           },
         },
-        oauth_type: {
-          type: DataTypes.ENUM("kakao", "github", "naver", "google"),
+        image_url: {
+          type: DataTypes.STRING(2048),
           allowNull: false,
         },
-        oauth_id: {
-          type: DataTypes.STRING(255),
+        sequence: {
+          type: DataTypes.INTEGER,
           allowNull: false,
+          defaultValue: 1,
         },
       },
       {
         sequelize,
-        tableName: "user_oauth",
+        tableName: "notice_image",
         timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    // models.UserOauth.belongsTo(models.User, {foreignKey: "user_id",sourceKey: "user_id"});
+    // models.NoticeImage.belongsTo(models.Notice, {foreignKey: "notice_id",sourceKey: "notice_id" });
   }
 }
 
-module.exports = UserOauth;
+module.exports = NoticeImage;

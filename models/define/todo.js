@@ -1,23 +1,16 @@
-const { Model, DataTypes } = require("sequelize");
+const Sequelize = require("sequelize");
 
-class Todo extends Model {
-  static init(sequelize) {
+class Todo extends Sequelize.Model {
+  static init(sequelize, DataTypes) {
     return super.init(
       {
         todo_id: {
-          type: DataTypes.BIGINT,
           autoIncrement: true,
+          type: DataTypes.BIGINT,
+          allowNull: false,
           primaryKey: true,
         },
-        deadline: {
-          type: DataTypes.DATE,
-          allowNull: false,
-        },
         title: {
-          type: DataTypes.STRING(255),
-          allowNull: false,
-        },
-        subtitle: {
           type: DataTypes.STRING(255),
           allowNull: false,
         },
@@ -25,36 +18,37 @@ class Todo extends Model {
           type: DataTypes.TEXT,
           allowNull: false,
         },
+        location: {
+          type: DataTypes.STRING(512),
+          allowNull: true,
+        },
+        starts_at: {
+          type: DataTypes.DATE,
+          allowNull: false,
+        },
+        ends_at: {
+          type: DataTypes.DATE,
+          allowNull: false,
+        },
         creater_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
-        },
-        status: {
-          type: DataTypes.STRING(50),
-          allowNull: false,
-        },
-        created_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
-        },
-        updated_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
+          references: {
+            model: "user",
+            key: "user_id",
+          },
         },
       },
       {
         sequelize,
         tableName: "todo",
-        timestamps: false,
+        timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    Todo.belongsTo(models.User, { foreignKey: "creater_id" });
-    Todo.hasMany(models.TodoMember, { foreignKey: "todo_id" });
+    // models.Todo.belongsTo(models.User, { foreignKey: 'creater_id', sourceKey: 'user_id' });
   }
 }
 

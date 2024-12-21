@@ -1,21 +1,21 @@
 const Sequelize = require("sequelize");
 
-class UserStudyroom extends Sequelize.Model {
+class OrganizationUser extends Sequelize.Model {
   static init(sequelize, DataTypes) {
     return super.init(
       {
-        user_studyroom_id: {
+        organization_user_id: {
           autoIncrement: true,
           type: DataTypes.BIGINT,
           allowNull: false,
           primaryKey: true,
         },
-        studyroom_id: {
+        organization_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
           references: {
-            model: "studyroom",
-            key: "studyroom_id",
+            model: "organization",
+            key: "organization_id",
           },
         },
         user_id: {
@@ -26,19 +26,24 @@ class UserStudyroom extends Sequelize.Model {
             key: "user_id",
           },
         },
+        class: {
+          type: DataTypes.STRING(512),
+          allowNull: false,
+          defaultValue: "",
+        },
       },
       {
         sequelize,
-        tableName: "user_studyroom",
+        tableName: "organization_user",
         timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    // models.UserStudyroom.belongsTo(models.Studyroom, { foreignKey: "studyroom_id", sourceKey: "studyroom_id" });
-    // models.UserStudyroom.belongsTo(models.User, { foreignKey: "user_id", sourceKey: "user_id" });
+    // models.OrganizationUser.belongsTo(models.Organization, {foreignKey: "organization_id",sourceKey: "organization_id"});
+    // models.OrganizationUser.belongsTo(models.User, {foreignKey: "user_id",sourceKey: "user_id"});
   }
 }
 
-module.exports = UserStudyroom;
+module.exports = OrganizationUser;

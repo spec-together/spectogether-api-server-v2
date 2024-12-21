@@ -1,10 +1,10 @@
 const Sequelize = require("sequelize");
 
-class UserOauth extends Sequelize.Model {
+class Admin extends Sequelize.Model {
   static init(sequelize, DataTypes) {
     return super.init(
       {
-        user_oauth_id: {
+        admin_id: {
           autoIncrement: true,
           type: DataTypes.BIGINT,
           allowNull: false,
@@ -18,26 +18,22 @@ class UserOauth extends Sequelize.Model {
             key: "user_id",
           },
         },
-        oauth_type: {
-          type: DataTypes.ENUM("kakao", "github", "naver", "google"),
-          allowNull: false,
-        },
-        oauth_id: {
-          type: DataTypes.STRING(255),
+        permission: {
+          type: DataTypes.ENUM("full", "notice", "studyroom", "inquiry"),
           allowNull: false,
         },
       },
       {
         sequelize,
-        tableName: "user_oauth",
+        tableName: "admin",
         timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    // models.UserOauth.belongsTo(models.User, {foreignKey: "user_id",sourceKey: "user_id"});
+    // models.Admin.belongsTo(models.User, { foreignKey: "user_id", targetKey: "user_id" });
   }
 }
 
-module.exports = UserOauth;
+module.exports = Admin;

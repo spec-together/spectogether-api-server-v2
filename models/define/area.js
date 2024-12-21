@@ -1,48 +1,34 @@
-const { Model, DataTypes } = require("sequelize");
+const Sequelize = require("sequelize");
 
-class Area extends Model {
-  static init(sequelize) {
+class Area extends Sequelize.Model {
+  static init(sequelize, DataTypes) {
     return super.init(
       {
         area_id: {
-          type: DataTypes.BIGINT,
           autoIncrement: true,
+          type: DataTypes.BIGINT,
+          allowNull: false,
           primaryKey: true,
         },
-        name: {
-          type: DataTypes.STRING(255),
+        sido: {
+          type: DataTypes.STRING(128),
           allowNull: false,
         },
-        location: {
-          type: DataTypes.GEOMETRY("POINT"),
-          allowNull: false,
-        },
-        legal_areacode: {
-          type: DataTypes.STRING(50),
-          allowNull: false,
-        },
-        created_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
-        },
-        updated_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
+        gungu: {
+          type: DataTypes.STRING(512),
           allowNull: false,
         },
       },
       {
         sequelize,
         tableName: "area",
-        timestamps: false,
+        timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    Area.hasMany(models.UserArea, { foreignKey: "area_id" });
-    Area.hasMany(models.Studyroom, { foreignKey: "area_id" });
+    // models.Area.hasMany(models.Comment, {foreignKey: "area_id",sourceKey: "area_id"});
   }
 }
 
