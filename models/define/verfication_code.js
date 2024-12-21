@@ -1,6 +1,6 @@
 const Sequelize = require("sequelize");
 
-class VerficationCode extends Sequelize.Model {
+class VerificationCode extends Sequelize.Model {
   static init(sequelize, DataTypes) {
     return super.init(
       {
@@ -50,4 +50,4 @@ class VerficationCode extends Sequelize.Model {
   }
 }
 
-module.exports = VerficationCode;
+module.exports = VerificationCode;
