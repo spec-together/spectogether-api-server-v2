@@ -22,6 +22,10 @@ class Todo extends Sequelize.Model {
           type: DataTypes.STRING(512),
           allowNull: true,
         },
+        status: {
+          type: DataTypes.ENUM("pending", "done", "deleted"),
+          allowNull: true,
+        },
         starts_at: {
           type: DataTypes.DATE,
           allowNull: false,
@@ -38,17 +42,41 @@ class Todo extends Sequelize.Model {
             key: "user_id",
           },
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "todo",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.Todo.belongsTo(models.User, { foreignKey: 'creater_id', sourceKey: 'user_id' });
+    this.hasMany(models.StudyroomTodo, {
+      as: "studyroom_todos",
+      foreignKey: "todo_id",
+    });
+    this.hasMany(models.TodoParticipant, {
+      as: "todo_participants",
+      foreignKey: "todo_id",
+    });
+    this.hasMany(models.UserTodo, {
+      as: "user_todos",
+      foreignKey: "todo_id",
+    });
+    this.belongsTo(models.User, {
+      as: "creater",
+      foreignKey: "creater_id",
+    });
   }
 }
 

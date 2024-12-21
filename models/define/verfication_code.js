@@ -27,17 +27,26 @@ class VerficationCode extends Sequelize.Model {
           type: DataTypes.STRING(1024),
           allowNull: false,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "verfication_code",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.VerficationCode.belongsTo(models.User, {foreignKey: "user_id",sourceKey: "user_id"});
+    // this.
   }
 }
 

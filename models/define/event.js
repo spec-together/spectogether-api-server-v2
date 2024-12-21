@@ -65,18 +65,34 @@ class Event extends Sequelize.Model {
           type: DataTypes.DATE,
           allowNull: false,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "event",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
 
   static associate(models) {
-    // models.Event.belongsTo(models.User, {foreignKey: "host_id",targetKey: "user_id"});
-    // models.Event.hasMany(models.Application, {foreignKey: "event_id",sourceKey: "event_id"});
+    this.hasMany(models.EventImage, {
+      as: "event_images",
+      foreignKey: "event_id",
+    });
+    this.belongsTo(models.User, {
+      as: "host",
+      foreignKey: "host_id",
+    });
   }
 }
 

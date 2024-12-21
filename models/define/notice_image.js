@@ -27,17 +27,29 @@ class NoticeImage extends Sequelize.Model {
           allowNull: false,
           defaultValue: 1,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "notice_image",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.NoticeImage.belongsTo(models.Notice, {foreignKey: "notice_id",sourceKey: "notice_id" });
+    this.belongsTo(models.Notice, {
+      as: "notice",
+      foreignKey: "notice_id",
+    });
   }
 }
 

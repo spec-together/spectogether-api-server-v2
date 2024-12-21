@@ -31,18 +31,34 @@ class OrganizationUser extends Sequelize.Model {
           allowNull: false,
           defaultValue: "",
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "organization_user",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
 
   static associate(models) {
-    // models.OrganizationUser.belongsTo(models.Organization, {foreignKey: "organization_id",sourceKey: "organization_id"});
-    // models.OrganizationUser.belongsTo(models.User, {foreignKey: "user_id",sourceKey: "user_id"});
+    this.belongsTo(models.Organization, {
+      as: "organization",
+      foreignKey: "organization_id",
+    });
+    this.belongsTo(models.User, {
+      as: "user",
+      foreignKey: "user_id",
+    });
   }
 }
 

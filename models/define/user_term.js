@@ -30,18 +30,33 @@ class UserTerm extends Sequelize.Model {
           type: DataTypes.BOOLEAN,
           allowNull: false,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "user_term",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.UserTerm.belongsTo(models.Term, { foreignKey: "term_id", sourceKey: "term_id" });
-    // models.UserTerm.belongsTo(models.User, { foreignKey: "user_id", sourceKey: "user_id" });
+    this.belongsTo(models.Term, {
+      as: "term",
+      foreignKey: "term_id",
+    });
+    this.belongsTo(models.User, {
+      as: "user",
+      foreignKey: "user_id",
+    });
   }
 }
 

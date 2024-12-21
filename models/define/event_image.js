@@ -26,17 +26,30 @@ class EventImage extends Sequelize.Model {
           allowNull: false,
           defaultValue: 1,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "event_image",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
 
   static associate(models) {
-    // models.EventImage.belongsTo(models.Event, {foreignKey: "event_id",targetKey: "event_id"});
+    this.belongsTo(models.Event, {
+      as: "event",
+      foreignKey: "event_id",
+    });
   }
 }
 

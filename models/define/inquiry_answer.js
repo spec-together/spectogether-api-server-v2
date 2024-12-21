@@ -33,18 +33,33 @@ class InquiryAnswer extends Sequelize.Model {
           type: DataTypes.STRING(2048),
           allowNull: true,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "inquiry_answer",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.InquiryAnswer.belongsTo(models.Inquiry, {foreignKey: "inquiry_id",targetKey: "inquiry_id"});
-    // models.InquiryAnswer.belongsTo(models.User, {foreignKey: "admin_id",targetKey: "user_id"});
+    this.belongsTo(models.User, {
+      as: "admin",
+      foreignKey: "admin_id",
+    });
+    this.belongsTo(models.Inquiry, {
+      as: "inquiry",
+      foreignKey: "inquiry_id",
+    });
   }
 }
 

@@ -26,13 +26,33 @@ class UserTodo extends Sequelize.Model {
             key: "todo_id",
           },
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "user_todo",
-        timestamps: true,
+        timestamps: false,
       }
     );
+  }
+  static associate(models) {
+    this.belongsTo(models.User, {
+      as: "user",
+      foreignKey: "user_id",
+    });
+    this.belongsTo(models.Todo, {
+      as: "todo",
+      foreignKey: "todo_id",
+    });
   }
 }
 

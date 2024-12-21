@@ -36,17 +36,37 @@ class Spec extends Sequelize.Model {
           allowNull: false,
           defaultValue: "",
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "spec",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.Spec.belongsTo(models.User, {foreignKey: 'user_id', sourceKey: 'user_id' });
+    this.hasMany(models.SpecPhoto, {
+      as: "spec_photos",
+      foreignKey: "spec_id",
+    });
+    this.hasMany(models.UserSpec, {
+      as: "user_specs",
+      foreignKey: "spec_id",
+    });
+    this.belongsTo(models.User, {
+      as: "user",
+      foreignKey: "user_id",
+    });
   }
 }
 

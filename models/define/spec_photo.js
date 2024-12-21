@@ -36,9 +36,11 @@ class SpecPhoto extends Sequelize.Model {
       }
     );
   }
-
   static associate(models) {
-    // models.SpecPhoto.belongsTo(models.Spec, {foreignKey: "spec_id",sourceKey: "spec_id"});
+    this.belongsTo(models.Spec, {
+      as: "spec",
+      foreignKey: "spec_id",
+    });
   }
 }
 

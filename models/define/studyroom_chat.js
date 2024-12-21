@@ -30,18 +30,33 @@ class StudyroomChat extends Sequelize.Model {
           type: DataTypes.STRING(2048),
           allowNull: false,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "studyroom_chat",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.StudyroomChat.belongsTo(models.User, { foreignKey: 'sender_id', sourceKey: 'user_id' });
-    // models.StudyroomChat.belongsTo(models.Studyroom, { foreignKey: 'studyroom_id', sourceKey: 'studyroom_id' });
+    this.belongsTo(models.Studyroom, {
+      as: "studyroom",
+      foreignKey: "studyroom_id",
+    });
+    this.belongsTo(models.User, {
+      as: "sender",
+      foreignKey: "sender_id",
+    });
   }
 }
 

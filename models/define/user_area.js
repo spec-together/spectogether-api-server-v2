@@ -34,10 +34,15 @@ class UserArea extends Sequelize.Model {
       }
     );
   }
-
   static associate(models) {
-    // models.UserArea.belongsTo(models.User, { foreignKey: 'user_id', sourceKey: 'user_id' });
-    // models.UserArea.belongsTo(models.Area, { foreignKey: 'area_id', sourceKey: 'area_id' });
+    this.belongsTo(models.Area, {
+      as: "area",
+      foreignKey: "area_id",
+    });
+    this.belongsTo(models.User, {
+      as: "user",
+      foreignKey: "user_id",
+    });
   }
 }
 
