@@ -1,7 +1,7 @@
 // routes/todo.routes.js
 const express = require("express");
 const router = express.Router();
-const todoController = require("../controllers/todo.controller");
+const todoController = require("../controllers/todo/todo.controller");
 const authenticateMiddleware = require("../middleware/authenticate.jwt");
 
 // 로그인 사용자만 접근 가능

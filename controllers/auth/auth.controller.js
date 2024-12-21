@@ -13,27 +13,27 @@ const {
   getEmailByEmailVerificationIdService,
   createUserAgreedTermsToDatabaseService,
   getCurrentTermsService,
-} = require("../services/auth/auth.service");
-const logger = require("../logger");
-const { RelatedServiceUnavailableError } = require("../errors");
+} = require("../../services/auth/auth.service");
+const logger = require("../../logger");
+const { RelatedServiceUnavailableError } = require("../../errors");
 const {
   decrypt62,
   comparePassword,
   encrypt62,
-} = require("../utils/encrypt.util");
+} = require("../../utils/encrypt.util");
 const {
   getEmailByEmailVerificationId,
-} = require("../repositories/auth.repository");
+} = require("../../repositories/auth.repository");
 const {
   createAccessTokenService,
   createRefreshTokenService,
-} = require("../services/auth/auth.token.service");
+} = require("../../services/auth/auth.token.service");
 const {
   refreshTokenCookieOptions,
   logoutCookieOptions,
-} = require("../options");
+} = require("../../options");
 const passport = require("passport");
-const { FRONTEND_URL } = require("../config.json").SERVER;
+const { FRONTEND_URL } = require("../../config.json").SERVER;
 
 const handleUserRegister = async (req, res, next) => {
   /*

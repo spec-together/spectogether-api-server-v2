@@ -1,5 +1,5 @@
-const emailVerificationService = require("../services/verification/email.verification.service.js");
-const { encrypt62 } = require("../utils/encrypt.util.js");
+const emailVerificationService = require("../../services/verification/email.verification.service.js");
+const { encrypt62 } = require("../../utils/encrypt.util.js");
 
 const handleCheckEmailUnique = async (req, res, next) => {
   try {

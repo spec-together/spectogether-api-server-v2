@@ -1,9 +1,9 @@
-const logger = require("../logger");
+const logger = require("../../logger");
 const {
   updateUserNicknameByUserId,
   checkIfUserExistsByUserId,
-} = require("../repositories/users.repository");
-const { encrypt62, decrypt62 } = require("../utils/encrypt.util");
+} = require("../../repositories/users.repository");
+const { encrypt62, decrypt62 } = require("../../utils/encrypt.util");
 const {
   getUserAgreedTermsService,
   getUserTodoService,
@@ -16,10 +16,10 @@ const {
   checkIfUserExistsByUserIdService,
   getTodoInfoService,
   getTodoAssignedUserNumberService,
-} = require("../services/users/users.service");
+} = require("../../services/users/users.service");
 const {
   validateEditUserInfoSchemaService,
-} = require("../utils/validators/users.validators");
+} = require("../../utils/validators/users.validators");
 
 const handleGetUsersAgreedTerm = async (req, res, next) => {
   try {
