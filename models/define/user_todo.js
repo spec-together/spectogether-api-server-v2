@@ -1,10 +1,10 @@
 const Sequelize = require("sequelize");
 
-class UserOauth extends Sequelize.Model {
+class UserTodo extends Sequelize.Model {
   static init(sequelize, DataTypes) {
     return super.init(
       {
-        user_oauth_id: {
+        user_todo_id: {
           autoIncrement: true,
           type: DataTypes.BIGINT,
           allowNull: false,
@@ -18,26 +18,22 @@ class UserOauth extends Sequelize.Model {
             key: "user_id",
           },
         },
-        oauth_type: {
-          type: DataTypes.ENUM("kakao", "github", "naver", "google"),
+        todo_id: {
+          type: DataTypes.BIGINT,
           allowNull: false,
-        },
-        oauth_id: {
-          type: DataTypes.STRING(255),
-          allowNull: false,
+          references: {
+            model: "todo",
+            key: "todo_id",
+          },
         },
       },
       {
         sequelize,
-        tableName: "user_oauth",
+        tableName: "user_todo",
         timestamps: true,
       }
     );
   }
-
-  static associate(models) {
-    // models.UserOauth.belongsTo(models.User, {foreignKey: "user_id",sourceKey: "user_id"});
-  }
 }
 
-module.exports = UserOauth;
+module.exports = UserTodo;

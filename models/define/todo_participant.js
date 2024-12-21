@@ -1,24 +1,24 @@
 const Sequelize = require("sequelize");
 
-class StudyroomMember extends Sequelize.Model {
+class TodoParticipant extends Sequelize.Model {
   static init(sequelize, DataTypes) {
     return super.init(
       {
-        studyroom_member_id: {
+        todo_participant_id: {
           autoIncrement: true,
           type: DataTypes.BIGINT,
           allowNull: false,
           primaryKey: true,
         },
-        studyroom_id: {
+        todo_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
           references: {
-            model: "studyroom",
-            key: "studyroom_id",
+            model: "todo",
+            key: "todo_id",
           },
         },
-        user_id: {
+        assigned_user_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
           references: {
@@ -26,27 +26,31 @@ class StudyroomMember extends Sequelize.Model {
             key: "user_id",
           },
         },
-        role: {
-          type: DataTypes.ENUM("owner", "admin", "member"),
+        status: {
+          type: DataTypes.BOOLEAN,
           allowNull: false,
         },
-        status: {
-          type: DataTypes.ENUM("active", "blocked"),
+        comment: {
+          type: DataTypes.TEXT,
+          allowNull: false,
+        },
+        image_url: {
+          type: DataTypes.STRING(2048),
           allowNull: false,
         },
       },
       {
         sequelize,
-        tableName: "studyroom_member",
+        tableName: "todo_participant",
         timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    // models.StudyroomMember.belongsTo(models.User, { foreignKey: "user_id", sourceKey: "user_id" });
-    // models.StudyroomMember.belongsTo(models.Studyroom, { foreignKey: "studyroom_id", sourceKey: "studyroom_id" });
+    // models.TodoParticipant.belongsTo(models.Todo, { foreignKey: "todo_id", sourceKey: "todo_id" });
+    // models.TodoParticipant.belongsTo(models.User, { foreignKey: "assigned_user_id", sourceKey: "user_id" });
   }
 }
 
-module.exports = StudyroomMember;
+module.exports = TodoParticipant;

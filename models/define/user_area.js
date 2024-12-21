@@ -1,31 +1,30 @@
-const { Model, DataTypes } = require("sequelize");
+const Sequelize = require("sequelize");
 
-class UserArea extends Model {
-  static init(sequelize) {
+class UserArea extends Sequelize.Model {
+  static init(sequelize, DataTypes) {
     return super.init(
       {
         user_area_id: {
-          type: DataTypes.BIGINT,
           autoIncrement: true,
+          type: DataTypes.BIGINT,
+          allowNull: false,
           primaryKey: true,
         },
         user_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
+          references: {
+            model: "user",
+            key: "user_id",
+          },
         },
         area_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
-        },
-        created_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
-        },
-        updated_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
-          allowNull: false,
+          references: {
+            model: "area",
+            key: "area_id",
+          },
         },
       },
       {
@@ -37,8 +36,8 @@ class UserArea extends Model {
   }
 
   static associate(models) {
-    UserArea.belongsTo(models.User, { foreignKey: "user_id" });
-    UserArea.belongsTo(models.Area, { foreignKey: "area_id" });
+    // models.UserArea.belongsTo(models.User, { foreignKey: 'user_id', sourceKey: 'user_id' });
+    // models.UserArea.belongsTo(models.Area, { foreignKey: 'area_id', sourceKey: 'area_id' });
   }
 }
 

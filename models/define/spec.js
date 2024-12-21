@@ -1,40 +1,52 @@
-const { Model, DataTypes } = require("sequelize");
+const Sequelize = require("sequelize");
 
-class Spec extends Model {
-  static init(sequelize) {
+class Spec extends Sequelize.Model {
+  static init(sequelize, DataTypes) {
     return super.init(
       {
         spec_id: {
-          type: DataTypes.BIGINT,
           autoIncrement: true,
+          type: DataTypes.BIGINT,
+          allowNull: false,
           primaryKey: true,
         },
-        title: {
+        user_id: {
+          type: DataTypes.BIGINT,
+          allowNull: false,
+          references: {
+            model: "user",
+            key: "user_id",
+          },
+        },
+        name: {
           type: DataTypes.STRING(255),
           allowNull: false,
         },
-        created_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
+        host: {
+          type: DataTypes.STRING(256),
+          allowNull: false,
+          defaultValue: "",
+        },
+        spec_date: {
+          type: DataTypes.DATEONLY,
           allowNull: false,
         },
-        updated_at: {
-          type: DataTypes.DATE(6),
-          defaultValue: DataTypes.NOW,
+        content: {
+          type: DataTypes.STRING(10000),
           allowNull: false,
+          defaultValue: "",
         },
       },
       {
         sequelize,
         tableName: "spec",
-        timestamps: false,
+        timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    Spec.hasMany(models.UserSpec, { foreignKey: "spec_id" });
-    Spec.hasMany(models.Studyroom, { foreignKey: "spec_id" });
+    // models.Spec.belongsTo(models.User, {foreignKey: 'user_id', sourceKey: 'user_id' });
   }
 }
 

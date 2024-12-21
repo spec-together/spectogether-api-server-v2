@@ -1,19 +1,16 @@
 const Sequelize = require("sequelize");
 
-class InquiryAnswer extends Sequelize.Model {
+class Notice extends Sequelize.Model {
   static init(sequelize, DataTypes) {
     return super.init(
       {
-        inquiry_id: {
+        notice_id: {
+          autoIncrement: true,
           type: DataTypes.BIGINT,
           allowNull: false,
           primaryKey: true,
-          references: {
-            model: "inquiry",
-            key: "inquiry_id",
-          },
         },
-        admin_id: {
+        author_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
           references: {
@@ -22,30 +19,25 @@ class InquiryAnswer extends Sequelize.Model {
           },
         },
         title: {
-          type: DataTypes.STRING(512),
+          type: DataTypes.STRING(1024),
           allowNull: false,
         },
         content: {
           type: DataTypes.TEXT,
           allowNull: false,
         },
-        image_url: {
-          type: DataTypes.STRING(2048),
-          allowNull: true,
-        },
       },
       {
         sequelize,
-        tableName: "inquiry_answer",
+        tableName: "notice",
         timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    // models.InquiryAnswer.belongsTo(models.Inquiry, {foreignKey: "inquiry_id",targetKey: "inquiry_id"});
-    // models.InquiryAnswer.belongsTo(models.User, {foreignKey: "admin_id",targetKey: "user_id"});
+    // models.Notice.belongsTo(models.User, { foreignKey: "author_id", sourceKey: "user_id" });
   }
 }
 
-module.exports = InquiryAnswer;
+module.exports = Notice;

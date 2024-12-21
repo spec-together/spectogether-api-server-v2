@@ -1,39 +1,37 @@
 const Sequelize = require("sequelize");
 
-class UserRefreshToken extends Sequelize.Model {
+class UserLocal extends Sequelize.Model {
   static init(sequelize, DataTypes) {
     return super.init(
       {
-        user_refresh_token_id: {
-          autoIncrement: true,
-          type: DataTypes.BIGINT,
-          allowNull: false,
-          primaryKey: true,
-        },
         user_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
+          primaryKey: true,
           references: {
             model: "user",
             key: "user_id",
           },
         },
-        refresh_token: {
-          type: DataTypes.TEXT,
+        password: {
+          type: DataTypes.STRING(1024),
           allowNull: false,
         },
       },
       {
         sequelize,
-        tableName: "user_refresh_token",
+        tableName: "user_local",
         timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    // models.UserRefreshToken.belongsTo(models.User, {foreignKey: "user_id",sourceKey: "user_id"});
+    models.UserLocal.belongsTo(models.User, {
+      foreignKey: "user_id",
+      sourceKey: "user_id",
+    });
   }
 }
 
-module.exports = UserRefreshToken;
+module.exports = UserLocal;
