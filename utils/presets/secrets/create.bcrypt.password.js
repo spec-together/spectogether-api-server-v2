@@ -2,11 +2,11 @@ const jwt = require("jsonwebtoken");
 const {
   generateHashedPassword,
   encrypt62,
-} = require("../../services/encrypt.service");
+} = require("../../encrypt.util");
 const {
   createAccessTokenService,
-} = require("../../services/auth.token.service");
-const { JWT_SECRET } = require("../../config.json").SERVER;
+} = require("../../../services/auth/auth.token.service");
+const { JWT_SECRET } = require("../../../config.json").SERVER;
 
 // generateHashedPassword("password").then((hashed) => console.log(hashed));
 

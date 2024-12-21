@@ -1,11 +1,11 @@
 const {
   createAccessTokenService,
   createTestUserTokenService,
-} = require("../../services/auth.token.service");
+} = require("../../../services/auth/auth.token.service");
 
-const { JWT_SECRET } = require("../../config.json").SERVER;
+const { JWT_SECRET } = require("../../../config.json").SERVER;
 const jwt = require("jsonwebtoken");
-const { encrypt62 } = require("../../services/encrypt.service");
+const { encrypt62 } = require("../../encrypt.util");
 
 // createAccessTokenService("1", "kw", "admin");
 const createBearerToken = (user_id) => {

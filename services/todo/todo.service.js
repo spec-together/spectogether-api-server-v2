@@ -1,6 +1,6 @@
-const todoRepository = require("../repositories/todo.repository");
-const { Studyroom } = require("../models"); // TODO : 리포 구현
-const { NotExistsError, InvalidInputError } = require("../errors");
+const todoRepository = require("../../repositories/todo.repository");
+const { Studyroom } = require("../../models"); // TODO : 리포 구현
+const { NotExistsError, InvalidInputError } = require("../../errors");
 
 // 입력 데이터 검증 함수
 const validateCreateTodo = (data) => {

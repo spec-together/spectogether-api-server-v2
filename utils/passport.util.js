@@ -10,17 +10,17 @@ const ExtractJwt = require("passport-jwt").ExtractJwt;
 // OAuth2.0 Strategy
 const KakaoStrategy = require("passport-oauth2").Strategy;
 
-const { JWT_SECRET } = require("./config.json").SERVER;
+const { JWT_SECRET } = require("../config.json").SERVER;
 const { KAKAO_REST_API_KEY, KAKAO_CLIENT_SECRET } =
-  require("./config.json").KAKAO;
+  require("../config.json").KAKAO;
 
-const logger = require("./logger");
+const logger = require("../logger");
 const {
   passportGetUserByUserIdService,
   passportGetUserByEmailService,
-} = require("./services/passport.service");
-const { saveKakaoUserInfoService } = require("./services/auth.service");
-const { decrypt62 } = require("./services/encrypt.service");
+} = require("../services/passport/passport.service");
+const { saveKakaoUserInfoService } = require("../services/auth/auth.service");
+const { decrypt62 } = require("./encrypt.util");
 
 // 샘플 삼아 추가한 쿠키에서 JWT를 파싱하는 전략입니다.
 const parseJwtFromCookie = {

@@ -1,4 +1,4 @@
-const contestService = require("../services/contest.service.js");
+const contestService = require("../services/event/contest.service.js");
 const logger = require("../logger");
 
 exports.getAllContests = async (req, res, next) => {

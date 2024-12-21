@@ -1,9 +1,9 @@
-const { InvalidInputError, KakaoUserNotRegisteredError } = require("../errors");
-const logger = require("../logger");
+const { InvalidInputError, KakaoUserNotRegisteredError } = require("../../errors");
+const logger = require("../../logger");
 const {
   getUserByUserId,
   getUserbyEmail,
-} = require("../repositories/passport.repository");
+} = require("../../repositories/passport.repository");
 
 const passportGetUserByUserIdService = async (userId) => {
   const user = await getUserByUserId(userId);

@@ -1,6 +1,6 @@
 // node presets/database/seed-inquiry.js
 
-const { Inquiry, InquiryAnswer, User, sequelize } = require("../../models");
+const { Inquiry, InquiryAnswer, User, sequelize } = require("../../../models");
 
 // 샘플 데이터를 생성하기 위한 유틸리티 함수
 // const { faker } = require("@faker-js/faker"); // @faker-js/faker 라이브러리를 사용하여 랜덤 데이터 생성

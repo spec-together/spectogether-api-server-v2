@@ -3,7 +3,7 @@ const {
   updateUserNicknameByUserId,
   checkIfUserExistsByUserId,
 } = require("../repositories/users.repository");
-const { encrypt62, decrypt62 } = require("../services/encrypt.service");
+const { encrypt62, decrypt62 } = require("../utils/encrypt.util");
 const {
   getUserAgreedTermsService,
   getUserTodoService,
@@ -16,10 +16,10 @@ const {
   checkIfUserExistsByUserIdService,
   getTodoInfoService,
   getTodoAssignedUserNumberService,
-} = require("../services/users.service");
+} = require("../services/users/users.service");
 const {
   validateEditUserInfoSchemaService,
-} = require("../services/users.validation.service");
+} = require("../utils/validators/users.validators");
 
 const handleGetUsersAgreedTerm = async (req, res, next) => {
   try {

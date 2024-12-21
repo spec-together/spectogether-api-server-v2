@@ -1,4 +1,4 @@
-const inquiryService = require("../services/inquiry.service.js");
+const inquiryService = require("../services/inquiry/inquiry.service.js");
 
 exports.handleGetInquiries = async (req, res, next) => {
   try {

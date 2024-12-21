@@ -1,9 +1,9 @@
-const { User } = require("../models");
-const { generateHashedPassword } = require("./encrypt.service");
+const { User } = require("../../models");
+const { generateHashedPassword } = require("../../utils/encrypt.util");
 const {
   validateNewUserInputSchema,
   validateLoginInputSchema,
-} = require("./auth.validation.service");
+} = require("../../utils/validators/auth.validators");
 const {
   getUserByEmailOrPhoneNumber,
   createNewUser,
@@ -16,8 +16,8 @@ const {
   getEmailByEmailVerificationId,
   putUserAgreedTerms,
   getCurrentTerms,
-} = require("../repositories/auth.repository");
-const logger = require("../logger");
+} = require("../../repositories/auth.repository");
+const logger = require("../../logger");
 const {
   NotExistsError,
   NotAllowedError,
@@ -25,10 +25,10 @@ const {
   AlreadyExistsError,
   InvalidInputError,
   UnauthorizedError,
-} = require("../errors");
-const { saveKakaoUserInfo } = require("../repositories/passport.repository");
+} = require("../../errors");
+const { saveKakaoUserInfo } = require("../../repositories/passport.repository");
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../config.json").SERVER;
+const { JWT_SECRET } = require("../../config.json").SERVER;
 
 const validateRegisterInputService = (data) => {
   const valid = validateNewUserInputSchema(data);

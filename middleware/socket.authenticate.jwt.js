@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config.json").SERVER;
 const { UnauthorizedError, NotAllowedError } = require("../errors");
 const logger = require("../logger");
-const { decrypt62 } = require("../services/encrypt.service");
+const { decrypt62 } = require("../utils/encrypt.util");
 
 /**
  * Bearer 토큰을 추출하고 검증하는 미들웨어

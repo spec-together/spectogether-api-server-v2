@@ -1,6 +1,6 @@
-const logger = require("../logger");
+const logger = require("../../logger");
 
-const responseHandler = (req, res, next) => {
+const responseHandlers = (req, res, next) => {
   res.success = (success) => {
     return res.json({ resultType: "SUCCESS", error: null, success });
   };
@@ -46,6 +46,6 @@ const errorHandler = (err, req, res, next) => {
 };
 
 module.exports = {
-  responseHandler,
+  responseHandler: responseHandlers,
   errorHandler,
 };

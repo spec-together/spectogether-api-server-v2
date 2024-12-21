@@ -13,21 +13,21 @@ const {
   getEmailByEmailVerificationIdService,
   createUserAgreedTermsToDatabaseService,
   getCurrentTermsService,
-} = require("../services/auth.service");
+} = require("../services/auth/auth.service");
 const logger = require("../logger");
 const { RelatedServiceUnavailableError } = require("../errors");
 const {
   decrypt62,
   comparePassword,
   encrypt62,
-} = require("../services/encrypt.service");
+} = require("../utils/encrypt.util");
 const {
   getEmailByEmailVerificationId,
 } = require("../repositories/auth.repository");
 const {
   createAccessTokenService,
   createRefreshTokenService,
-} = require("../services/auth.token.service");
+} = require("../services/auth/auth.token.service");
 const {
   refreshTokenCookieOptions,
   logoutCookieOptions,

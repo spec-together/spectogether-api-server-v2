@@ -1,5 +1,5 @@
-const { NotExistsError, DatabaseError } = require("../errors");
-const logger = require("../logger");
+const { NotExistsError, DatabaseError } = require("../../errors");
+const logger = require("../../logger");
 const {
   getAgreedTermsByUserId,
   getUserTodoByUserId,
@@ -13,8 +13,8 @@ const {
   checkIfUserExistsByUserId,
   getTodoInfo,
   getAssignedMemberByTodoId,
-} = require("../repositories/users.repository");
-const { encrypt62 } = require("./encrypt.service");
+} = require("../../repositories/users.repository");
+const { encrypt62 } = require("../../utils/encrypt.util");
 
 const getUserAgreedTermsService = async (user_id) => {
   const userAgreedTerms = await getAgreedTermsByUserId(user_id);

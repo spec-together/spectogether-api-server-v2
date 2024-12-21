@@ -1,10 +1,10 @@
-const inquiryRepository = require("../repositories/inquiry.repository");
+const inquiryRepository = require("../../repositories/inquiry.repository");
 const {
   DatabaseError,
   InvalidInputError,
   NotExistsError,
-} = require("../errors");
-const { validateInquiryAnswerInput } = require("./inquiry.validator.js");
+} = require("../../errors");
+const { validateInquiryAnswerInput } = require("../../utils/validators/inquiry.validators.js");
 
 exports.getAllInquiries = async (userId, page, limit, status) => {
   const offset = (page - 1) * limit;

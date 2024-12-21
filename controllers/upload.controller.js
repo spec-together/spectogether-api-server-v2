@@ -1,5 +1,5 @@
 // controllers/upload.controller.js
-const uploadService = require("../services/upload.service");
+const uploadService = require("../services/upload/upload.service");
 
 const handleUpload = (destination) => {
   const upload = uploadService

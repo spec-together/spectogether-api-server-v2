@@ -1,9 +1,9 @@
 const crypto = require("node:crypto");
 // const { Op } = require("sequelize");
 
-const emailVerificationRepo = require("../repositories/email.verification.repository.js");
-const sendVerificationEmail = require("../utils/mailer.js");
-const { AlreadyExistsError, InvalidTokenError } = require("../errors.js");
+const emailVerificationRepo = require("../../repositories/email.verification.repository.js");
+const sendVerificationEmail = require("../../utils/mailer.util.js");
+const { AlreadyExistsError, InvalidTokenError } = require("../../errors.js");
 
 const isEmailUniqueService = async (email) => {
   const user = await emailVerificationRepo.findUserByEmail(email);

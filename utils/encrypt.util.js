@@ -1,4 +1,4 @@
-// encrypt.service.js
+// encrypt.util.js
 
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");

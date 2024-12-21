@@ -1,4 +1,4 @@
-const todoService = require("../services/todo.service");
+const todoService = require("../services/todo/todo.service");
 
 exports.handleCreateTodo = async (req, res, next) => {
   try {

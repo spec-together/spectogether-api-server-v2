@@ -1,10 +1,10 @@
-const contestRepository = require("../repositories/contest.repository.js");
+const contestRepository = require("../../repositories/contest.repository.js");
 const {
   DatabaseError,
   NotExistsError,
   InvalidInputError,
-} = require("../errors");
-const { validateContestInput } = require("./contest.validation.service");
+} = require("../../errors");
+const { validateContestInput } = require("../../utils/validators/event.validators");
 
 const validateDates = ({
   application_start_date,

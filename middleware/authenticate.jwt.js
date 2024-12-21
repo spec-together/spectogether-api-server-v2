@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const logger = require("../logger"); // 로거 설정 경로에 맞게 수정
 const { UnauthorizedError, NotAllowedError } = require("../errors");
-const { decrypt62 } = require("../services/encrypt.service");
+const { decrypt62 } = require("../utils/encrypt.util");
 const { JWT_SECRET } = require("../config.json").SERVER;
 
 /**

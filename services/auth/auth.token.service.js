@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
-const { UserRefreshToken } = require("../models");
-const { encrypt62 } = require("./encrypt.service");
-const { JWT_SECRET } = require("../config.json").SERVER;
+const { UserRefreshToken } = require("../../models");
+const { encrypt62 } = require("../../utils/encrypt.util");
+const { JWT_SECRET } = require("../../config.json").SERVER;
 
 const createAccessTokenService = (user_id, name, nickname) => {
   const encryptedUserId = encrypt62(user_id.toString());
