@@ -5,7 +5,7 @@ const emailVerificationRepo = require("../../repositories/email.verification.rep
 const sendVerificationEmail = require("../../utils/mailer.util.js");
 const { AlreadyExistsError, InvalidTokenError } = require("../../errors.js");
 
-const isEmailUniqueService = async (email) => {
+const isEmailUnique = async (email) => {
   const user = await emailVerificationRepo.findUserByEmail(email);
   if (user === null) {
     return true;
@@ -57,7 +57,7 @@ const verifyToken = async (email, code) => {
 };
 
 module.exports = {
-  isEmailUniqueService,
+  isEmailUnique,
   sendVerification,
   verifyToken,
 };

@@ -1,16 +1,30 @@
 const express = require("express");
 const emailVerificationController = require("../controllers/verification/email.verification.controller.js");
+const emailVerificationValidator = require("../utils/validators/email.verification.validators.js");
+const validate = require("../middleware/validate.js");
 
 const router = express.Router();
 
 // POST /verification/email/unique
-router.post("/unique", emailVerificationController.handleCheckEmailUnique);
+router.post(
+  "/unique",
+  validate(emailVerificationValidator.validateCheckEmailUnique),
+  emailVerificationController.checkEmailUnique
+);
 
 // POST /verification/email/send
-router.post("/send", emailVerificationController.handleSendVerificationEmail);
+router.post(
+  "/send",
+  validate(emailVerificationValidator.validateSendVerificationEmail),
+  emailVerificationController.sendVerificationEmail
+);
 
 // POST /verification/email/verify
-router.post("/verify", emailVerificationController.handleVerifyEmail);
+router.post(
+  "/verify",
+  validate(emailVerificationValidator.validateVerifyEmail),
+  emailVerificationController.verifyEmail
+);
 
 module.exports = router;
 
@@ -29,7 +43,7 @@ module.exports = router;
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CheckEmailUnique'
+ *             $ref: '#/components/schemas/CheckEmailUniqueRequest'
  *     responses:
  *       200:
  *         description: 사용 가능한 이메일
@@ -47,7 +61,7 @@ module.exports = router;
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/SendVerification'
+ *             $ref: '#/components/schemas/SendVerificationEmailRequest'
  *     responses:
  *       200:
  *         description: 인증 메일 발송됨
@@ -67,7 +81,7 @@ module.exports = router;
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/VerifyEmail'
+ *             $ref: '#/components/schemas/VerifyEmailRequest'
  *     responses:
  *       200:
  *         description: 이메일 인증 성공

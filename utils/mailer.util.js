@@ -1,14 +1,14 @@
 const nodemailer = require("nodemailer");
 const config = require("../config.json");
-const { GOOGLE_EMAIL, GOOGLE_EMAIL_PASSWORD } = config.MAILER;
+const mailerConfig = config.MAILER;
 
 // 이메일 전송 함수
 async function sendVerificationEmail(email, token) {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: GOOGLE_EMAIL,
-      pass: GOOGLE_EMAIL_PASSWORD,
+      user: mailerConfig.GOOGLE_EMAIL,
+      pass: mailerConfig.GOOGLE_EMAIL_PASSWORD,
     },
   });
 

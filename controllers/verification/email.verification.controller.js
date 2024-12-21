@@ -1,10 +1,10 @@
 const emailVerificationService = require("../../services/verification/email.verification.service.js");
 const { encrypt62 } = require("../../utils/encrypt.util.js");
 
-const handleCheckEmailUnique = async (req, res, next) => {
+const checkEmailUnique = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const isUnique = await emailVerificationService.isEmailUniqueService(email);
+    const isUnique = await emailVerificationService.isEmailUnique(email);
     if (isUnique) {
       return res
         .status(200)
@@ -15,7 +15,7 @@ const handleCheckEmailUnique = async (req, res, next) => {
   }
 };
 
-const handleSendVerificationEmail = async (req, res, next) => {
+const sendVerificationEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
     const code = await emailVerificationService.sendVerification(email);
@@ -27,7 +27,7 @@ const handleSendVerificationEmail = async (req, res, next) => {
   }
 };
 
-const handleVerifyEmail = async (req, res, next) => {
+const verifyEmail = async (req, res, next) => {
   try {
     const { email, code } = req.body;
     const verifiedEmail = await emailVerificationService.verifyToken(
@@ -47,7 +47,7 @@ const handleVerifyEmail = async (req, res, next) => {
 };
 
 module.exports = {
-  handleCheckEmailUnique,
-  handleSendVerificationEmail,
-  handleVerifyEmail,
+  checkEmailUnique,
+  sendVerificationEmail,
+  verifyEmail,
 };

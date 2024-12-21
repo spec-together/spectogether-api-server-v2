@@ -1,5 +1,5 @@
 const EmailVerificationSchema = {
-  CheckEmailUnique: {
+  CheckEmailUniqueRequest: {
     type: "object",
     properties: {
       email: {
@@ -11,7 +11,7 @@ const EmailVerificationSchema = {
     required: ["email"],
   },
 
-  SendVerification: {
+  SendVerificationEmailRequest: {
     type: "object",
     properties: {
       email: {
@@ -22,18 +22,7 @@ const EmailVerificationSchema = {
     },
     required: ["email"],
   },
-
-  SendVerificationResponse: {
-    type: "object",
-    properties: {
-      message: {
-        type: "string",
-        example: "인증 이메일이 발송되었습니다.",
-      },
-    },
-  },
-
-  VerifyEmail: {
+  VerifyEmailRequest: {
     type: "object",
     properties: {
       email: {
@@ -49,7 +38,15 @@ const EmailVerificationSchema = {
     required: ["email", "code"],
   },
 
-  // 응답 스키마 추가
+  SendVerificationEmailResponse: {
+    type: "object",
+    properties: {
+      message: {
+        type: "string",
+        example: "인증 이메일이 발송되었습니다.",
+      },
+    },
+  },
   VerifyEmailResponse: {
     type: "object",
     properties: {
