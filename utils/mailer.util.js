@@ -22,4 +22,6 @@ async function sendVerificationEmail(email, token) {
   console.log("Message sent: %s", info.messageId);
 }
 
-module.exports = sendVerificationEmail;
+module.exports = {
+  sendVerificationEmail,
+};

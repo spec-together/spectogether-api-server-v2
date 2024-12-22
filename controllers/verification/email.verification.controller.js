@@ -1,20 +1,6 @@
 const emailVerificationService = require("../../services/verification/email.verification.service.js");
 const { encrypt62 } = require("../../utils/encrypt.util.js");
 
-const checkEmailUnique = async (req, res, next) => {
-  try {
-    const { email } = req.body;
-    const isUnique = await emailVerificationService.isEmailUnique(email);
-    if (isUnique) {
-      return res
-        .status(200)
-        .success({ email, message: "사용 가능한 이메일입니다." });
-    }
-  } catch (error) {
-    next(error);
-  }
-};
-
 const sendVerificationEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -47,7 +33,6 @@ const verifyEmail = async (req, res, next) => {
 };
 
 module.exports = {
-  checkEmailUnique,
   sendVerificationEmail,
   verifyEmail,
 };

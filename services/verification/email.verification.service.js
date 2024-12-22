@@ -1,22 +1,10 @@
 const crypto = require("node:crypto");
-const { User, VerificationCode } = require("../../models/index.js");
+const { VerificationCode } = require("../../models/index.js");
 // const { Op } = require("sequelize");
 
 // const emailVerificationRepo = require("../../repositories/email.verification.repository.js");
-const sendVerificationEmail = require("../../utils/mailer.util.js");
-const { AlreadyExistsError, InvalidTokenError } = require("../../errors.js");
-
-const isEmailUnique = async (email) => {
-  const exUser = await User.findOne({
-    where: { email },
-    attributes: ["email", "user_id"],
-  });
-  if (exUser === null) {
-    return true;
-  } else {
-    throw new AlreadyExistsError("이미 사용 중인 이메일입니다.");
-  }
-};
+const mailer = require("../../utils/mailer.util.js");
+const { InvalidTokenError } = require("../../errors.js");
 
 const generateToken = () => {
   return crypto.randomInt(100000, 1000000).toString();
@@ -29,7 +17,7 @@ const sendVerification = async (email) => {
     identifier_value: email,
     verification_code: code,
   });
-  await sendVerificationEmail(email, code);
+  await mailer.sendVerificationEmail(email, code);
   return code;
 };
 
@@ -79,7 +67,6 @@ const verifyToken = async (email, code) => {
 };
 
 module.exports = {
-  isEmailUnique,
   sendVerification,
   verifyToken,
 };

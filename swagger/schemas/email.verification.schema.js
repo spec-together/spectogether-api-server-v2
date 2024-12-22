@@ -1,16 +1,4 @@
 const EmailVerificationSchema = {
-  CheckEmailUniqueRequest: {
-    type: "object",
-    properties: {
-      email: {
-        type: "string",
-        format: "email",
-        description: "중복 확인할 이메일",
-      },
-    },
-    required: ["email"],
-  },
-
   SendVerificationEmailRequest: {
     type: "object",
     properties: {
