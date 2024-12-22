@@ -1,7 +1,6 @@
-const Sequelize = require("sequelize");
-
-class UserArea extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+const { DataTypes, Model, Sequelize } = require("sequelize");
+class UserArea extends Model {
+  static init(sequelize) {
     return super.init(
       {
         user_area_id: {

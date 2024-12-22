@@ -1,7 +1,6 @@
-const Sequelize = require("sequelize");
-
-class UserOauth extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+const { DataTypes, Model, Sequelize } = require("sequelize");
+class UserOauth extends Model {
+  static init(sequelize) {
     return super.init(
       {
         user_oauth_id: {

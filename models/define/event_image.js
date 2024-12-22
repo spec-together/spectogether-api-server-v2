@@ -1,7 +1,7 @@
-const Sequelize = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
 
-class EventImage extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+class EventImage extends Model {
+  static init(sequelize) {
     return super.init(
       {
         event_image_id: {

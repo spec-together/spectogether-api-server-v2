@@ -1,7 +1,6 @@
-const Sequelize = require("sequelize");
-
-class VerificationCode extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+const { DataTypes, Model, Sequelize } = require("sequelize");
+class VerificationCode extends Model {
+  static init(sequelize) {
     return super.init(
       {
         verification_code_id: {

@@ -1,7 +1,7 @@
-const Sequelize = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
 
-class UserRefreshToken extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+class UserRefreshToken extends Model {
+  static init(sequelize) {
     return super.init(
       {
         user_refresh_token_id: {

@@ -1,7 +1,6 @@
-const Sequelize = require("sequelize");
-
-class UserTodo extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+const { DataTypes, Model, Sequelize } = require("sequelize");
+class UserTodo extends Model {
+  static init(sequelize) {
     return super.init(
       {
         user_todo_id: {

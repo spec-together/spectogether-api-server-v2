@@ -1,7 +1,6 @@
-const Sequelize = require("sequelize");
-
-class NoticeImage extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+const { DataTypes, Model, Sequelize } = require("sequelize");
+class NoticeImage extends Model {
+  static init(sequelize) {
     return super.init(
       {
         notice_image_id: {
