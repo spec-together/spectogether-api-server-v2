@@ -66,6 +66,8 @@ module.exports = router;
  *               $ref: '#/components/schemas/VerifyEmailResponse'
  *       400:
  *         description: 유효하지 않은 인증 코드
+ *       429:
+ *         description: 요청 횟수 초과
  *       500:
  *         description: 서버 오류
  */

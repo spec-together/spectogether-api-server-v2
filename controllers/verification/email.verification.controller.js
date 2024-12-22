@@ -20,20 +20,12 @@ const verifyEmail = async (req, res, next) => {
   try {
     const { id, code } = req.body;
     const verificationCodeId = decrypt62(id);
-    const verificationRecord = await emailVerificationService.verifyToken({
+    await emailVerificationService.verifyToken({
       id: verificationCodeId,
       code,
     });
-
-    res.status(200).success({
-      id: encrypt62(verificationRecord.verification_code_id.toString()),
-      message: "이메일 인증이 완료되었습니다.",
-    });
+    res.status(200).success({ message: "이메일 인증이 완료되었습니다." }); // res.status(200).success(null)
   } catch (error) {
-    if (error instanceof InvalidTokenError) {
-      error.statusCode =
-        error.current_attempts >= error.max_attempts ? 429 : 400;
-    }
     next(error);
   }
 };

@@ -43,10 +43,6 @@ const EmailVerificationSchema = {
   VerifyEmailResponse: {
     type: "object",
     properties: {
-      id: {
-        type: "string",
-        description: "암호화된 이메일 인증 코드 ID",
-      },
       message: {
         type: "string",
         example: "이메일 인증이 완료되었습니다.",

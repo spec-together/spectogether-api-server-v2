@@ -52,6 +52,7 @@ const verifyToken = async ({ id, code }) => {
     throw new InvalidTokenError("이메일 인증 실패. 시도 횟수 초과", {
       current_attempts: MAX_ATTEMPTS, // record.attempt 이지만
       max_attempts: MAX_ATTEMPTS,
+      statusCode: 429,
     });
   }
 
@@ -68,6 +69,7 @@ const verifyToken = async ({ id, code }) => {
         throw new InvalidTokenError("이메일 인증 실패. 시도 횟수 초과", {
           current_attempts: failedRecord.attempt,
           max_attempts: MAX_ATTEMPTS,
+          statusCode: 429,
         });
       }
 
@@ -76,6 +78,7 @@ const verifyToken = async ({ id, code }) => {
         {
           current_attempts: failedRecord.attempt,
           max_attempts: MAX_ATTEMPTS,
+          // statusCode: 400, // 기본값
         }
       );
     }

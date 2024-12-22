@@ -70,7 +70,8 @@ class KakaoUserNotRegisteredError extends CustomError {
 
 class InvalidTokenError extends CustomError {
   constructor(reason, data = null) {
-    super(reason, "INVALID_TOKEN", 400, data);
+    const statusCode = data?.statusCode || 400;
+    super(reason, "INVALID_TOKEN", statusCode, data);
   }
 }
 
