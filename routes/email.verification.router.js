@@ -39,7 +39,7 @@ module.exports = router;
  *             $ref: '#/components/schemas/SendVerificationEmailRequest'
  *     responses:
  *       200:
- *         description: 인증 메일 발송됨
+ *         description: 인증 메일 발송됨, 인증 코드 ID 반환
  *         content:
  *           application/json:
  *             schema:

@@ -1,13 +1,16 @@
+const { InvalidTokenError } = require("../../errors.js");
 const emailVerificationService = require("../../services/verification/email.verification.service.js");
-const { encrypt62 } = require("../../utils/encrypt.util.js");
+const { encrypt62, decrypt62 } = require("../../utils/encrypt.util.js");
 
 const sendVerificationEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const code = await emailVerificationService.sendVerification(email);
-    res
-      .status(200)
-      .success({ email, message: "인증 이메일이 발송되었습니다." });
+    const { id: verificationCodeId } =
+      await emailVerificationService.sendVerification({ email });
+    res.status(200).success({
+      id: encrypt62(verificationCodeId.toString()),
+      message: "인증 메일이 발송되었습니다.",
+    });
   } catch (error) {
     next(error);
   }
@@ -15,19 +18,22 @@ const sendVerificationEmail = async (req, res, next) => {
 
 const verifyEmail = async (req, res, next) => {
   try {
-    const { email, code } = req.body;
-    const verifiedEmail = await emailVerificationService.verifyToken(
-      email,
-      code
-    );
+    const { id, code } = req.body;
+    const verificationCodeId = decrypt62(id);
+    const verificationRecord = await emailVerificationService.verifyToken({
+      id: verificationCodeId,
+      code,
+    });
 
     res.status(200).success({
-      email_verification_code_id: encrypt62(
-        verifiedEmail.email_verification_code_id
-      ),
+      id: encrypt62(verificationRecord.verification_code_id.toString()),
       message: "이메일 인증이 완료되었습니다.",
     });
   } catch (error) {
+    if (error instanceof InvalidTokenError) {
+      error.statusCode =
+        error.current_attempts >= error.max_attempts ? 429 : 400;
+    }
     next(error);
   }
 };

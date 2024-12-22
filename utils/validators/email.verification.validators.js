@@ -16,10 +16,10 @@ const sendVerificationEmailSchema = {
 const verifyEmailSchema = {
   type: "object",
   properties: {
-    email: { type: "string", format: "email" },
+    id: { type: "string" },
     code: { type: "string" },
   },
-  required: ["email", "code"],
+  required: ["id", "code"],
   additionalProperties: false,
 };
 

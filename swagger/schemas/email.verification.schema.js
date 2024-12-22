@@ -10,35 +10,40 @@ const EmailVerificationSchema = {
     },
     required: ["email"],
   },
+
+  SendVerificationEmailResponse: {
+    type: "object",
+    properties: {
+      id: {
+        type: "string",
+        description: "암호화된 이메일 인증 코드 ID",
+      },
+      message: {
+        type: "string",
+        example: "인증 메일이 발송되었습니다.",
+      },
+    },
+  },
+
   VerifyEmailRequest: {
     type: "object",
     properties: {
-      email: {
+      id: {
         type: "string",
-        format: "email",
-        description: "인증할 이메일",
+        description: "암호화된 이메일 인증 코드 ID",
       },
       code: {
         type: "string",
         description: "이메일로 받은 인증 코드",
       },
     },
-    required: ["email", "code"],
+    required: ["id", "code"],
   },
 
-  SendVerificationEmailResponse: {
-    type: "object",
-    properties: {
-      message: {
-        type: "string",
-        example: "인증 이메일이 발송되었습니다.",
-      },
-    },
-  },
   VerifyEmailResponse: {
     type: "object",
     properties: {
-      email_verification_id: {
+      id: {
         type: "string",
         description: "암호화된 이메일 인증 코드 ID",
       },
