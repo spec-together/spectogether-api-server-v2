@@ -31,6 +31,10 @@ class Spec extends Sequelize.Model {
           type: DataTypes.DATEONLY,
           allowNull: false,
         },
+        status: {
+          type: DataTypes.ENUM("public", "private"),
+          allowNull: false,
+        },
         content: {
           type: DataTypes.STRING(10000),
           allowNull: false,

@@ -7,7 +7,6 @@ class User extends Sequelize.Model {
         user_id: {
           autoIncrement: true,
           type: DataTypes.BIGINT,
-          allowNull: false,
           primaryKey: true,
         },
         name: {
@@ -18,6 +17,11 @@ class User extends Sequelize.Model {
           type: DataTypes.STRING(255),
           allowNull: false,
         },
+        nickname_changes: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          defaultValue: 0,
+        },
         birthdate: {
           type: DataTypes.DATEONLY,
           allowNull: false,
@@ -25,15 +29,40 @@ class User extends Sequelize.Model {
         phone_number: {
           type: DataTypes.STRING(50),
           allowNull: false,
-          unique: "user_pk",
+          unique: true,
         },
         email: {
           type: DataTypes.STRING(255),
           allowNull: false,
         },
+        is_email_verified: {
+          type: DataTypes.BOOLEAN,
+          allowNull: false,
+          defaultValue: false,
+        },
+        is_email_public: {
+          type: DataTypes.BOOLEAN,
+          allowNull: true,
+          defaultValue: false,
+        },
         profile_image: {
           type: DataTypes.STRING(255),
           allowNull: false,
+        },
+        description: {
+          type: DataTypes.STRING(512),
+          allowNull: false,
+          defaultValue: "",
+        },
+        website: {
+          type: DataTypes.STRING(1024),
+          allowNull: false,
+          defaultValue: "",
+        },
+        is_premium_user: {
+          type: DataTypes.BOOLEAN,
+          allowNull: false,
+          defaultValue: false,
         },
         spec_level: {
           type: DataTypes.INTEGER,
@@ -48,12 +77,13 @@ class User extends Sequelize.Model {
         created_at: {
           type: DataTypes.DATE(6),
           allowNull: false,
-          defaultValue: "CURRENT_TIMESTAMP(6)",
+          defaultValue: "CURRENT_TIMESTAMP(6)", // Sequelize.literal("CURRENT_TIMESTAMP(6)")
         },
         updated_at: {
           type: DataTypes.DATE(6),
           allowNull: false,
           defaultValue: "CURRENT_TIMESTAMP(6)",
+          onUpdate: "CURRENT_TIMESTAMP(6)", // Sequelize.literal("CURRENT_TIMESTAMP(6)"),
         },
       },
       {
@@ -138,6 +168,18 @@ class User extends Sequelize.Model {
     });
     this.hasMany(models.UserTodo, {
       as: "user_todos",
+      foreignKey: "user_id",
+    });
+    this.hasMany(models.UserPayments, {
+      as: "user_payments",
+      foreignKey: "user_id",
+    });
+    this.hasMany(models.UserPremium, {
+      as: "user_premium",
+      foreignKey: "user_id",
+    });
+    this.hasMany(models.UserSchool, {
+      as: "user_schools",
       foreignKey: "user_id",
     });
   }

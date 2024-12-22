@@ -1,13 +1,12 @@
 const Sequelize = require("sequelize");
 
-class UserArea extends Sequelize.Model {
+class UserPayments extends Sequelize.Model {
   static init(sequelize, DataTypes) {
     return super.init(
       {
-        user_area_id: {
-          autoIncrement: true,
+        user_payments_id: {
           type: DataTypes.BIGINT,
-          allowNull: false,
+          autoIncrement: true,
           primaryKey: true,
         },
         user_id: {
@@ -18,23 +17,13 @@ class UserArea extends Sequelize.Model {
             key: "user_id",
           },
         },
-        area_id: {
-          type: DataTypes.BIGINT,
-          allowNull: false,
-          references: {
-            model: "area",
-            key: "area_id",
-          },
-        },
-        sequence: {
+        payment_amount: {
           type: DataTypes.INTEGER,
           allowNull: false,
-          defaultValue: 1,
         },
         created_at: {
           type: DataTypes.DATE(6),
           allowNull: false,
-          // defaultValue: "CURRENT_TIMESTAMP(6)",
           defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
         },
         updated_at: {
@@ -46,16 +35,13 @@ class UserArea extends Sequelize.Model {
       },
       {
         sequelize,
-        tableName: "user_area",
+        tableName: "user_payments",
         timestamps: false,
       }
     );
   }
+
   static associate(models) {
-    this.belongsTo(models.Area, {
-      as: "area",
-      foreignKey: "area_id",
-    });
     this.belongsTo(models.User, {
       as: "user",
       foreignKey: "user_id",
@@ -63,4 +49,4 @@ class UserArea extends Sequelize.Model {
   }
 }
 
-module.exports = UserArea;
+module.exports = UserPayments;

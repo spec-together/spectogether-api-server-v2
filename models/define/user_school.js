@@ -1,13 +1,12 @@
-const Sequelize = require("sequelize");
+const { Model, DataTypes, Sequelize } = require("sequelize");
 
-class UserArea extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+class UserSchool extends Model {
+  static init(sequelize) {
     return super.init(
       {
-        user_area_id: {
-          autoIncrement: true,
+        user_school_id: {
           type: DataTypes.BIGINT,
-          allowNull: false,
+          autoIncrement: true,
           primaryKey: true,
         },
         user_id: {
@@ -18,23 +17,31 @@ class UserArea extends Sequelize.Model {
             key: "user_id",
           },
         },
-        area_id: {
+        school_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
           references: {
-            model: "area",
-            key: "area_id",
+            model: "school",
+            key: "school_id",
           },
         },
-        sequence: {
-          type: DataTypes.INTEGER,
+        email: {
+          type: DataTypes.STRING(512),
           allowNull: false,
-          defaultValue: 1,
+        },
+        is_verified: {
+          type: DataTypes.BOOLEAN,
+          allowNull: false,
+          defaultValue: false,
+        },
+        is_public: {
+          type: DataTypes.BOOLEAN,
+          allowNull: false,
+          defaultValue: false,
         },
         created_at: {
           type: DataTypes.DATE(6),
           allowNull: false,
-          // defaultValue: "CURRENT_TIMESTAMP(6)",
           defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
         },
         updated_at: {
@@ -46,21 +53,22 @@ class UserArea extends Sequelize.Model {
       },
       {
         sequelize,
-        tableName: "user_area",
+        tableName: "user_school",
         timestamps: false,
       }
     );
   }
+
   static associate(models) {
-    this.belongsTo(models.Area, {
-      as: "area",
-      foreignKey: "area_id",
-    });
     this.belongsTo(models.User, {
       as: "user",
       foreignKey: "user_id",
     });
+    this.belongsTo(models.School, {
+      as: "school",
+      foreignKey: "school_id",
+    });
   }
 }
 
-module.exports = UserArea;
+module.exports = UserSchool;
