@@ -30,17 +30,17 @@ class VerificationCode extends Sequelize.Model {
         created_at: {
           type: DataTypes.DATE(6),
           allowNull: false,
-          defaultValue: "CURRENT_TIMESTAMP(6)",
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
         },
         updated_at: {
           type: DataTypes.DATE(6),
           allowNull: false,
-          defaultValue: "CURRENT_TIMESTAMP(6)",
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
         },
       },
       {
         sequelize,
-        tableName: "verfication_code",
+        tableName: "verification_code",
         timestamps: false,
       }
     );
