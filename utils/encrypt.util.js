@@ -122,9 +122,14 @@ const comparePassword = async (password, hashedPassword) => {
   }
 };
 
+const generate6DigitToken = () => {
+  return crypto.randomInt(100000, 1000000).toString();
+};
+
 module.exports = {
   encrypt62,
   decrypt62,
   generateHashedPassword,
   comparePassword,
+  generate6DigitToken,
 };
