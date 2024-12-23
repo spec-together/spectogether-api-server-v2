@@ -8,6 +8,16 @@ class SampleError extends Error {
     this.data = data;
   }
 }
+class AWSError extends Error {
+  errorCode = "AWS_ERROR"; // 한두단어로 에러표시
+  statusCode = 503; // 해당 에러 발생 시 전달할 응답코드
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
 
 class RelatedServiceUnavailableError extends Error {
   errorCode = "RELATED_SERVICE_UNAVAILABLE"; // 한두단어로 에러표시
@@ -117,4 +127,5 @@ module.exports = {
   KakaoUserNotRegisteredError,
   RelatedServiceUnavailableError,
   InvalidTokenError,
+  AWSError,
 };
