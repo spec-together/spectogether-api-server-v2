@@ -31,6 +31,18 @@ class CustomError extends Error {
   }
 }
 
+class MaxAttemptsExceededError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "MAX_ATTEMPTS_EXCEEDED", 429, data);
+  }
+}
+
+class TimeOutError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "TIME_OUT", 408, data);
+  }
+}
+
 class RelatedServiceUnavailableError extends CustomError {
   constructor(reason, data = null) {
     super(reason, "RELATED_SERVICE_UNAVAILABLE", 503, data);
@@ -116,4 +128,6 @@ module.exports = {
   AWSError,
   EmailSendingError,
   UnknownError,
+  MaxAttemptsExceededError,
+  TimeOutError,
 };

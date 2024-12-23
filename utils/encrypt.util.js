@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const baseX = require("base-x").default;
 const { SALT_ROUNDS, CIPHER_SECRET_KEY } = require("../config.json").SERVER;
 const logger = require("../logger"); // Ensure correct path
-const { NotAllowedError } = require("../errors");
+const { NotAllowedError, InvalidInputError } = require("../errors");
 
 // Base62 문자 집합 정의
 const BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -85,7 +85,7 @@ const decrypt62 = (encryptedText) => {
     return decrypted.toString("utf8");
   } catch (err) {
     logger.error(`복호화 오류: ${err.message}`, { stack: err.stack });
-    throw err;
+    throw new InvalidInputError("올바르지 않은 입력값입니다.");
   }
 };
 
