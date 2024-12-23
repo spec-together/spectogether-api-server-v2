@@ -1,7 +1,7 @@
-const Sequelize = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
 
-class UserRefreshToken extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+class UserRefreshToken extends Model {
+  static init(sequelize) {
     return super.init(
       {
         user_refresh_token_id: {
@@ -22,17 +22,29 @@ class UserRefreshToken extends Sequelize.Model {
           type: DataTypes.TEXT,
           allowNull: false,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "user_refresh_token",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.UserRefreshToken.belongsTo(models.User, {foreignKey: "user_id",sourceKey: "user_id"});
+    this.belongsTo(models.User, {
+      as: "user",
+      foreignKey: "user_id",
+    });
   }
 }
 

@@ -1,7 +1,6 @@
-const Sequelize = require("sequelize");
-
-class SpecPhoto extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+const { DataTypes, Model, Sequelize } = require("sequelize");
+class SpecPhoto extends Model {
+  static init(sequelize) {
     return super.init(
       {
         spec_photo_id: {
@@ -36,9 +35,11 @@ class SpecPhoto extends Sequelize.Model {
       }
     );
   }
-
   static associate(models) {
-    // models.SpecPhoto.belongsTo(models.Spec, {foreignKey: "spec_id",sourceKey: "spec_id"});
+    this.belongsTo(models.Spec, {
+      as: "spec",
+      foreignKey: "spec_id",
+    });
   }
 }
 

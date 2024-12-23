@@ -1,7 +1,7 @@
-const Sequelize = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
 
-class StudyroomTodo extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+class StudyroomTodo extends Model {
+  static init(sequelize) {
     return super.init(
       {
         studyroom_todo_id: {
@@ -26,18 +26,33 @@ class StudyroomTodo extends Sequelize.Model {
             key: "todo_id",
           },
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "studyroom_todo",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.StudyroomTodo.belongsTo(models.Studyroom, { foreignKey: "studyroom_id", sourceKey: "studyroom_id" });
-    // models.StudyroomTodo.belongsTo(models.Todo, { foreignKey: "todo_id", sourceKey: "todo_id" });
+    this.belongsTo(models.Studyroom, {
+      as: "studyroom",
+      foreignKey: "studyroom_id",
+    });
+    this.belongsTo(models.Todo, {
+      as: "todo",
+      foreignKey: "todo_id",
+    });
   }
 }
 

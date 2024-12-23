@@ -1,7 +1,6 @@
-const Sequelize = require("sequelize");
-
-class Studyroom extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+const { DataTypes, Model, Sequelize } = require("sequelize");
+class Studyroom extends Model {
+  static init(sequelize) {
     return super.init(
       {
         studyroom_id: {
@@ -42,20 +41,46 @@ class Studyroom extends Sequelize.Model {
           type: DataTypes.STRING(50),
           allowNull: false,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "studyroom",
         hasTrigger: true,
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.Studyroom.belongsTo(models.Area, { foreignKey: 'area_id', sourceKey: 'area_id' });
-    // models.Studyroom.hasMany(models.StudyroomUser, { foreignKey: 'studyroom_id', sourceKey: 'studyroom_id' });
-    // models.Studyroom.hasMany(models.StudyroomSchedule, { foreignKey: 'studyroom_id', sourceKey: 'studyroom_id' });
+    this.belongsTo(models.Area, {
+      as: "area",
+      foreignKey: "area_id",
+    });
+    this.hasMany(models.StudyroomChat, {
+      as: "studyroom_chats",
+      foreignKey: "studyroom_id",
+    });
+    this.hasMany(models.StudyroomMember, {
+      as: "studyroom_members",
+      foreignKey: "studyroom_id",
+    });
+    this.hasMany(models.StudyroomTodo, {
+      as: "studyroom_todos",
+      foreignKey: "studyroom_id",
+    });
+    this.hasMany(models.UserStudyroom, {
+      as: "user_studyrooms",
+      foreignKey: "studyroom_id",
+    });
   }
 }
 
