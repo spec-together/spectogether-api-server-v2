@@ -1,6 +1,5 @@
-const { InvalidTokenError } = require("../../errors.js");
 const emailVerificationService = require("../../services/verification/email.verification.service.js");
-const { encrypt62, decrypt62 } = require("../../utils/encrypt.util.js");
+const encryptUtil = require("../../utils/encrypt.util.js");
 
 const sendVerificationEmail = async (req, res, next) => {
   try {
@@ -8,7 +7,7 @@ const sendVerificationEmail = async (req, res, next) => {
     const { id: verificationCodeId } =
       await emailVerificationService.sendVerification({ email });
     res.status(200).success({
-      id: encrypt62(verificationCodeId.toString()),
+      id: encryptUtil.encrypt62(verificationCodeId.toString()),
       message: "인증 메일이 발송되었습니다.",
     });
   } catch (error) {
@@ -19,7 +18,7 @@ const sendVerificationEmail = async (req, res, next) => {
 const verifyEmail = async (req, res, next) => {
   try {
     const { id, code } = req.body;
-    const verificationCodeId = decrypt62(id);
+    const verificationCodeId = encryptUtil.decrypt62(id);
     await emailVerificationService.verifyToken({
       id: verificationCodeId,
       code,

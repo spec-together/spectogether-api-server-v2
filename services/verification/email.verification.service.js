@@ -1,22 +1,14 @@
 const crypto = require("node:crypto");
-const { Sequelize, VerificationCode } = require("../../models/index.js");
-// const { Op } = require("sequelize");
+const db = require("../../models");
 const mailer = require("../../utils/mailer.util.js");
-const {
-  DatabaseError,
-  InvalidTokenError,
-  EmailSendingError,
-  UnknownError,
-} = require("../../errors.js");
+const customErrors = require("../../errors.js");
 
-const generateToken = () => {
-  return crypto.randomInt(100000, 1000000).toString();
-};
+const generateToken = () => crypto.randomInt(100000, 1000000).toString();
 
 const sendVerification = async ({ email }) => {
   try {
     const code = generateToken();
-    const verificationRecord = await VerificationCode.create({
+    const verificationRecord = await db.VerificationCode.create({
       identifier_type: "email",
       identifier_value: email,
       verification_code: code,
@@ -24,8 +16,8 @@ const sendVerification = async ({ email }) => {
     await mailer.sendVerificationEmail(email, code);
     return { id: verificationRecord.verification_code_id };
   } catch (error) {
-    if (error instanceof Sequelize.DatabaseError) {
-      throw new DatabaseError(
+    if (error instanceof db.Sequelize.DatabaseError) {
+      throw new customErrors.DatabaseError(
         "이메일 인증 실패. 데이터베이스 오류입니다.",
         error
       );
@@ -33,14 +25,16 @@ const sendVerification = async ({ email }) => {
     if (error instanceof EmailSendingError) {
       throw error;
     }
-    throw new UnknownError("이메일 인증 실패. 알 수 없는 오류가 발생했습니다.");
+    throw new customErrors.UnknownError(
+      "이메일 인증 실패. 알 수 없는 오류가 발생했습니다."
+    );
   }
 };
 
 const MAX_ATTEMPTS = 5; // 최대 시도 횟수
 
 const verifyToken = async ({ id, code }) => {
-  const record = await VerificationCode.findOne({
+  const record = await db.VerificationCode.findOne({
     where: {
       verification_code_id: id,
       identifier_type: "email",
@@ -49,15 +43,18 @@ const verifyToken = async ({ id, code }) => {
   });
 
   if (record && record.attempt >= MAX_ATTEMPTS) {
-    throw new InvalidTokenError("이메일 인증 실패. 시도 횟수 초과", {
-      current_attempts: MAX_ATTEMPTS, // record.attempt 이지만
-      max_attempts: MAX_ATTEMPTS,
-      statusCode: 429,
-    });
+    throw new customErrors.InvalidTokenError(
+      "이메일 인증 실패. 시도 횟수 초과",
+      {
+        current_attempts: MAX_ATTEMPTS, // record.attempt 이지만
+        max_attempts: MAX_ATTEMPTS,
+        statusCode: 429,
+      }
+    );
   }
 
   if (!record) {
-    const failedRecord = await VerificationCode.findOne({
+    const failedRecord = await db.VerificationCode.findOne({
       where: { verification_code_id: id },
     });
 
@@ -66,14 +63,17 @@ const verifyToken = async ({ id, code }) => {
       await failedRecord.save();
 
       if (failedRecord.attempt >= MAX_ATTEMPTS) {
-        throw new InvalidTokenError("이메일 인증 실패. 시도 횟수 초과", {
-          current_attempts: failedRecord.attempt,
-          max_attempts: MAX_ATTEMPTS,
-          statusCode: 429,
-        });
+        throw new customErrors.InvalidTokenError(
+          "이메일 인증 실패. 시도 횟수 초과",
+          {
+            current_attempts: failedRecord.attempt,
+            max_attempts: MAX_ATTEMPTS,
+            statusCode: 429,
+          }
+        );
       }
 
-      throw new InvalidTokenError(
+      throw new customErrors.InvalidTokenError(
         "이메일 인증 실패. 토큰이 유효하지 않습니다.",
         {
           current_attempts: failedRecord.attempt,
@@ -83,10 +83,12 @@ const verifyToken = async ({ id, code }) => {
       );
     }
 
-    throw new InvalidTokenError("이메일 인증 실패. 토큰이 유효하지 않습니다.");
+    throw new customErrors.InvalidTokenError(
+      "이메일 인증 실패. 토큰이 유효하지 않습니다."
+    );
   }
 
-  await VerificationCode.destroy({ where: { verification_code_id: id } });
+  await db.VerificationCode.destroy({ where: { verification_code_id: id } });
   return record;
 
   // TODO: 만료 시간 검증 추가
