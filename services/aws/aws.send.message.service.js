@@ -1,5 +1,6 @@
 const { SNSClient, PublishCommand } = require("@aws-sdk/client-sns");
 const logger = require("../../logger");
+const { AWSError } = require("../../errors");
 const { ACCESS_KEY_ID, SECRET_ACCESS_KEY } =
   require("../../config.json").AWS.ST_MESSAGE_SENDER;
 
@@ -26,7 +27,7 @@ const sendSMS = async (phoneNumber, message) => {
     return data;
   } catch (error) {
     logger.error(`[AWS.send.message] 메시지 전송 실패: ${error}`);
-    throw error;
+    throw new AWSError("AWS Error", error);
   }
 };
 
