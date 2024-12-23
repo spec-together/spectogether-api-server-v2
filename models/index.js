@@ -43,7 +43,7 @@ modelFiles
   })
   .forEach((file) => {
     const model = require(path.join(modelsDir, file)); // Function
-    model.init(sequelize, Sequelize.DataTypes);
+    model.init(sequelize);
     db[model.name] = model;
   });
 

@@ -20,7 +20,10 @@ const {
 
 const { PORT } = require("./config.json").SERVER;
 
-const { AccessTokenStrategy, KakaoOAuthStrategy } = require("./utils/passport.util");
+const {
+  AccessTokenStrategy,
+  KakaoOAuthStrategy,
+} = require("./utils/passport.util");
 const {
   errorHandler,
   responseHandler,
@@ -49,7 +52,7 @@ app.use(responseHandler);
 
 app.use(cookieParser());
 app.use(cors(corsOptions));
-app.use(morgan("combined"));
+app.use(morgan("dev"));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

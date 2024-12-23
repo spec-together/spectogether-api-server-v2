@@ -1,23 +1,14 @@
 const { DataTypes, Model, Sequelize } = require("sequelize");
-class StudyroomChat extends Model {
+class UserPremium extends Model {
   static init(sequelize) {
     return super.init(
       {
-        studyroom_chat_id: {
-          autoIncrement: true,
+        user_premium_id: {
           type: DataTypes.BIGINT,
-          allowNull: false,
+          autoIncrement: true,
           primaryKey: true,
         },
-        studyroom_id: {
-          type: DataTypes.BIGINT,
-          allowNull: false,
-          references: {
-            model: "studyroom",
-            key: "studyroom_id",
-          },
-        },
-        sender_id: {
+        user_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
           references: {
@@ -25,38 +16,36 @@ class StudyroomChat extends Model {
             key: "user_id",
           },
         },
-        content: {
-          type: DataTypes.STRING(2048),
+        type: {
+          type: DataTypes.ENUM("year", "month"),
           allowNull: false,
         },
         created_at: {
           type: DataTypes.DATE(6),
           allowNull: false,
-          defaultValue: "CURRENT_TIMESTAMP(6)",
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
         },
         updated_at: {
           type: DataTypes.DATE(6),
           allowNull: false,
-          defaultValue: "CURRENT_TIMESTAMP(6)",
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+          onUpdate: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
         },
       },
       {
         sequelize,
-        tableName: "studyroom_chat",
+        tableName: "user_premium",
         timestamps: false,
       }
     );
   }
+
   static associate(models) {
-    this.belongsTo(models.Studyroom, {
-      as: "studyroom",
-      foreignKey: "studyroom_id",
-    });
     this.belongsTo(models.User, {
-      as: "sender",
-      foreignKey: "sender_id",
+      as: "user",
+      foreignKey: "user_id",
     });
   }
 }
 
-module.exports = StudyroomChat;
+module.exports = UserPremium;

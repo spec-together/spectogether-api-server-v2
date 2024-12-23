@@ -19,101 +19,87 @@ class AWSError extends Error {
   }
 }
 
-class RelatedServiceUnavailableError extends Error {
-  errorCode = "RELATED_SERVICE_UNAVAILABLE"; // 한두단어로 에러표시
-  statusCode = 503; // 해당 에러 발생 시 전달할 응답코드
-
-  constructor(reason, data) {
-    super(reason);
-    this.reason = reason;
-    this.data = data;
+class CustomError extends Error {
+  constructor(reason, errorCode, statusCode, data = null) {
+    super(reason); // error.message = reason
+    this.reason = reason; // error.reason = reason
+    this.name = this.constructor.name;
+    this.errorCode = errorCode; // 한두단어로 에러표시. "SAMPLE_ERROR"
+    this.statusCode = statusCode; // 해당 에러 발생 시 전달할 응답코드. 500
+    this.data = data; // 추가 에러 데이터.
+    Error.captureStackTrace(this, this.constructor);
   }
 }
 
-class DatabaseError extends Error {
-  errorCode = "DB_ERROR"; // 한두단어로 에러표시
-  statusCode = 500; // 해당 에러 발생 시 전달할 응답코드
-
-  constructor(reason, data) {
-    super(reason);
-    this.reason = reason;
-    this.data = data;
+class RelatedServiceUnavailableError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "RELATED_SERVICE_UNAVAILABLE", 503, data);
   }
 }
 
-class InvalidInputError extends Error {
-  errorCode = "INVALID_INPUT"; // 한두단어로 에러표시
-  statusCode = 400; // 해당 에러 발생 시 전달할 응답코드
-
-  constructor(reason, data) {
-    super(reason);
-    this.reason = reason;
-    this.data = data;
-  }
-}
-class AlreadyExistsError extends Error {
-  errorCode = "ALREADY_EXISTS"; // 한두단어로 에러표시
-  statusCode = 409; // 해당 에러 발생 시 전달할 응답코드
-
-  constructor(reason, data) {
-    super(reason);
-    this.reason = reason;
-    this.data = data;
-  }
-}
-class NotExistsError extends Error {
-  errorCode = "NOT_EXISTS"; // 한두단어로 에러표시
-  statusCode = 404; // 해당 에러 발생 시 전달할 응답코드
-
-  constructor(reason, data) {
-    super(reason);
-    this.reason = reason;
-    this.data = data;
-  }
-}
-class NotAllowedError extends Error {
-  errorCode = "NOT_ALLOWED"; // 한두단어로 에러표시
-  statusCode = 403; // 해당 에러 발생 시 전달할 응답코드
-
-  constructor(reason, data) {
-    super(reason);
-    this.reason = reason;
-    this.data = data;
-  }
-}
-class UnauthorizedError extends Error {
-  errorCode = "UNAUTHORIZED"; // 한두단어로 에러표시
-  statusCode = 401; // 해당 에러 발생 시 전달할 응답코드
-
-  constructor(reason, data) {
-    super(reason);
-    this.reason = reason;
-    this.data = data;
+class DatabaseError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "DB_ERROR", 500, data);
   }
 }
 
-class KakaoUserNotRegisteredError extends Error {
-  errorCode = "USER_NOT_REGISTERED"; // 한두단어로 에러표시
-  statusCode = 418; // 해당 에러 발생 시 전달할 응답코드
-
-  constructor(reason, data) {
-    super(reason);
-    this.reason = reason;
-    this.data = data;
+class InvalidInputError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "INVALID_INPUT", 400, data);
   }
 }
 
-class InvalidTokenError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = "InvalidTokenError";
-    this.status = 400;
+class AlreadyExistsError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "ALREADY_EXISTS", 409, data);
+  }
+}
+
+class NotExistsError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "NOT_EXISTS", 404, data);
+  }
+}
+
+class NotAllowedError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "NOT_ALLOWED", 403, data);
+  }
+}
+class UnauthorizedError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "UNAUTHORIZED", 401, data);
+  }
+}
+
+class KakaoUserNotRegisteredError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "USER_NOT_REGISTERED", 418, data);
+  }
+}
+
+class InvalidTokenError extends CustomError {
+  constructor(reason, data = null) {
+    const statusCode = data?.statusCode || 400;
+    super(reason, "INVALID_TOKEN", statusCode, data);
+  }
+}
+
+class EmailSendingError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "SENDING_EMAIL_ERROR", 500, data);
+  }
+}
+
+class UnknownError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "UNKNOWN_ERROR", 500, data);
   }
 }
 
 /*
 사용할 땐 아래와 같이 사용하면 됩니다.
-throw new SampleError("그냥 냈음", { data: "sample data" });
+throw new SampleError("그냥 냈음", { data1: "sample data 1", data2: "sample data 2" });
 */
 
 module.exports = {
@@ -128,4 +114,6 @@ module.exports = {
   RelatedServiceUnavailableError,
   InvalidTokenError,
   AWSError,
+  EmailSendingError,
+  UnknownError,
 };

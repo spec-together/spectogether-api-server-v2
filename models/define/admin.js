@@ -1,7 +1,7 @@
-const Sequelize = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
 
-class Admin extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+class Admin extends Model {
+  static init(sequelize) {
     return super.init(
       {
         admin_id: {
@@ -22,17 +22,30 @@ class Admin extends Sequelize.Model {
           type: DataTypes.ENUM("full", "notice", "studyroom", "inquiry"),
           allowNull: false,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "admin",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
 
   static associate(models) {
-    // models.Admin.belongsTo(models.User, { foreignKey: "user_id", targetKey: "user_id" });
+    this.belongsTo(models.User, {
+      as: "user",
+      foreignKey: "user_id",
+    });
   }
 }
 

@@ -1,7 +1,7 @@
-const Sequelize = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
 
-class Term extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+class Term extends Model {
+  static init(sequelize) {
     return super.init(
       {
         term_id: {
@@ -30,17 +30,30 @@ class Term extends Sequelize.Model {
           type: DataTypes.BOOLEAN,
           allowNull: false,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "term",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
 
   static associate(models) {
-    // models.Term.hasMany(models.User, {foreignKey: "term_id",sourceKey: "term_id"});
+    this.hasMany(models.UserTerm, {
+      as: "user_terms",
+      foreignKey: "term_id",
+    });
   }
 }
 

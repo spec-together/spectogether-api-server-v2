@@ -1,7 +1,6 @@
-const Sequelize = require("sequelize");
-
-class UserSpec extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+const { DataTypes, Model, Sequelize } = require("sequelize");
+class UserSpec extends Model {
+  static init(sequelize) {
     return super.init(
       {
         user_spec_id: {
@@ -26,18 +25,34 @@ class UserSpec extends Sequelize.Model {
             key: "spec_id",
           },
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: "CURRENT_TIMESTAMP(6)",
+        },
       },
       {
         sequelize,
         tableName: "user_spec",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
 
   static associate(models) {
-    // models.UserSpec.belongsTo(models.User, {foreignKey: "user_id",sourceKey: "user_id"});
-    // models.UserSpec.belongsTo(models.Spec, {foreignKey: "spec_id",sourceKey: "spec_id"});
+    this.belongsTo(models.Spec, {
+      as: "spec",
+      foreignKey: "spec_id",
+    });
+    this.belongsTo(models.User, {
+      as: "user",
+      foreignKey: "user_id",
+    });
   }
 }
 
