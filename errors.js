@@ -8,6 +8,16 @@ class SampleError extends Error {
     this.data = data;
   }
 }
+class AWSError extends Error {
+  errorCode = "AWS_ERROR"; // 한두단어로 에러표시
+  statusCode = 503; // 해당 에러 발생 시 전달할 응답코드
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
 
 class CustomError extends Error {
   constructor(reason, errorCode, statusCode, data = null) {
@@ -18,6 +28,18 @@ class CustomError extends Error {
     this.statusCode = statusCode; // 해당 에러 발생 시 전달할 응답코드. 500
     this.data = data; // 추가 에러 데이터.
     Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+class MaxAttemptsExceededError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "MAX_ATTEMPTS_EXCEEDED", 429, data);
+  }
+}
+
+class TimeOutError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "TIME_OUT", 408, data);
   }
 }
 
@@ -103,6 +125,9 @@ module.exports = {
   KakaoUserNotRegisteredError,
   RelatedServiceUnavailableError,
   InvalidTokenError,
+  AWSError,
   EmailSendingError,
   UnknownError,
+  MaxAttemptsExceededError,
+  TimeOutError,
 };

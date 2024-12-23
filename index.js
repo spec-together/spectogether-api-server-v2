@@ -35,16 +35,19 @@ const { swaggerUi, specs } = require("./swagger/swagger");
 // ex) const exampleRouter = require("./routers/example.router");
 const authRouter = require("./routes/auth.router");
 const usersRouter = require("./routes/users.router");
+const inquiryRouter = require("./routes/inquiry.router");
+const contestRouter = require("./routes/contest.router");
+const phoneVerificationRouter = require("./routes/phone.verification.router");
+const emailVerificationRouter = require("./routes/email.verification.router");
+const studyroomRouter = require("./routes/studyroom.router");
+
+// TODO : 일단 구현 중에는 분리해서 구현하고 있으며, 구현 끝나고 스터디 룸 등으로 이동할지 결정하자.
+const todoRouter = require("./routes/todo.router");
 
 // Socket.io Router는 이 주석 아래에 import 해주시면 됩니다.
 // ex) const exampleSocketRouter = require("./routes/example.socket.router");
 const studyroomChatSocketRouter = require("./routes/socket/studyroom.chat.socket.router");
 const videoSocketRouter = require("./routes/socket/video.socket.router");
-const inquiryRouter = require("./routes/inquiry.router");
-const contestRouter = require("./routes/contest.router");
-const emailVerificationRouter = require("./routes/email.verification.router");
-const todoRouter = require("./routes/todo.router"); // TODO : 일단 구현 중에는 분리해서 구현하고 있으며, 구현 끝나고 스터디 룸 등으로 이동할지 결정하자.
-
 // ** 중요 ** 미들웨어 순서를 변경할 때는 신경써서 작업해 주세요.
 const app = express();
 
@@ -75,8 +78,9 @@ app.use("/users", usersRouter);
 app.use("/inquiries", inquiryRouter);
 app.use("/contests", contestRouter);
 app.use("/verification/email", emailVerificationRouter);
+app.use("/verification/phone", phoneVerificationRouter);
 app.use("/todos", todoRouter);
-app.use("/studyrooms", require("./routes/studyroom.router"));
+app.use("/studyrooms", studyroomRouter);
 
 // 에러 핸들러는 최하단에 위치해야 하는 미들웨어입니다. 절대 순서를 변경하지 마세요.
 app.use(errorHandler);
