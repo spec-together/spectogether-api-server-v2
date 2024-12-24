@@ -4,13 +4,11 @@ const router = express.Router();
 const authController = require("../controllers/auth/auth.controller");
 const registerController = require("../controllers/auth/register.auth.controller");
 const loginController = require("../controllers/auth/login.auth.controller");
+const kakaoController = require("../controllers/auth/kakao.auth.controller");
 
 const authValidator = require("../utils/validators/auth.validators");
 
 const passport = require("passport");
-
-// TODO : 나중에 지워라 컨벤션 심각하게 위반하는거 ..
-const { AlreadyExistsError } = require("../errors");
 const validate = require("../middleware/validate");
 
 // 24.12.24 다시 작성하였음
@@ -29,6 +27,10 @@ router.post(
   loginController.localLogin
 );
 
+// 카카오 로그인
+router.get("/login/kakao", kakaoController.kakaoLogin);
+router.get("/login/kakao/callback", kakaoController.kakaoCallback);
+
 // 로그아웃
 router.get("/logout", loginController.logout);
 
@@ -39,12 +41,7 @@ router.get("/token/reissue", loginController.reissueAccessToken);
 // legacy code, 버그가 있을 수 있습니다.
 // 테스트하지 않은 코드들 입니다.
 router.get("/terms", authController.handleGetTerms);
-
 router.post("/register/test", authController.handleCreateTestUser);
-
-router.get("/login/kakao", passport.authenticate("kakao", { session: false }));
-router.get("/login/kakao/callback", authController.handleKakaoCallback);
-
 router.get("/teapot", (res) => res.status(418).send("I'm a teapot"));
 
 module.exports = router;

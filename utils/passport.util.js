@@ -117,7 +117,6 @@ const KakaoOAuthStrategy = new KakaoStrategy(
       // TODO : user_oauth에 저장하는 로직에 대해서 생각해보아야 합니다.
       // register 당시에 저장을 해야 하는데, 사용자가 주는 정보는 믿을 수 없으므로
       // temp db에 잠시 담아두고 동일하게 인증하는 방식으로 진행해야 함.
-      await saveKakaoUserInfoService(kakaoUserProfileParsed);
 
       const user = await passportGetUserByEmailService(
         kakaoUserProfileParsed.email
