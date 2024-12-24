@@ -1,23 +1,25 @@
 const { NotExistsError, DatabaseError } = require("../../errors");
 const logger = require("../../logger");
-const {
-  getAgreedTermsByUserId,
-  getUserTodoByUserId,
-  getUserStudyroomByUserId,
-  getUserSpecsByUserId,
-  getUserNeighborhoodsByUserId,
-  getSensitiveUserProfileByUserId,
-  getInsensitiveUserProfileByUserId,
-  updateUserProfileImageByUserId,
-  updateUserNicknameByUserId,
-  checkIfUserExistsByUserId,
-  getTodoInfo,
-  getAssignedMemberByTodoId,
-} = require("../../repositories/users.repository");
 const { encrypt62 } = require("../../utils/encrypt.util");
+const {
+  UserTerm,
+  UserStudyroom,
+  Studyroom,
+  Todo,
+  TodoMember,
+  UserSpec,
+  Spec,
+  UserArea,
+  Area,
+  User,
+} = require("../models");
 
-const getUserAgreedTermsService = async (user_id) => {
-  const userAgreedTerms = await getAgreedTermsByUserId(user_id);
+exports.getUserAgreedTerms = async (userId) => {
+  const userAgreedTerms = await UserTerm.findAll({
+    where: {
+      user_id: userId,
+    },
+  });
   logger.debug(
     `[getUserAgreedTermsService] 해당 사용자의 동의한 약관을 가져옵니다: ${JSON.stringify(
       userAgreedTerms,
@@ -43,8 +45,29 @@ const getUserAgreedTermsService = async (user_id) => {
   return ret;
 };
 
-const getUserStudyroomService = async (userId) => {
-  const studyrooms = await getUserStudyroomByUserId(userId);
+exports.getUserStudyroom = async (userId) => {
+  const studyrooms = await UserStudyroom.findAll({
+    where: {
+      user_id: userId,
+    },
+    include: [
+      {
+        model: Studyroom,
+        attributes: [
+          "studyroom_id",
+          "title",
+          "subtitle",
+          "area_id",
+          "profile_image",
+          "target_type",
+          "target_id",
+          "status",
+          "created_at",
+        ],
+        required: false,
+      },
+    ],
+  });
   if (!studyrooms) {
     throw new NotExistsError("해당 사용자의 스터디룸이 없습니다.");
   }
@@ -73,8 +96,30 @@ const getUserStudyroomService = async (userId) => {
   return ret;
 };
 
-const getUserTodoService = async (userId) => {
-  const todos = await getUserTodoByUserId(userId);
+exports.getUserTodo = async (userId) => {
+  const todos = await Todo.findAll({
+    attributes: [
+      "todo_id",
+      "title",
+      "subtitle",
+      "content",
+      "creater_id",
+      "deadline",
+      "status",
+      "created_at",
+    ],
+    include: [
+      {
+        model: TodoMember,
+        where: { assigned_user_id: userId },
+        attributes: ["status"], // TodoMember의 속성을 포함하지 않으려면 빈 배열
+      },
+    ],
+    // 필요한 경우 정렬, 페이징 등을 추가할 수 있습니다.
+    // order: [['deadline', 'ASC']],
+    // limit: 10,
+    // offset: 0,
+  });
   if (!todos) {
     throw new NotExistsError("해당 사용자의 할 일이 없습니다.");
   }
@@ -99,8 +144,25 @@ const getUserTodoService = async (userId) => {
   return ret;
 };
 
-const getTodoInfoService = async (todoId) => {
-  const todo = await getTodoInfo(todoId);
+exports.getTodoInfo = async (todoId) => {
+  const todo = await Todo.findByPk(todoId, {
+    attributes: [
+      "todo_id",
+      "title",
+      "subtitle",
+      "content",
+      "creater_id",
+      "deadline",
+      "status",
+      "created_at",
+    ],
+    // include: [
+    //   {
+    //     model: TodoMember,
+    //     attributes: ["status"],
+    //   },
+    // ],
+  });
   if (!todo) {
     throw new NotExistsError("해당 할 일이 없습니다.");
   }
@@ -108,8 +170,11 @@ const getTodoInfoService = async (todoId) => {
   return todo;
 };
 
-const getTodoAssignedUserNumberService = async (todoId) => {
-  const todo = await getAssignedMemberByTodoId(todoId);
+exports.getTodoAssignedUserNumber = async (todoId) => {
+  const todo = await TodoMember.findAll({
+    where: { todo_id: todoId },
+    attributes: ["assigned_user_id", "status"],
+  });
   if (!todo) {
     throw new NotExistsError("해당 todo에 배정된 사용자가 존재하지 않습니다.");
   }
@@ -120,15 +185,18 @@ const getTodoAssignedUserNumberService = async (todoId) => {
   return todo;
 };
 
-const getUserSpecsByUserIdService = async (userId) => {
-  const userSpecs = await getUserSpecsByUserId(userId);
-  logger.debug(
-    `[getUserSpecsByUserIdService] 해당 사용자의 스펙을 가져옵니다: ${JSON.stringify(
-      userSpecs,
-      null,
-      2
-    )}`
-  );
+exports.getUserSpecsByUserId = async (userId) => {
+  const userSpecs = await UserSpec.findAll({
+    where: { user_id: userId },
+    attributes: ["created_at"],
+    include: [
+      {
+        model: Spec,
+        attributes: ["spec_id", "title"],
+        required: false, // LEFT OUTER JOIN 수행
+      },
+    ],
+  });
   if (!userSpecs) {
     throw new NotExistsError("해당 사용자의 스펙이 없습니다.");
   }
@@ -151,8 +219,20 @@ const getUserSpecsByUserIdService = async (userId) => {
   return specs;
 };
 
-const getUserNeighborhoodsByUserIdService = async (userId) => {
-  const userNeighborhoods = await getUserNeighborhoodsByUserId(userId);
+exports.getUserNeighborhoodsByUserId = async (userId) => {
+  const userNeighborhoods = await UserArea.findAll({
+    where: {
+      user_id: userId,
+    },
+    attributes: [],
+    include: [
+      {
+        model: Area,
+        attributes: ["area_id", "name", "location", "legal_areacode"],
+        required: false,
+      },
+    ],
+  });
   logger.debug(
     `[getUserNeighborhoodsByUserIdService] 해당 사용자의 동네를 가져옵니다: ${JSON.stringify(
       userNeighborhoods,
@@ -171,8 +251,21 @@ const getUserNeighborhoodsByUserIdService = async (userId) => {
   return neighborhoods;
 };
 
-const getUserMyProfileService = async (userId) => {
-  const user = await getSensitiveUserProfileByUserId(userId);
+exports.getUserMyProfile = async (userId) => {
+  const user = await User.findByPk(userId, {
+    attributes: [
+      "user_id",
+      "name",
+      "nickname",
+      "birthdate",
+      "phone_number",
+      "email",
+      "profile_image",
+      "spec_level",
+      "manner_score",
+      "created_at",
+    ],
+  });
   if (!user) {
     throw new NotExistsError("해당 사용자가 없습니다.");
   }
@@ -180,8 +273,17 @@ const getUserMyProfileService = async (userId) => {
   return user;
 };
 
-const getOtherUserProfileService = async (otherUserId) => {
-  const user = await getInsensitiveUserProfileByUserId(otherUserId);
+exports.getOtherUserProfile = async (otherUserId) => {
+  const user = await User.findByPk(otherUserId, {
+    attributes: [
+      "user_id",
+      "nickname",
+      "profile_image",
+      "spec_level",
+      "manner_score",
+      "created_at",
+    ],
+  });
   if (!user) {
     throw new NotExistsError("해당 사용자가 없습니다.");
   }
@@ -189,19 +291,25 @@ const getOtherUserProfileService = async (otherUserId) => {
   return user;
 };
 
-const editUserInfoService = async (userId, type, content) => {
+exports.editUserInfo = async (userId, type, content) => {
   logger.debug(
     `[editUserInfoService] userId: ${userId}, type: ${type}, content: ${content}`
   );
   if (type === "profile_image") {
-    const updatedUser = await updateUserProfileImageByUserId(userId, content);
+    const updatedUser = await User.update(
+      { profile_image: profileImage },
+      { where: { user_id: userId } }
+    );
     if (updatedUser === 0) {
       throw new DatabaseError("기존값과 동일해 정보가 수정되지 않았습니다.");
     }
 
     return updatedUser;
   } else if (type === "nickname") {
-    const updatedUser = await updateUserNicknameByUserId(userId, content);
+    const updatedUser = await User.update(
+      { nickname: nickname },
+      { where: { user_id: userId } }
+    );
     if (updatedUser === 0) {
       throw new DatabaseError("기존값과 동일해 정보가 수정되지 않았습니다.");
     }
@@ -211,8 +319,8 @@ const editUserInfoService = async (userId, type, content) => {
   return result;
 };
 
-const checkIfUserExistsByUserIdService = async (userId) => {
-  const user = await checkIfUserExistsByUserId(userId);
+exports.checkIfUserExistsByUserId = async (userId) => {
+  const user = await User.findByPk(userId, { attributes: ["user_id"] });
   logger.debug(
     `[checkIfUserExistsByUserIdService] user: ${JSON.stringify(user, null, 2)}`
   );
@@ -221,18 +329,4 @@ const checkIfUserExistsByUserIdService = async (userId) => {
   }
 
   return user;
-};
-
-module.exports = {
-  getUserAgreedTermsService,
-  getUserStudyroomService,
-  getUserTodoService,
-  getUserSpecsByUserIdService,
-  getUserNeighborhoodsByUserIdService,
-  getUserMyProfileService,
-  getOtherUserProfileService,
-  editUserInfoService,
-  checkIfUserExistsByUserIdService,
-  getTodoInfoService,
-  getTodoAssignedUserNumberService,
 };

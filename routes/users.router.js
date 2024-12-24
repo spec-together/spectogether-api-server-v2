@@ -1,36 +1,26 @@
 const express = require("express");
-const {
-  handleGetUsersAgreedTerm,
-  handleGetUserStudyrooms,
-  handleGetUserTodos,
-  handleGetUserSpecs,
-  handleGetUserNeighborhoods,
-  handleGetUserMyProfile,
-  handleGetOtherUserProfile,
-  handleEditUserInfo,
-  handleGetTodoInfo,
-} = require("../controllers/users/users.controller");
+const userController = require("../controllers/users/users.controller");
 const { authenticateAccessToken } = require("../middleware/authenticate.jwt");
 const router = express.Router();
 
-router.get("/terms", authenticateAccessToken, handleGetUsersAgreedTerm);
+router.get("/terms", authenticateAccessToken, userController.handleGetUsersAgreedTerm);
 
-router.get("/studyrooms", authenticateAccessToken, handleGetUserStudyrooms);
-router.get("/todos", authenticateAccessToken, handleGetUserTodos);
-router.get("/todos/:todo_id", authenticateAccessToken, handleGetTodoInfo);
-router.get("/specs", authenticateAccessToken, handleGetUserSpecs);
+router.get("/studyrooms", authenticateAccessToken, userController.handleGetUserStudyrooms);
+router.get("/todos", authenticateAccessToken, userController.handleGetUserTodos);
+router.get("/todos/:todo_id", authenticateAccessToken, userController.handleGetTodoInfo);
+router.get("/specs", authenticateAccessToken, userController.handleGetUserSpecs);
 router.get(
   "/neighborhoods",
   authenticateAccessToken,
   handleGetUserNeighborhoods
 );
-router.get("/profile", authenticateAccessToken, handleGetUserMyProfile);
+router.get("/profile", authenticateAccessToken, userController.handleGetUserMyProfile);
 router.get(
   "/:user_id/profile",
   authenticateAccessToken,
-  handleGetOtherUserProfile
+  userController.handleGetOtherUserProfile
 );
-router.patch("/", authenticateAccessToken, handleEditUserInfo);
+router.patch("/", authenticateAccessToken, userController.handleEditUserInfo);
 
 module.exports = router;
 
