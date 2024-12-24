@@ -3,24 +3,62 @@ const userController = require("../controllers/users/users.controller");
 const { authenticateAccessToken } = require("../middleware/authenticate.jwt");
 const router = express.Router();
 
-router.get("/terms", authenticateAccessToken, userController.handleGetUsersAgreedTerm);
+router.get(
+  "/terms",
+  authenticateAccessToken,
+  userController.handleGetUsersAgreedTerm
+);
 
-router.get("/studyrooms", authenticateAccessToken, userController.handleGetUserStudyrooms);
-router.get("/todos", authenticateAccessToken, userController.handleGetUserTodos);
-router.get("/todos/:todo_id", authenticateAccessToken, userController.handleGetTodoInfo);
-router.get("/specs", authenticateAccessToken, userController.handleGetUserSpecs);
+router.get(
+  "/studyrooms",
+  authenticateAccessToken,
+  userController.handleGetUserStudyrooms
+);
+router.get(
+  "/todos",
+  authenticateAccessToken,
+  userController.handleGetUserTodos
+);
+router.get(
+  "/todos/:todo_id",
+  authenticateAccessToken,
+  userController.handleGetTodoInfo
+);
+router.get(
+  "/specs",
+  authenticateAccessToken,
+  userController.handleGetUserSpecs
+);
 router.get(
   "/neighborhoods",
   authenticateAccessToken,
-  handleGetUserNeighborhoods
+  userController.handleGetUserNeighborhoods
 );
-router.get("/profile", authenticateAccessToken, userController.handleGetUserMyProfile);
+router.get(
+  "/profile",
+  authenticateAccessToken,
+  userController.handleGetUserMyProfile
+);
 router.get(
   "/:user_id/profile",
   authenticateAccessToken,
   userController.handleGetOtherUserProfile
 );
-router.patch("/", authenticateAccessToken, userController.handleEditUserInfo);
+router.patch(
+  "/email",
+  authenticateAccessToken,
+  userController.handleEditUserEmail
+);
+router.patch(
+  "/profile-image",
+  authenticateAccessToken,
+  userController.handleEditUserProfileImage
+);
+router.patch(
+  "/nickname",
+  authenticateAccessToken,
+  userController.handleEditUserNickname
+);
 
 module.exports = router;
 

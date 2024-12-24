@@ -126,7 +126,7 @@ exports.handleGetUserNeighborhoods = async (req, res, next) => {
     const userNeighborhoods =
       await userService.getUserNeighborhoodsByUserId(user_id);
     return res.status(200).success({
-      neighborhoods: userNeighborhoods,
+      areas: userNeighborhoods,
     });
   } catch (error) {
     logger.error(
@@ -148,7 +148,8 @@ exports.handleGetUserMyProfile = async (req, res, next) => {
     const { user_id } = req.user;
     await userService.checkIfUserExistsByUserId(user_id);
     const user = await userService.getUserMyProfile(user_id);
-    const neighborhoods = await userService.getUserNeighborhoodsByUserId(user_id);
+    const neighborhoods =
+      await userService.getUserNeighborhoodsByUserId(user_id);
     const specs = await userService.getUserSpecsByUserId(user_id);
     user.dataValues.neighborhoods = neighborhoods;
     user.dataValues.specs = specs;
@@ -174,7 +175,7 @@ exports.handleGetOtherUserProfile = async (req, res, next) => {
       `[handleGetOtherUserProfile] req.params : ${JSON.stringify(req.params, null, 2)}`
     );
     const { user_id } = req.params;
-    await userService.checkIfUserExistsByUserId(user_id);
+    await userService.checkIfUserExistsByUserId(decrypt62(user_id));
     const user = await userService.getOtherUserProfile(decrypt62(user_id));
     return res.status(200).success({
       user,
@@ -191,23 +192,75 @@ exports.handleGetOtherUserProfile = async (req, res, next) => {
   }
 };
 
-exports.handleEditUserInfo = async (req, res, next) => {
+exports.handleEditUserEmail = async (req, res, next) => {
   try {
     logger.info(
-      `[handleEditUserInfo] req.user : ${JSON.stringify(req.user, null, 2)}`
+      `[handleEditUserEmail] req.user : ${JSON.stringify(req.user, null, 2)}`
     );
     const { user_id } = req.user;
+    const { email } = req.body;
     await userService.checkIfUserExistsByUserId(user_id);
     validateEditUserInfoSchemaService(req.body);
-    const { type, content } = req.body;
-    const userInfo = { userId: user_id, type, content };
-    await userService.editUserInfo(userInfo);
+    const userInfo = { userId: user_id, email };
+    await userService.editUserEmail(userInfo);
     return res.status(200).success({
-      message: "정보가 성공적으로 수정되었습니다.",
+      message: "이메일이 성공적으로 수정되었습니다.",
     });
   } catch (error) {
     logger.error(
-      `[handleEditUserInfo]\
+      `[handleEditUserEmail]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
+};
+
+exports.handleEditUserProfileImage = async (req, res, next) => {
+  try {
+    logger.info(
+      `[handleEditUserProfileImage] req.user : ${JSON.stringify(req.user, null, 2)}`
+    );
+    const { user_id } = req.user;
+    const { profileImage } = req.body;
+    await userService.checkIfUserExistsByUserId(user_id);
+    validateEditUserInfoSchemaService(req.body);
+    const userInfo = { userId: user_id, profileImage };
+    await userService.editUserProfileImage(userInfo);
+    return res.status(200).success({
+      message: "프로필 이미지가 성공적으로 수정되었습니다.",
+    });
+  } catch (error) {
+    logger.error(
+      `[handleEditUserProfileImage]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
+};
+
+exports.handleEditUserNickname = async (req, res, next) => {
+  try {
+    logger.info(
+      `[handleEditUserNickname] req.user : ${JSON.stringify(req.user, null, 2)}`
+    );
+    const { user_id } = req.user;
+    const { nickname } = req.body;
+    await userService.checkIfUserExistsByUserId(user_id);
+    validateEditUserInfoSchemaService(req.body);
+    const userInfo = { userId: user_id, nickname };
+    await userService.editUserNickname(userInfo);
+    return res.status(200).success({
+      message: "프로필 이미지가 성공적으로 수정되었습니다.",
+    });
+  } catch (error) {
+    logger.error(
+      `[handleEditUserNickname]\
       \nNAME ${error.name}\
       \nREASON ${JSON.stringify(error.reason, null, 2)}\
       \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
