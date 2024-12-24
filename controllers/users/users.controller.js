@@ -1,33 +1,17 @@
 const logger = require("../../logger");
-const {
-  updateUserNicknameByUserId,
-  checkIfUserExistsByUserId,
-} = require("../../repositories/users.repository");
 const { encrypt62, decrypt62 } = require("../../utils/encrypt.util");
-const {
-  getUserAgreedTermsService,
-  getUserTodoService,
-  getUserStudyroomService,
-  getUserSpecsByUserIdService,
-  getUserNeighborhoodsByUserIdService,
-  getUserMyProfileService,
-  getOtherUserProfileService,
-  editUserInfoService,
-  checkIfUserExistsByUserIdService,
-  getTodoInfoService,
-  getTodoAssignedUserNumberService,
-} = require("../../services/users/users.service");
+const userService = require("../../services/users/users.service");
 const {
   validateEditUserInfoSchemaService,
 } = require("../../utils/validators/users.validators");
 
-const handleGetUsersAgreedTerm = async (req, res, next) => {
+exports.handleGetUsersAgreedTerm = async (req, res, next) => {
   try {
     logger.info(
       `[handleGetUsersAgreedTerm] req.user : ${JSON.stringify(req.user, null, 2)}`
     );
     const { user_id } = req.user;
-    const userAgreedTerms = await getUserAgreedTermsService(user_id);
+    const userAgreedTerms = await userService.getUserAgreedTerms(user_id);
     return res.status(200).success({
       terms: userAgreedTerms,
     });
@@ -43,14 +27,14 @@ const handleGetUsersAgreedTerm = async (req, res, next) => {
   }
 };
 
-const handleGetTodoInfo = async (req, res, next) => {
+exports.handleGetTodoInfo = async (req, res, next) => {
   try {
     logger.info(
       `[handleGetTodoInfo] req.params : ${JSON.stringify(req.params, null, 2)}`
     );
     const { todo_id } = req.params;
-    const todo = await getTodoInfoService(todo_id);
-    const members = await getTodoAssignedUserNumberService(todo_id);
+    const todo = await userService.getTodoInfo(todo_id);
+    const members = await userService.getTodoAssignedUserNumber(todo_id);
     return res.status(200).success({
       info: todo.dataValues,
       assigned_member: members,
@@ -67,13 +51,13 @@ const handleGetTodoInfo = async (req, res, next) => {
   }
 };
 
-const handleGetUserStudyrooms = async (req, res, next) => {
+exports.handleGetUserStudyrooms = async (req, res, next) => {
   try {
     logger.info(
       `[handleGetUserStudyrooms] req.user : ${JSON.stringify(req.user, null, 2)}`
     );
     const { user_id } = req.user;
-    const userStudyrooms = await getUserStudyroomService(user_id);
+    const userStudyrooms = await userService.getUserStudyroom(user_id);
     return res.status(200).success({
       studyrooms: userStudyrooms,
     });
@@ -89,13 +73,13 @@ const handleGetUserStudyrooms = async (req, res, next) => {
   }
 };
 
-const handleGetUserTodos = async (req, res, next) => {
+exports.handleGetUserTodos = async (req, res, next) => {
   try {
     logger.info(
       `[handleGetUserTodos] req.user : ${JSON.stringify(req.user, null, 2)}`
     );
     const { user_id } = req.user;
-    const userTodos = await getUserTodoService(user_id);
+    const userTodos = await userService.getUserTodo(user_id);
     return res.status(200).success({
       todos: userTodos,
     });
@@ -111,13 +95,13 @@ const handleGetUserTodos = async (req, res, next) => {
   }
 };
 
-const handleGetUserSpecs = async (req, res, next) => {
+exports.handleGetUserSpecs = async (req, res, next) => {
   try {
     logger.info(
       `[handleGetUserSpecs] req.user : ${JSON.stringify(req.user, null, 2)}`
     );
     const { user_id } = req.user;
-    const userSpecs = await getUserSpecsByUserIdService(user_id);
+    const userSpecs = await userService.getUserSpecsByUserId(user_id);
     return res.status(200).success({
       specs: userSpecs,
     });
@@ -133,16 +117,16 @@ const handleGetUserSpecs = async (req, res, next) => {
   }
 };
 
-const handleGetUserNeighborhoods = async (req, res, next) => {
+exports.handleGetUserNeighborhoods = async (req, res, next) => {
   try {
     logger.info(
       `[handleGetUserNeighborhoods] req.user : ${JSON.stringify(req.user, null, 2)}`
     );
     const { user_id } = req.user;
     const userNeighborhoods =
-      await getUserNeighborhoodsByUserIdService(user_id);
+      await userService.getUserNeighborhoodsByUserId(user_id);
     return res.status(200).success({
-      neighborhoods: userNeighborhoods,
+      areas: userNeighborhoods,
     });
   } catch (error) {
     logger.error(
@@ -156,21 +140,22 @@ const handleGetUserNeighborhoods = async (req, res, next) => {
   }
 };
 
-const handleGetUserMyProfile = async (req, res, next) => {
+exports.handleGetUserMyProfile = async (req, res, next) => {
   try {
     logger.info(
       `[handleGetUserMyProfile] req.user : ${JSON.stringify(req.user, null, 2)}`
     );
     const { user_id } = req.user;
-    await checkIfUserExistsByUserIdService(user_id);
-    const user = await getUserMyProfileService(user_id);
-    const neighborhoods = await getUserNeighborhoodsByUserIdService(user_id);
-    const specs = await getUserSpecsByUserIdService(user_id);
-    user.dataValues.neighborhoods = neighborhoods;
-    user.dataValues.specs = specs;
-    user.dataValues.user_id = encrypt62(user.dataValues.user_id);
+    await userService.checkIfUserExistsByUserId(user_id);
+    const user = await userService.getUserMyProfile(user_id);
+    const neighborhoods =
+      await userService.getUserNeighborhoodsByUserId(user_id);
+    const specs = await userService.getUserSpecsByUserId(user_id);
+    user.areas = neighborhoods;
+    user.specs = specs;
+    user.user_id = encrypt62(user.user_id);
     return res.status(200).success({
-      user,
+      user: user,
     });
   } catch (error) {
     logger.error(
@@ -184,16 +169,16 @@ const handleGetUserMyProfile = async (req, res, next) => {
   }
 };
 
-const handleGetOtherUserProfile = async (req, res, next) => {
+exports.handleGetOtherUserProfile = async (req, res, next) => {
   try {
     logger.info(
       `[handleGetOtherUserProfile] req.params : ${JSON.stringify(req.params, null, 2)}`
     );
     const { user_id } = req.params;
-    await checkIfUserExistsByUserIdService(user_id);
-    const user = await getOtherUserProfileService(decrypt62(user_id));
+    await userService.checkIfUserExistsByUserId(decrypt62(user_id));
+    const user = await userService.getOtherUserProfile(decrypt62(user_id));
     return res.status(200).success({
-      user,
+      user: user,
     });
   } catch (error) {
     logger.error(
@@ -207,22 +192,23 @@ const handleGetOtherUserProfile = async (req, res, next) => {
   }
 };
 
-const handleEditUserInfo = async (req, res, next) => {
+exports.handleEditUserEmail = async (req, res, next) => {
   try {
     logger.info(
-      `[handleEditUserInfo] req.user : ${JSON.stringify(req.user, null, 2)}`
+      `[handleEditUserEmail] req.user : ${JSON.stringify(req.user, null, 2)}`
     );
     const { user_id } = req.user;
-    await checkIfUserExistsByUserIdService(user_id);
-    validateEditUserInfoSchemaService(req.body);
-    const { type, content } = req.body;
-    await editUserInfoService(user_id, type, content);
+    const { email } = req.body;
+    await userService.checkIfUserExistsByUserId(user_id);
+    // validateEditUserInfoSchemaService(req.body);
+    const userInfo = { userId: user_id, email };
+    await userService.editUserEmail(userInfo);
     return res.status(200).success({
-      message: "정보가 성공적으로 수정되었습니다.",
+      message: "이메일이 성공적으로 수정되었습니다.",
     });
   } catch (error) {
     logger.error(
-      `[handleEditUserInfo]\
+      `[handleEditUserEmail]\
       \nNAME ${error.name}\
       \nREASON ${JSON.stringify(error.reason, null, 2)}\
       \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
@@ -232,14 +218,54 @@ const handleEditUserInfo = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  handleGetUsersAgreedTerm,
-  handleGetUserStudyrooms,
-  handleGetUserTodos,
-  handleGetUserSpecs,
-  handleGetUserNeighborhoods,
-  handleGetUserMyProfile,
-  handleGetOtherUserProfile,
-  handleEditUserInfo,
-  handleGetTodoInfo,
+exports.handleEditUserProfileImage = async (req, res, next) => {
+  try {
+    logger.info(
+      `[handleEditUserProfileImage] req.user : ${JSON.stringify(req.user, null, 2)}`
+    );
+    const { user_id } = req.user;
+    const { profileImage } = req.body;
+    await userService.checkIfUserExistsByUserId(user_id);
+    // validateEditUserInfoSchemaService(req.body);
+    const userInfo = { userId: user_id, profileImage };
+    await userService.editUserProfileImage(userInfo);
+    return res.status(200).success({
+      message: "프로필 이미지가 성공적으로 수정되었습니다.",
+    });
+  } catch (error) {
+    logger.error(
+      `[handleEditUserProfileImage]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
+};
+
+exports.handleEditUserNickname = async (req, res, next) => {
+  try {
+    logger.info(
+      `[handleEditUserNickname] req.user : ${JSON.stringify(req.user, null, 2)}`
+    );
+    const { user_id } = req.user;
+    const { nickname } = req.body;
+    await userService.checkIfUserExistsByUserId(user_id);
+    // validateEditUserInfoSchemaService(req.body);
+    const userInfo = { userId: user_id, nickname };
+    await userService.editUserNickname(userInfo);
+    return res.status(200).success({
+      message: "닉네임이 성공적으로 수정되었습니다.",
+    });
+  } catch (error) {
+    logger.error(
+      `[handleEditUserNickname]\
+      \nNAME ${error.name}\
+      \nREASON ${JSON.stringify(error.reason, null, 2)}\
+      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
+      \nSTACK ${error.stack}`
+    );
+    next(error);
+  }
 };

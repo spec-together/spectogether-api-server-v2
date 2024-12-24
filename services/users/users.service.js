@@ -1,50 +1,75 @@
+const { profile } = require("winston");
 const { NotExistsError, DatabaseError } = require("../../errors");
 const logger = require("../../logger");
-const {
-  getAgreedTermsByUserId,
-  getUserTodoByUserId,
-  getUserStudyroomByUserId,
-  getUserSpecsByUserId,
-  getUserNeighborhoodsByUserId,
-  getSensitiveUserProfileByUserId,
-  getInsensitiveUserProfileByUserId,
-  updateUserProfileImageByUserId,
-  updateUserNicknameByUserId,
-  checkIfUserExistsByUserId,
-  getTodoInfo,
-  getAssignedMemberByTodoId,
-} = require("../../repositories/users.repository");
 const { encrypt62 } = require("../../utils/encrypt.util");
+const db = require("../../models");
 
-const getUserAgreedTermsService = async (user_id) => {
-  const userAgreedTerms = await getAgreedTermsByUserId(user_id);
+exports.getUserAgreedTerms = async (userId) => {
+  const currentTerms = await db.Term.findAll({
+    where: { status: true },
+    attributes: [
+      "term_id",
+      "name",
+      "description",
+      "is_required",
+      "term_version",
+    ],
+  });
+  if (!currentTerms.length) {
+    throw new NotExistsError("현행 약관이 존재하지 않습니다.");
+  }
+  const userAgreedTerms = await db.UserTerm.findAll({
+    where: {
+      user_id: userId,
+    },
+    attributes: ["term_id", "is_agreed"],
+  });
+  const combinedTerms = currentTerms.map((term) => {
+    const userAgreed = userAgreedTerms.find(
+      (ut) => ut.term_id === term.term_id
+    );
+    return {
+      id: term.term_id,
+      name: term.name,
+      description: term.description,
+      is_required: term.is_required,
+      version: term.term_version,
+      user_agreed: userAgreed ? userAgreed.is_agreed : false,
+    };
+  });
+
   logger.debug(
-    `[getUserAgreedTermsService] 해당 사용자의 동의한 약관을 가져옵니다: ${JSON.stringify(
-      userAgreedTerms,
+    `[getUserAgreedTermsService] 사용자 ID ${userId}의 약관 동의 정보: ${JSON.stringify(
+      combinedTerms,
       null,
       2
     )}`
   );
-  if (!userAgreedTerms) {
-    throw new NotExistsError("해당 사용자의 동의한 약관이 없습니다.");
-  }
 
-  let ret = [];
-
-  for (const term of userAgreedTerms) {
-    // TIP :for ~ in 과 for ~ of 의 차이는?
-    ret.push({
-      term_id: term.term_id,
-      is_agreed: term.is_agreed,
-      last_agreed_at: term.updated_at,
-    });
-  }
-
-  return ret;
+  return { terms: combinedTerms };
 };
 
-const getUserStudyroomService = async (userId) => {
-  const studyrooms = await getUserStudyroomByUserId(userId);
+exports.getUserStudyroom = async (userId) => {
+  const studyrooms = await db.UserStudyroom.findAll({
+    where: { user_id: userId },
+    include: [
+      {
+        model: db.Studyroom,
+        as: "studyroom",
+        attributes: [
+          "studyroom_id",
+          "title",
+          "subtitle",
+          "area_id",
+          "profile_image",
+          "goal",
+          "status",
+          "created_at",
+        ],
+        required: false,
+      },
+    ],
+  });
   if (!studyrooms) {
     throw new NotExistsError("해당 사용자의 스터디룸이 없습니다.");
   }
@@ -52,15 +77,13 @@ const getUserStudyroomService = async (userId) => {
   let ret = [];
   for (const studyroom of studyrooms) {
     ret.push({
-      studyroom_id: encrypt62(studyroom.Studyroom.studyroom_id),
-      title: studyroom.Studyroom.title,
-      subtitle: studyroom.Studyroom.subtitle,
-      area_id: studyroom.Studyroom.area_id,
-      profile_image: studyroom.Studyroom.profile_image,
-      target_type: studyroom.Studyroom.target_type,
-      target_id: studyroom.Studyroom.target_id,
-      status: studyroom.Studyroom.status,
-      created_at: studyroom.Studyroom.created_at,
+      studyroom_id: encrypt62(studyroom.studyroom.studyroom_id),
+      title: studyroom.studyroom.title,
+      subtitle: studyroom.studyroom.subtitle,
+      area: studyroom.studyroom.area_id,
+      profile_image: studyroom.studyroom.profile_image,
+      status: studyroom.studyroom.status,
+      created_at: studyroom.studyroom.created_at,
     });
   }
   logger.debug(
@@ -73,34 +96,115 @@ const getUserStudyroomService = async (userId) => {
   return ret;
 };
 
-const getUserTodoService = async (userId) => {
-  const todos = await getUserTodoByUserId(userId);
-  if (!todos) {
+exports.getUserTodo = async (userId) => {
+  const studyroomTodos = await db.StudyroomTodo.findAll({
+    attributes: ["studyroom_id"],
+    include: [
+      {
+        model: db.Todo,
+        as: "todo",
+        attributes: [
+          "todo_id",
+          "title",
+          "content",
+          "location",
+          "status", // todo_status: "enum (pending, done, deleted)"
+          "starts_at",
+          "ends_at",
+          "creater_id",
+          "created_at",
+          "updated_at",
+        ],
+        include: [
+          {
+            model: db.TodoParticipant,
+            as: "todo_participants",
+            where: { assigned_user_id: userId },
+            attributes: ["assigned_user_id", "status"], // my_status: "enum (pending, abandoned, done)"
+          },
+        ],
+      },
+    ],
+  });
+
+  const userTodos = await db.UserTodo.findAll({
+    where: { user_id: userId },
+    attributes: ["todo_id"],
+    include: [
+      {
+        model: db.Todo,
+        as: "todo",
+        attributes: [
+          "todo_id",
+          "title",
+          "content",
+          "location",
+          "status",
+          "starts_at",
+          "ends_at",
+          "creater_id",
+          "created_at",
+          "updated_at",
+        ],
+      },
+    ],
+  });
+
+  const todos = [...studyroomTodos, ...userTodos].map((todoEntry) => {
+    const isStudyroomTodo = !!todoEntry.studyroom_id;
+    const todo = todoEntry.todo;
+
+    return {
+      type: isStudyroomTodo ? "studyroom" : "user",
+      studyroom_id: isStudyroomTodo ? encrypt62(todoEntry.studyroom_id) : null,
+      todo_id: todo?.todo_id,
+      title: todo?.title,
+      content: todo?.content,
+      location: todo?.location,
+      todo_status: todo?.status,
+      my_status: isStudyroomTodo
+        ? todo?.todo_participants?.[0]?.status || null
+        : null,
+      starts_at: todo?.starts_at,
+      ends_at: todo?.ends_at,
+      creater_id: todo?.creater_id,
+      participants: isStudyroomTodo
+        ? todo?.todo_participants?.map((participant) => ({
+            id: participant.assigned_user_id,
+            nickname: participant.nickname || null,
+          })) || []
+        : [],
+      created_at: todo?.created_at,
+      updated_at: todo?.updated_at,
+    };
+  });
+
+  if (!todos.length) {
     throw new NotExistsError("해당 사용자의 할 일이 없습니다.");
   }
 
-  let ret = [];
-
-  for (const todo of todos) {
-    ret.push({
-      todo_id: todo.todo_id,
-      title: todo.title,
-      subtitle: todo.subtitle,
-      content: todo.content,
-      creater_id: encrypt62(todo.creater_id),
-      deadline: todo.deadline,
-      status: todo.status,
-      created_at: todo.created_at,
-      assigned_user_id: encrypt62(userId),
-      assigned_status: todo.TodoMembers[0]?.status,
-    });
-  }
-
-  return ret;
+  return todos;
 };
 
-const getTodoInfoService = async (todoId) => {
-  const todo = await getTodoInfo(todoId);
+exports.getTodoInfo = async (todoId) => {
+  const todo = await db.Todo.findByPk(todoId, {
+    attributes: [
+      "todo_id",
+      "title",
+      "content",
+      "location",
+      "status",
+      "start_at",
+      "ends_at",
+      "creater_id",
+    ],
+    // include: [
+    //   {
+    //     model: TodoMember,
+    //     attributes: ["status"],
+    //   },
+    // ],
+  });
   if (!todo) {
     throw new NotExistsError("해당 할 일이 없습니다.");
   }
@@ -108,8 +212,11 @@ const getTodoInfoService = async (todoId) => {
   return todo;
 };
 
-const getTodoAssignedUserNumberService = async (todoId) => {
-  const todo = await getAssignedMemberByTodoId(todoId);
+exports.getTodoAssignedUserNumber = async (todoId) => {
+  const todo = await db.TodoParticipant.findAll({
+    where: { todo_id: todoId },
+    attributes: ["assigned_user_id", "status"],
+  });
   if (!todo) {
     throw new NotExistsError("해당 todo에 배정된 사용자가 존재하지 않습니다.");
   }
@@ -120,26 +227,47 @@ const getTodoAssignedUserNumberService = async (todoId) => {
   return todo;
 };
 
-const getUserSpecsByUserIdService = async (userId) => {
-  const userSpecs = await getUserSpecsByUserId(userId);
-  logger.debug(
-    `[getUserSpecsByUserIdService] 해당 사용자의 스펙을 가져옵니다: ${JSON.stringify(
-      userSpecs,
-      null,
-      2
-    )}`
-  );
+exports.getUserSpecsByUserId = async (userId) => {
+  const userSpecs = await db.UserSpec.findAll({
+    where: { user_id: userId },
+    attributes: ["created_at"],
+    include: [
+      {
+        model: db.Spec,
+        as: "spec",
+        attributes: ["spec_id", "name", "host", "spec_date", "content"],
+        required: false, // LEFT OUTER JOIN 수행
+        include: [
+          {
+            model: db.SpecPhoto,
+            as: "spec_photos",
+            attributes: ["image_url", "sequence"],
+            required: false,
+          },
+        ],
+      },
+    ],
+  });
   if (!userSpecs) {
     throw new NotExistsError("해당 사용자의 스펙이 없습니다.");
   }
   // Spec 데이터만 추출
-  const specs = userSpecs
-    .filter((us) => us.Spec !== null)
-    .map((us) => ({
-      ...us.Spec.dataValues,
+  const specs = userSpecs.map((us) => {
+    const specData = us.spec;
+    return {
+      spec_id: specData.spec_id,
+      name: specData.name,
+      host: specData.host,
+      spec_date: specData.spec_date,
+      content: specData.content,
+      images: specData.spec_photos.map((image) => ({
+        sequence: image.sequence,
+        image_url: image.image_url,
+      })),
       created_at: us.created_at,
-      rank: Math.floor(Math.random() * 4) + 1,
-    }));
+    };
+  });
+
   logger.debug(
     `[getUserSpecsByUserIdService] 파싱된 스펙: ${JSON.stringify(
       specs,
@@ -147,14 +275,25 @@ const getUserSpecsByUserIdService = async (userId) => {
       2
     )}`
   );
-  // TODO : 이거 좀 더 깔끔하게 수정..
+
   return specs;
 };
 
-const getUserNeighborhoodsByUserIdService = async (userId) => {
-  const userNeighborhoods = await getUserNeighborhoodsByUserId(userId);
+exports.getUserNeighborhoodsByUserId = async (userId) => {
+  const userNeighborhoods = await db.UserArea.findAll({
+    where: { user_id: userId },
+    attributes: ["sequence"],
+    include: [
+      {
+        model: db.Area,
+        as: "area",
+        attributes: ["area_id", "sido", "gungu"],
+        required: false,
+      },
+    ],
+  });
   logger.debug(
-    `[getUserNeighborhoodsByUserIdService] 해당 사용자의 동네를 가져옵니다: ${JSON.stringify(
+    `[getUserNeighborhoodsByUserId] 해당 사용자의 동네를 가져옵니다: ${JSON.stringify(
       userNeighborhoods,
       null,
       2
@@ -163,56 +302,212 @@ const getUserNeighborhoodsByUserIdService = async (userId) => {
   if (!userNeighborhoods) {
     throw new NotExistsError("해당 사용자의 동네가 없습니다.");
   }
-  // Spec 데이터만 추출
-  const neighborhoods = userNeighborhoods
-    .map((un) => un.Area)
-    .filter((area) => area !== null);
+
+  const neighborhoods = userNeighborhoods.map((un) => {
+    const area = un.area;
+    return {
+      sequence: un.sequence,
+      sido: area.sido,
+      gungu: area.gungu,
+    };
+  });
 
   return neighborhoods;
 };
 
-const getUserMyProfileService = async (userId) => {
-  const user = await getSensitiveUserProfileByUserId(userId);
+exports.getUserMyProfile = async (userId) => {
+  const user = await db.User.findByPk(userId, {
+    attributes: [
+      "user_id",
+      "name",
+      "nickname",
+      "nickname_changes",
+      "birthdate",
+      "phone_number",
+      "email",
+      "is_email_verified",
+      "profile_image",
+      "spec_level",
+      "manner_score",
+      "created_at",
+    ],
+    include: [
+      {
+        model: db.UserSchool,
+        as: "user_schools",
+        attributes: ["school_id", "is_verified", "is_public"],
+        include: [
+          {
+            model: db.School,
+            as: "school",
+            attributes: ["name"],
+          },
+        ],
+      },
+    ],
+  });
   if (!user) {
     throw new NotExistsError("해당 사용자가 없습니다.");
   }
 
-  return user;
+  const profile = {
+    user_id: user.user_id,
+    name: user.name,
+    nickname: user.nickname,
+    remaining_nickname_changes: 2 - user.nickname_changes,
+    birthdate: user.birthdate,
+    phone: user.phone_number,
+    email: user.email,
+    is_email_verified: user.is_email_verified,
+    school: user.user_schools?.[0]?.school?.name,
+    is_school_verified: user.user_schools?.[0]?.is_verified,
+    profile_image: user.profile_image,
+    spec_level: user.spec_level,
+    manner_score: user.manner_score,
+    created_at: user.created_at,
+  };
+
+  return profile;
 };
 
-const getOtherUserProfileService = async (otherUserId) => {
-  const user = await getInsensitiveUserProfileByUserId(otherUserId);
+exports.getOtherUserProfile = async (otherUserId) => {
+  const user = await db.User.findByPk(otherUserId, {
+    attributes: [
+      "user_id",
+      "nickname",
+      "birthdate",
+      "phone_number",
+      "email",
+      "is_email_verified",
+      "is_email_public",
+      "profile_image",
+      "website",
+      "description",
+      "spec_level",
+      "manner_score",
+      "created_at",
+    ],
+    include: [
+      {
+        model: db.UserArea,
+        as: "user_areas",
+        attributes: ["sequence"],
+        include: [
+          {
+            model: db.Area,
+            as: "area",
+            attributes: ["sido", "gungu"],
+          },
+        ],
+      },
+      {
+        model: db.UserSpec,
+        as: "user_specs",
+        attributes: ["spec_id"],
+        include: [
+          {
+            model: db.Spec,
+            as: "spec",
+            attributes: ["name", "host", "spec_date", "status", "content"],
+          },
+        ],
+      },
+      {
+        model: db.UserSchool,
+        as: "user_schools",
+        attributes: ["school_id", "is_verified", "is_public"],
+        include: [
+          {
+            model: db.School,
+            as: "school",
+            attributes: ["name"],
+          },
+        ],
+      },
+    ],
+  });
   if (!user) {
     throw new NotExistsError("해당 사용자가 없습니다.");
   }
 
-  return user;
+  const publicProfile = {
+    nickname: user.nickname,
+    phone: user.phone_number,
+    email: user.is_email_public ? email : null,
+    is_email_verified: user.is_email_verified,
+    school: user.user_schools.is_public ? user.user_schools.school.name : null,
+    is_school_verified: user.user_schools.is_verified,
+    profile_image: user.profile_image,
+    website: user.website,
+    introduction: user.description,
+    areas: user.user_areas.map((area) => ({
+      sequence: area.sequence,
+      sido: area.Area.sido,
+      gungu: area.Area.gungu,
+    })),
+    spec_level: user.spec_level,
+    specs: user.user_specs.map((spec) => {
+      return spec.spec.status === "private"
+        ? null
+        : {
+            name: spec.spec.name,
+            host: spec.spec.host,
+            spec_date: spec.spec.spec_date,
+            content: spec.spec.content,
+          };
+    }),
+    manner_score: user.manner_score,
+    created_at: user.created_at,
+  };
+
+  return publicProfile;
 };
 
-const editUserInfoService = async (userId, type, content) => {
-  logger.debug(
-    `[editUserInfoService] userId: ${userId}, type: ${type}, content: ${content}`
+exports.editUserEmail = async (userInfo) => {
+  const { userId, email } = userInfo;
+  logger.debug(`[editUserEmail] userId: ${userId}, email: ${email}`);
+  const [updatedCount] = await db.User.update(
+    { email },
+    { where: { user_id: userId } }
   );
-  if (type === "profile_image") {
-    const updatedUser = await updateUserProfileImageByUserId(userId, content);
-    if (updatedUser === 0) {
-      throw new DatabaseError("기존값과 동일해 정보가 수정되지 않았습니다.");
-    }
-
-    return updatedUser;
-  } else if (type === "nickname") {
-    const updatedUser = await updateUserNicknameByUserId(userId, content);
-    if (updatedUser === 0) {
-      throw new DatabaseError("기존값과 동일해 정보가 수정되지 않았습니다.");
-    }
-
-    return updatedUser;
+  if (updatedCount === 0) {
+    throw new DatabaseError("기존 이메일과 동일해 수정되지 않았습니다.");
   }
-  return result;
+  return { updatedCount };
 };
 
-const checkIfUserExistsByUserIdService = async (userId) => {
-  const user = await checkIfUserExistsByUserId(userId);
+exports.editUserProfileImage = async (userInfo) => {
+  const { userId, profileImage } = userInfo;
+  logger.debug(
+    `[editUserProfileImage] userId: ${userId}, profileImage: ${profileImage}`
+  );
+  const [updatedCount] = await db.User.update(
+    { profile_image: profileImage },
+    { where: { user_id: userId } }
+  );
+  if (updatedCount === 0) {
+    throw new DatabaseError("기존 프로필 이미지와 동일해 수정되지 않았습니다.");
+  }
+  return { updatedCount };
+};
+
+exports.editUserNickname = async (userInfo) => {
+  const { userId, nickname } = userInfo;
+  logger.debug(`[editUserNickname] userId: ${userId}, nickname: ${nickname}`);
+  const [updatedCount] = await db.User.update(
+    {
+      nickname: nickname,
+    },
+    { where: { user_id: userId } }
+  );
+  if (updatedCount === 0) {
+    throw new DatabaseError("기존 닉네임과 동일해 수정되지 않았습니다.");
+  }
+  return updatedCount;
+};
+
+exports.checkIfUserExistsByUserId = async (userId) => {
+  const user = await db.User.findByPk(userId, { attributes: ["user_id"] });
   logger.debug(
     `[checkIfUserExistsByUserIdService] user: ${JSON.stringify(user, null, 2)}`
   );
@@ -221,18 +516,4 @@ const checkIfUserExistsByUserIdService = async (userId) => {
   }
 
   return user;
-};
-
-module.exports = {
-  getUserAgreedTermsService,
-  getUserStudyroomService,
-  getUserTodoService,
-  getUserSpecsByUserIdService,
-  getUserNeighborhoodsByUserIdService,
-  getUserMyProfileService,
-  getOtherUserProfileService,
-  editUserInfoService,
-  checkIfUserExistsByUserIdService,
-  getTodoInfoService,
-  getTodoAssignedUserNumberService,
 };
