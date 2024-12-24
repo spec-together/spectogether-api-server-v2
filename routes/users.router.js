@@ -1,63 +1,89 @@
 const express = require("express");
+
 const userController = require("../controllers/users/users.controller");
+const patchUserController = require("../controllers/users/patch.users.controller");
+const profileUserController = require("../controllers/users/profile.users.controller");
+const todoController = require("../controllers/users/todo.users.controller");
+const studyroomController = require("../controllers/users/studyroom.users.controller");
+
 const { authenticateAccessToken } = require("../middleware/authenticate.jwt");
 const router = express.Router();
 
+// 사용자가 동의한 약관 가져오기
 router.get(
   "/terms",
   authenticateAccessToken,
   userController.handleGetUsersAgreedTerm
 );
 
+// STUDYROOM
+
+// 사용자 스터디룸 가져오기
 router.get(
   "/studyrooms",
   authenticateAccessToken,
-  userController.handleGetUserStudyrooms
+  studyroomController.handleGetUserStudyrooms
 );
+
+// TODO
+
+// todo 가져오기
 router.get(
   "/todos",
   authenticateAccessToken,
-  userController.handleGetUserTodos
+  todoController.handleGetUserTodos
 );
 router.get(
   "/todos/:todo_id",
   authenticateAccessToken,
-  userController.handleGetTodoInfo
+  todoController.handleGetTodoInfo
 );
+
+// PROFILE
+
+// 사용자 스펙 가져오기
 router.get(
   "/specs",
   authenticateAccessToken,
-  userController.handleGetUserSpecs
+  profileUserController.handleGetUserSpecs
 );
+// 사용자 동네 가져오기
 router.get(
   "/neighborhoods",
   authenticateAccessToken,
-  userController.handleGetUserNeighborhoods
+  profileUserController.handleGetUserNeighborhoods
 );
+
+// 내 프로필 가져오기
 router.get(
   "/profile",
   authenticateAccessToken,
-  userController.handleGetUserMyProfile
+  profileUserController.handleGetUserMyProfile
 );
+// 남의 프로필 가져오기
 router.get(
   "/:user_id/profile",
   authenticateAccessToken,
-  userController.handleGetOtherUserProfile
+  profileUserController.handleGetOtherUserProfile
 );
+
+// PATCH
+
+// 사용자 프로필 수정
 router.patch(
   "/email",
   authenticateAccessToken,
-  userController.handleEditUserEmail
+  patchUserController.handleEditUserEmail
 );
 router.patch(
   "/profile-image",
   authenticateAccessToken,
-  userController.handleEditUserProfileImage
+  patchUserController.handleEditUserProfileImage
 );
 router.patch(
   "/nickname",
   authenticateAccessToken,
-  userController.handleEditUserNickname
+  patchUserController.handleEditUserNickname
 );
 
 module.exports = router;
