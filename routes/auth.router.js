@@ -13,23 +13,31 @@ const passport = require("passport");
 const { AlreadyExistsError } = require("../errors");
 const validate = require("../middleware/validate");
 
-// 새로 작성한 코드
+// 24.12.24 다시 작성하였음
+
+// 회원가입
 router.post(
   "/register",
   validate(authValidator.userRegister),
   registerController.userRegister
 );
 
+// 로컬 로그인
 router.post(
   "/login/local",
   validate(authValidator.userLogin),
   loginController.localLogin
 );
 
+// 로그아웃
 router.get("/logout", loginController.logout);
+
+// AT 재발급
 router.get("/token/reissue", loginController.reissueAccessToken);
 
 // Route Definitions
+// legacy code, 버그가 있을 수 있습니다.
+// 테스트하지 않은 코드들 입니다.
 router.get("/terms", authController.handleGetTerms);
 
 router.post("/register/test", authController.handleCreateTestUser);
