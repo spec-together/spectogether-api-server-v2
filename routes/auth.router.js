@@ -1,14 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const authController = require("../controllers/auth/auth.controller");
 const registerController = require("../controllers/auth/register.auth.controller");
 const loginController = require("../controllers/auth/login.auth.controller");
 const kakaoController = require("../controllers/auth/kakao.auth.controller");
 
 const authValidator = require("../utils/validators/auth.validators");
 
-const passport = require("passport");
 const validate = require("../middleware/validate");
 
 // 24.12.24 다시 작성하였음
@@ -26,22 +24,17 @@ router.post(
   validate(authValidator.userLogin),
   loginController.localLogin
 );
-
 // 카카오 로그인
 router.get("/login/kakao", kakaoController.kakaoLogin);
 router.get("/login/kakao/callback", kakaoController.kakaoCallback);
-
 // 로그아웃
 router.get("/logout", loginController.logout);
 
 // AT 재발급
 router.get("/token/reissue", loginController.reissueAccessToken);
 
-// Route Definitions
-// legacy code, 버그가 있을 수 있습니다.
-// 테스트하지 않은 코드들 입니다.
-router.get("/terms", authController.handleGetTerms);
-router.post("/register/test", authController.handleCreateTestUser);
+// 24.12.24 terms 삭제 처리, test user 생성 코드도 삭제 처리
+
 router.get("/teapot", (res) => res.status(418).send("I'm a teapot"));
 
 module.exports = router;

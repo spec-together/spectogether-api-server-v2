@@ -18,7 +18,6 @@ const {
   InvalidInputError,
   UnauthorizedError,
 } = require("../../errors");
-const { saveKakaoUserInfo } = require("../../repositories/passport.repository");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../../config.json").SERVER;
 
