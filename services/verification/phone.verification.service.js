@@ -101,7 +101,11 @@ const verifyToken = async (id, token) => {
   // 4-2. 토큰 일치하는 경우 true 리턴
   else {
     // 4-3. DB에서 인증세션 삭제
-    await record.destroy();
+    // await record.destroy();
+    // 인증세션을 삭제할 경우 추후 테이블 ID를 기반으로
+    // 전화번호를 조회하는 기능을 사용할 수 없음에 따라 변경합니다.
+
+    // 추후 일괄적으로 삭제하는 로직을 구성할 필요가 있습니다.
     return true;
   }
 };
