@@ -151,11 +151,11 @@ exports.handleGetUserMyProfile = async (req, res, next) => {
     const neighborhoods =
       await userService.getUserNeighborhoodsByUserId(user_id);
     const specs = await userService.getUserSpecsByUserId(user_id);
-    user.dataValues.neighborhoods = neighborhoods;
-    user.dataValues.specs = specs;
-    user.dataValues.user_id = encrypt62(user.dataValues.user_id);
+    user.areas = neighborhoods;
+    user.specs = specs;
+    user.user_id = encrypt62(user.user_id);
     return res.status(200).success({
-      user,
+      user: user,
     });
   } catch (error) {
     logger.error(
@@ -178,7 +178,7 @@ exports.handleGetOtherUserProfile = async (req, res, next) => {
     await userService.checkIfUserExistsByUserId(decrypt62(user_id));
     const user = await userService.getOtherUserProfile(decrypt62(user_id));
     return res.status(200).success({
-      user,
+      user: user,
     });
   } catch (error) {
     logger.error(
@@ -200,7 +200,7 @@ exports.handleEditUserEmail = async (req, res, next) => {
     const { user_id } = req.user;
     const { email } = req.body;
     await userService.checkIfUserExistsByUserId(user_id);
-    validateEditUserInfoSchemaService(req.body);
+    // validateEditUserInfoSchemaService(req.body);
     const userInfo = { userId: user_id, email };
     await userService.editUserEmail(userInfo);
     return res.status(200).success({
@@ -226,7 +226,7 @@ exports.handleEditUserProfileImage = async (req, res, next) => {
     const { user_id } = req.user;
     const { profileImage } = req.body;
     await userService.checkIfUserExistsByUserId(user_id);
-    validateEditUserInfoSchemaService(req.body);
+    // validateEditUserInfoSchemaService(req.body);
     const userInfo = { userId: user_id, profileImage };
     await userService.editUserProfileImage(userInfo);
     return res.status(200).success({
@@ -252,11 +252,11 @@ exports.handleEditUserNickname = async (req, res, next) => {
     const { user_id } = req.user;
     const { nickname } = req.body;
     await userService.checkIfUserExistsByUserId(user_id);
-    validateEditUserInfoSchemaService(req.body);
+    // validateEditUserInfoSchemaService(req.body);
     const userInfo = { userId: user_id, nickname };
     await userService.editUserNickname(userInfo);
     return res.status(200).success({
-      message: "프로필 이미지가 성공적으로 수정되었습니다.",
+      message: "닉네임이 성공적으로 수정되었습니다.",
     });
   } catch (error) {
     logger.error(

@@ -51,12 +51,11 @@ exports.getUserAgreedTerms = async (userId) => {
 
 exports.getUserStudyroom = async (userId) => {
   const studyrooms = await db.UserStudyroom.findAll({
-    where: {
-      user_id: userId,
-    },
+    where: { user_id: userId },
     include: [
       {
         model: db.Studyroom,
+        as: "studyroom",
         attributes: [
           "studyroom_id",
           "title",
@@ -78,13 +77,13 @@ exports.getUserStudyroom = async (userId) => {
   let ret = [];
   for (const studyroom of studyrooms) {
     ret.push({
-      studyroom_id: encrypt62(studyroom.Studyroom.studyroom_id),
-      title: studyroom.Studyroom.title,
-      subtitle: studyroom.Studyroom.subtitle,
-      area: studyroom.Studyroom.area_id,
-      profile_image: studyroom.Studyroom.profile_image,
-      status: studyroom.Studyroom.status,
-      created_at: studyroom.Studyroom.created_at,
+      studyroom_id: encrypt62(studyroom.studyroom.studyroom_id),
+      title: studyroom.studyroom.title,
+      subtitle: studyroom.studyroom.subtitle,
+      area: studyroom.studyroom.area_id,
+      profile_image: studyroom.studyroom.profile_image,
+      status: studyroom.studyroom.status,
+      created_at: studyroom.studyroom.created_at,
     });
   }
   logger.debug(
@@ -99,88 +98,92 @@ exports.getUserStudyroom = async (userId) => {
 
 exports.getUserTodo = async (userId) => {
   const studyroomTodos = await db.StudyroomTodo.findAll({
+    attributes: ["studyroom_id"],
     include: [
       {
-        model: Todo,
+        model: db.Todo,
+        as: "todo",
         attributes: [
           "todo_id",
           "title",
           "content",
+          "location",
+          "status", // todo_status: "enum (pending, done, deleted)"
+          "starts_at",
+          "ends_at",
           "creater_id",
-          "deadline",
-          "status",
           "created_at",
           "updated_at",
         ],
         include: [
           {
             model: db.TodoParticipant,
+            as: "todo_participants",
             where: { assigned_user_id: userId },
-            attributes: ["assigned_user_id", "status"],
+            attributes: ["assigned_user_id", "status"], // my_status: "enum (pending, abandoned, done)"
           },
         ],
       },
     ],
   });
 
-  const userTodos = await db.Todo.findAll({
-    where: {
-      creater_id: userId,
-    },
-    attributes: [
-      "todo_id",
-      "title",
-      "content",
-      "creater_id",
-      "status",
-      "created_at",
-      "updated_at",
+  const userTodos = await db.UserTodo.findAll({
+    where: { user_id: userId },
+    attributes: ["todo_id"],
+    include: [
+      {
+        model: db.Todo,
+        as: "todo",
+        attributes: [
+          "todo_id",
+          "title",
+          "content",
+          "location",
+          "status",
+          "starts_at",
+          "ends_at",
+          "creater_id",
+          "created_at",
+          "updated_at",
+        ],
+      },
     ],
   });
 
-  const todos = [...studyroomTodos, ...userTodos];
+  const todos = [...studyroomTodos, ...userTodos].map((todoEntry) => {
+    const isStudyroomTodo = !!todoEntry.studyroom_id;
+    const todo = todoEntry.todo;
+
+    return {
+      type: isStudyroomTodo ? "studyroom" : "user",
+      studyroom_id: isStudyroomTodo ? encrypt62(todoEntry.studyroom_id) : null,
+      todo_id: todo?.todo_id,
+      title: todo?.title,
+      content: todo?.content,
+      location: todo?.location,
+      todo_status: todo?.status,
+      my_status: isStudyroomTodo
+        ? todo?.todo_participants?.[0]?.status || null
+        : null,
+      starts_at: todo?.starts_at,
+      ends_at: todo?.ends_at,
+      creater_id: todo?.creater_id,
+      participants: isStudyroomTodo
+        ? todo?.todo_participants?.map((participant) => ({
+            id: participant.assigned_user_id,
+            nickname: participant.nickname || null,
+          })) || []
+        : [],
+      created_at: todo?.created_at,
+      updated_at: todo?.updated_at,
+    };
+  });
 
   if (!todos.length) {
     throw new NotExistsError("해당 사용자의 할 일이 없습니다.");
   }
 
-  const ret = todos.map((todoEntry) => {
-    let todo;
-    let studyroomId = null;
-    let assignedStatus = null;
-
-    if (todoEntry instanceof StudyroomTodo) {
-      todo = todoEntry.Todo;
-      studyroomId = encrypt62(todoEntry.studyroom_id);
-      assignedStatus = todoEntry.TodoParticipants[0]?.status;
-    } else {
-      todo = todoEntry;
-    }
-
-    return {
-      type: studyroomId ? "studyroom" : "user", // 타입 설정
-      studyroom_id: studyroomId || null, // 스터디룸 ID (없으면 null)
-      todo_id: encrypt62(todo.todo_id), // 암호화된 todo ID
-      title: todo.title,
-      content: todo.content,
-      location: todo.location || null, // 위치 필드 추가 (null일 경우)
-      todo_status: todo.status, // enum (pending, done, deleted)
-      my_status: assignedStatus || "pending", // 사용자의 상태 (기본값은 pending)
-      starts_at: todo.starts_at || null, // 시작일 (null일 경우)
-      ends_at: todo.ends_at || null, // 종료일 (null일 경우)
-      creater_id: encrypt62(todo.creater_id), // 암호화된 생성자 ID
-      participants: todoEntry.TodoParticipants
-        ? todoEntry.TodoParticipants.map((participant) => ({
-            id: encrypt62(participant.assigned_user_id), // 암호화된 참여자 ID
-            nickname: participant.nickname, // 참여자 닉네임 (기본값은 Unknown)
-          }))
-        : [],
-      created_at: todo.created_at,
-      updated_at: todo.updated_at,
-    };
-  });
-
-  return ret;
+  return todos;
 };
 
 exports.getTodoInfo = async (todoId) => {
@@ -231,11 +234,13 @@ exports.getUserSpecsByUserId = async (userId) => {
     include: [
       {
         model: db.Spec,
-        attributes: ["spec_id", "title", "host", "spec_date", "content"],
+        as: "spec",
+        attributes: ["spec_id", "name", "host", "spec_date", "content"],
         required: false, // LEFT OUTER JOIN 수행
         include: [
           {
             model: db.SpecPhoto,
+            as: "spec_photos",
             attributes: ["image_url", "sequence"],
             required: false,
           },
@@ -248,19 +253,17 @@ exports.getUserSpecsByUserId = async (userId) => {
   }
   // Spec 데이터만 추출
   const specs = userSpecs.map((us) => {
-    const specData = us.Spec;
+    const specData = us.spec;
     return {
       spec_id: specData.spec_id,
-      name: specData.title,
+      name: specData.name,
       host: specData.host,
       spec_date: specData.spec_date,
       content: specData.content,
-      images: specData.SpecImages
-        ? specData.SpecImages.map((image) => ({
-            sequence: image.sequence,
-            image_url: image.image_url,
-          }))
-        : [],
+      images: specData.spec_photos.map((image) => ({
+        sequence: image.sequence,
+        image_url: image.image_url,
+      })),
       created_at: us.created_at,
     };
   });
@@ -283,6 +286,7 @@ exports.getUserNeighborhoodsByUserId = async (userId) => {
     include: [
       {
         model: db.Area,
+        as: "area",
         attributes: ["area_id", "sido", "gungu"],
         required: false,
       },
@@ -300,7 +304,7 @@ exports.getUserNeighborhoodsByUserId = async (userId) => {
   }
 
   const neighborhoods = userNeighborhoods.map((un) => {
-    const area = un.Area;
+    const area = un.area;
     return {
       sequence: un.sequence,
       sido: area.sido,
@@ -327,32 +331,36 @@ exports.getUserMyProfile = async (userId) => {
       "manner_score",
       "created_at",
     ],
+    include: [
+      {
+        model: db.UserSchool,
+        as: "user_schools",
+        attributes: ["school_id", "is_verified", "is_public"],
+        include: [
+          {
+            model: db.School,
+            as: "school",
+            attributes: ["name"],
+          },
+        ],
+      },
+    ],
   });
   if (!user) {
     throw new NotExistsError("해당 사용자가 없습니다.");
   }
 
-  const userSchool = await db.UserSchool.findOne({
-    where: { user_id: userId },
-    attributes: ["school_id", "is_verified"],
-    include: [
-      {
-        model: db.School,
-        attributes: ["name"],
-      },
-    ],
-  });
-
   const profile = {
+    user_id: user.user_id,
     name: user.name,
     nickname: user.nickname,
-    remaining_nickname_changes: remainingNicknameChanges,
+    remaining_nickname_changes: 2 - user.nickname_changes,
     birthdate: user.birthdate,
     phone: user.phone_number,
     email: user.email,
-    is_email_verified: user.is_email_verified || false,
-    school: userSchool.name || null,
-    is_school_verified: userSchool.is_verified || false,
+    is_email_verified: user.is_email_verified,
+    school: user.user_schools?.[0]?.school?.name,
+    is_school_verified: user.user_schools?.[0]?.is_verified,
     profile_image: user.profile_image,
     spec_level: user.spec_level,
     manner_score: user.manner_score,
@@ -423,7 +431,6 @@ exports.getOtherUserProfile = async (otherUserId) => {
   }
 
   const publicProfile = {
-    ...user.toJSON(),
     nickname: user.nickname,
     phone: user.phone_number,
     email: user.is_email_public ? email : null,
@@ -440,13 +447,13 @@ exports.getOtherUserProfile = async (otherUserId) => {
     })),
     spec_level: user.spec_level,
     specs: user.user_specs.map((spec) => {
-      return spec.status === "private"
+      return spec.spec.status === "private"
         ? null
         : {
-            name: spec.Spec.name,
-            host: spec.Spec.host,
-            spec_date: spec.Spec.spec_date,
-            content: spec.Spec.content,
+            name: spec.spec.name,
+            host: spec.spec.host,
+            spec_date: spec.spec.spec_date,
+            content: spec.spec.content,
           };
     }),
     manner_score: user.manner_score,
@@ -488,13 +495,15 @@ exports.editUserNickname = async (userInfo) => {
   const { userId, nickname } = userInfo;
   logger.debug(`[editUserNickname] userId: ${userId}, nickname: ${nickname}`);
   const [updatedCount] = await db.User.update(
-    { nickname },
+    {
+      nickname: nickname,
+    },
     { where: { user_id: userId } }
   );
   if (updatedCount === 0) {
     throw new DatabaseError("기존 닉네임과 동일해 수정되지 않았습니다.");
   }
-  return { updatedCount };
+  return updatedCount;
 };
 
 exports.checkIfUserExistsByUserId = async (userId) => {
