@@ -37,6 +37,19 @@ const userRegister = async (req, res, next) => {
   }
 };
 
+const getTerms = async (req, res, next) => {
+  try {
+    const terms = await registerService.getCurrentActiveTerms();
+    return res.status(200).success({
+      terms,
+    });
+  } catch (err) {
+    logError(err);
+    next(err);
+  }
+};
+
 module.exports = {
   userRegister,
+  getTerms,
 };

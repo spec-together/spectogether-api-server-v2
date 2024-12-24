@@ -33,6 +33,7 @@ router.get("/logout", loginController.logout);
 // AT 재발급
 router.get("/token/reissue", loginController.reissueAccessToken);
 
+router.get("/terms", registerController.getTerms);
 // 24.12.24 terms 삭제 처리, test user 생성 코드도 삭제 처리
 
 router.get("/teapot", (res) => res.status(418).send("I'm a teapot"));
