@@ -1,48 +1,43 @@
 const express = require("express");
 const router = express.Router();
 
-const {
-  handleUserRegister,
-  handleUserLocalLogin,
-  handleKakaoCallback,
-  handleUserLogout,
-  handleReissueAccessToken,
-  handleCreateTestUser,
-  handleGetTerms,
-} = require("../controllers/auth/auth.controller");
+const authController = require("../controllers/auth/auth.controller");
+const registerController = require("../controllers/auth/register.auth.controller");
+const loginController = require("../controllers/auth/login.auth.controller");
+
+const authValidator = require("../utils/validators/auth.validators");
+
 const passport = require("passport");
 
 // TODO : 나중에 지워라 컨벤션 심각하게 위반하는거 ..
-const {
-  checkIfUserExistsByEmail,
-  checkIfUserExistsByPhoneNumber,
-} = require("../repositories/auth.repository");
 const { AlreadyExistsError } = require("../errors");
+const validate = require("../middleware/validate");
+
+// 새로 작성한 코드
+router.post(
+  "/register",
+  validate(authValidator.userRegister),
+  registerController.userRegister
+);
+
+router.post(
+  "/login/local",
+  validate(authValidator.userLogin),
+  loginController.localLogin
+);
+
+router.get("/logout", loginController.logout);
+router.get("/token/reissue", loginController.reissueAccessToken);
 
 // Route Definitions
-router.get("/terms", handleGetTerms);
-router.post("/register", handleUserRegister);
-router.post("/register/test", handleCreateTestUser);
-router.post("/login/local", handleUserLocalLogin);
+router.get("/terms", authController.handleGetTerms);
+
+router.post("/register/test", authController.handleCreateTestUser);
+
 router.get("/login/kakao", passport.authenticate("kakao", { session: false }));
-router.get("/login/kakao/callback", handleKakaoCallback);
-router.get("/logout", handleUserLogout);
-router.get("/token/reissue", handleReissueAccessToken);
-router.get("/teapot", (req, res) => res.status(418).send("I'm a teapot"));
+router.get("/login/kakao/callback", authController.handleKakaoCallback);
 
-router.post("/verification/email/unique", async (req, res, next) => {
-  const { email } = req.body;
-  const result = await checkIfUserExistsByEmail(email);
-  if (result) next(new AlreadyExistsError("이미 존재하는 이메일입니다."));
-  return res.status(200).success("사용 가능한 이메일입니다.");
-});
-
-router.post("/verification/phone/unique", async (req, res, next) => {
-  const { phone_number } = req.body;
-  const result = await checkIfUserExistsByPhoneNumber(phone_number);
-  if (result) next(new AlreadyExistsError("이미 존재하는 전화번호입니다."));
-  return res.status(200).success("사용 가능한 전화번호입니다.");
-});
+router.get("/teapot", (res) => res.status(418).send("I'm a teapot"));
 
 module.exports = router;
 

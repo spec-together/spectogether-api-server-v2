@@ -1,19 +1,3 @@
-const {
-  createTestUserService,
-  validateRegisterInputService,
-  checkDuplicateUserService,
-  createNewUserService,
-  createCalendarForNewUserService,
-  validateLoginInputService,
-  getUserInfoService,
-  checkIfTokenIsValidService,
-  removeRefreshTokenFromDatabaseByTokenStringService,
-  checkIfRefreshTokenExistsByTokenStringService,
-  checkAndReturnRefreshTokenIfExistsInRequestCookie,
-  getEmailByEmailVerificationIdService,
-  createUserAgreedTermsToDatabaseService,
-  getCurrentTermsService,
-} = require("../../services/auth/auth.service");
 const logger = require("../../logger");
 const { RelatedServiceUnavailableError } = require("../../errors");
 const {
@@ -21,80 +5,45 @@ const {
   comparePassword,
   encrypt62,
 } = require("../../utils/encrypt.util");
-const {
-  getEmailByEmailVerificationId,
-} = require("../../repositories/auth.repository");
-const {
-  createAccessTokenService,
-  createRefreshTokenService,
-} = require("../../services/auth/auth.token.service");
+
+const authService = require("../../services/auth/auth.service");
+const authTokenService = require("../../services/auth/auth.token.service");
+
+// 새로 작성하는 서비스 ..
+const registerService = require("../../services/auth/register.auth.service");
+
 const {
   refreshTokenCookieOptions,
   logoutCookieOptions,
 } = require("../../options");
+
 const passport = require("passport");
+const { logError } = require("../../utils/handlers/error.logger");
 const { FRONTEND_URL } = require("../../config.json").SERVER;
 
 const handleUserRegister = async (req, res, next) => {
   /*
-  1. 데이터 검증, 카카오로 회원가입 시에는 user_oauth에도 집어넣기
-  2. 이미 존재하는 사용자인지 확인 ( key = email )
-  3. email verification id에 등록된 email과 일치하는지 확인
-  4. spec_level, manner_level, role, is_active 는 default로 생성
-  4-1. user_terms 에 연결
-  5. calendar 생성, user_calendar 연결
-  6. todo는 나중에 테이블에 쿼리 떄릴거임
+  1. 미들웨어에서 데이터 검증
+  2. 이미 존재하는 사용자인지 확인하기 (전화번호가 중복하는지 확인)
+  3. 핸드폰번호는 인증세션 ID를 제공
+    해당 인증세션이 인증되었는지 확인하기
+    * 현재는 인증완료되면 지우도록 되어 있는데 수정 필요
+  4. name, nickname, birhdate, phone_verify_session_id, email 
+    제공할 필요 있음, 이때 profile_image는 서버측에서 default로 입력
+  5. 사용자가 동의한 약관 정보 저장하기
   */
   try {
-    const newUserData = req.body;
-    // 데이터 검증
-    logger.debug(`[handleUserRegister] 데이터 검증`);
-    validateRegisterInputService(newUserData);
-    // 카카오 회원가입일 경우에 user_oauth에 데이터 추가하기
-    if (newUserData.user_register_type === "kakao") {
-      // TODO : 카카오 회원가입일 경우에 user_oauth에 데이터 추가하기
-    }
-
-    // 중복 사용자 확인
-    logger.debug(`[handleUserRegister] 중복 사용자 확인`);
-    await checkDuplicateUserService(
-      newUserData.email,
-      newUserData.phone_number
+    // 2. 이미 존재하는 사용자인지 확인하기
+    // 2-1. 인증 세션에서 핸드폰번호 가져오기
+    const { phone_verification_session_id } = req.body;
+    const phoneNumber = await registerService.getPhoneNumberByVerificationId(
+      phone_verification_session_id
     );
-    // email verification id 확인
-    // TODO : 편리성을 위해서 우선 비활성화 ... 추후에 핸드폰 번호 인증과 함께 활성화 필요
-
-    // logger.debug(`[handleUserRegister] email verification id 확인`);
-    // const emailVerifyId = decrypt62(newUserData.email_verification_id);
-    // await getEmailByEmailVerificationIdService(emailVerifyId);
-
-    // 사용자 생성
-    logger.debug(`[handleUserRegister] 사용자 생성`);
-    const newUser = await createNewUserService(newUserData);
-
-    // user_terms 연결
-    // TODO : 모든 약관에 대한 동의여부를 보냈는지 확인하기
-    await createUserAgreedTermsToDatabaseService(
-      newUser.user_id,
-      newUserData.terms
-    );
-
-    // 캘린더 생성 및 user_calendar에 연결
-    logger.debug(`[handleUserRegister] 캘린더 생성 및 user_calendar에 연결`);
-    await createCalendarForNewUserService(newUser.user_id);
-
-    return res.status(201).success({
-      message: "사용자 생성에 성공했습니다.",
-    });
-  } catch (error) {
-    logger.error(
-      `[handleUserRegister]\
-      \nNAME ${error.name}\
-      \nREASON ${JSON.stringify(error.reason, null, 2)}\
-      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
-      \nSTACK ${error.stack}`
-    );
-    next(error);
+    // 2-2. 해당 핸드폰번호로 이미 사용자가 존재하는지 확인하기
+    await registerService.checkIfUserExistsByPhoneNumber(phoneNumber);
+  } catch (err) {
+    logError(err);
+    next(err);
   }
 };
 
@@ -103,7 +52,7 @@ const handleUserRegister = async (req, res, next) => {
 const handleCreateTestUser = async (req, res, next) => {
   try {
     const { name, email, phone_number } = req.body;
-    const newUser = await createTestUserService(name, email, phone_number);
+    const newUser = await authService.createTestUser(name, email, phone_number);
     res.status(201).success({
       created_user: newUser,
       message: "테스트 유저 생성에 성공했습니다.",
@@ -132,17 +81,21 @@ const handleUserLocalLogin = async (req, res, next) => {
     // 데이터 검증
     const reqBody = req.body;
     const { login_id, password } = reqBody;
-    validateLoginInputService(reqBody);
+    authService.validateLoginInputService(reqBody);
 
     // 사용자 조회 후 사용자 정보 받아오기
     logger.debug(`[handleUserLocalLogin] 사용자 조회`);
-    const user = await getUserInfoService(login_id);
+    const user = await authService.getUserInfo(login_id);
     await comparePassword(password, user.password);
 
     // JWT 토큰 발급
     const { user_id, name, nickname } = user;
-    const accessToken = createAccessTokenService(user_id, name, nickname);
-    const refreshToken = await createRefreshTokenService(user_id);
+    const accessToken = authTokenService.createAccessToken(
+      user_id,
+      name,
+      nickname
+    );
+    const refreshToken = await authTokenService.createRefreshToken(user_id);
     logger.debug(
       `[handleUserLocalLogin] 토큰 발급 완료\
       \nAT : ${accessToken}\
@@ -212,8 +165,12 @@ const handleKakaoPassportCallback = async (err, user, info, req, res, next) => {
       `[handleKakaoCallback 3] 217' User : ${JSON.stringify(user, null, 2)}`
     );
     const { user_id, name, nickname } = user;
-    const accessToken = createAccessTokenService(user_id, name, nickname);
-    const refreshToken = await createRefreshTokenService(user_id);
+    const accessToken = authTokenService.createAccessToken(
+      user_id,
+      name,
+      nickname
+    );
+    const refreshToken = await authTokenService.createRefreshToken(user_id);
     const encryptedUserId = encrypt62(user_id);
 
     logger.info(
@@ -244,7 +201,7 @@ const handleUserLogout = async (req, res, next) => {
     checkIfTokenIsValidService(refreshToken);
     // const { user_id } = isTokenValid.decoded;
     // DB에 저장된 RT 삭제
-    await removeRefreshTokenFromDatabaseByTokenStringService(refreshToken);
+    await removeRefreshTokenFromDatabaseByTokenString(refreshToken);
 
     return res
       .status(200)
@@ -269,10 +226,14 @@ const handleReissueAccessToken = async (req, res, next) => {
   */
   try {
     const refreshToken = checkAndReturnRefreshTokenIfExistsInRequestCookie(req);
-    const isTokenValid = checkIfTokenIsValidService(refreshToken);
-    await checkIfRefreshTokenExistsByTokenStringService(refreshToken);
+    const isTokenValid = checkIfTokenIsValid(refreshToken);
+    await checkIfRefreshTokenExistsByTokenString(refreshToken);
     const { user_id, name, nickname } = isTokenValid.decoded;
-    const newAccessToken = createAccessTokenService(user_id, name, nickname);
+    const newAccessToken = authTokenService.createAccessToken(
+      user_id,
+      name,
+      nickname
+    );
 
     return res.status(201).success({ access_token: newAccessToken });
   } catch (error) {
@@ -290,7 +251,7 @@ const handleReissueAccessToken = async (req, res, next) => {
 const handleGetTerms = async (req, res, next) => {
   try {
     // TODO : 약관들을 가져오는 로직
-    const result = await getCurrentTermsService();
+    const result = await getCurrentTerms();
     logger.debug(
       `[handleGetTerms] 약관들을 가져왔습니다 : ${JSON.stringify(result, null, 2)}`
     );

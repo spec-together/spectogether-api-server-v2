@@ -26,6 +26,11 @@ class VerificationCode extends Model {
           type: DataTypes.STRING(1024),
           allowNull: false,
         },
+        is_verified: {
+          type: DataTypes.BOOLEAN,
+          allowNull: true,
+          defaultValue: false,
+        },
         created_at: {
           type: DataTypes.DATE(6),
           allowNull: false,

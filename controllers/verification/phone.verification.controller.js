@@ -1,5 +1,6 @@
 const logger = require("../../logger");
 const phoneVerificationService = require("../../services/verification/phone.verification.service");
+const { logError } = require("../../utils/handlers/error.logger");
 
 const checkPhoneUnique = async (req, res, next) => {
   //
@@ -9,13 +10,7 @@ const checkPhoneUnique = async (req, res, next) => {
       await phoneVerificationService.checkPhoneUnique(phone_number);
     if (result) return res.status(200).success("사용 가능한 전화번호입니다.");
   } catch (error) {
-    logger.error(
-      `[checkPhoneUnique]\
-      \nNAME ${error.name}\
-      \nREASON ${JSON.stringify(error.reason, null, 2)}\
-      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
-      \nSTACK ${error.stack}`
-    );
+    logError(error);
     next(error);
   }
 };
@@ -29,13 +24,7 @@ const sendTokenToPhone = async (req, res, next) => {
       id: encryptedId,
     });
   } catch (error) {
-    logger.error(
-      `[sendTokenToPhone]\
-      \nNAME ${error.name}\
-      \nREASON ${JSON.stringify(error.reason, null, 2)}\
-      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
-      \nSTACK ${error.stack}`
-    );
+    logError(error);
     next(error);
   }
 };
@@ -46,13 +35,7 @@ const verifyToken = async (req, res, next) => {
     await phoneVerificationService.verifyToken(id, token);
     return res.status(200).success("인증에 성공했습니다.");
   } catch (error) {
-    logger.error(
-      `[verifyToken]\
-      \nNAME ${error.name}\
-      \nREASON ${JSON.stringify(error.reason, null, 2)}\
-      \nMESSAGE ${JSON.stringify(error.message, null, 2)}\
-      \nSTACK ${error.stack}`
-    );
+    logError(error);
     next(error);
   }
 };
