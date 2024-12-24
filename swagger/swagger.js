@@ -6,7 +6,7 @@ const responseSchema = require("./schemas/response.schema");
 const usersSchema = require("./schemas/users.schema");
 const inquirySchema = require("./schemas/inquiry.schema");
 const contestSchema = require("./schemas/contest.schema.js");
-const emailVerificationSchema = require("./schemas/email.verification.schema.js");
+const EmailVerificationSchema = require("./schemas/email.verification.schema.js");
 const todoSchema = require("./schemas/todo.schema");
 const studyroomSchema = require("./schemas/studyroom.schema");
 
@@ -50,7 +50,7 @@ const options = {
         ...usersSchema,
         ...inquirySchema,
         ...contestSchema,
-        ...emailVerificationSchema,
+        ...EmailVerificationSchema,
         ...todoSchema,
         ...studyroomSchema,
       },
