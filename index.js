@@ -4,7 +4,6 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-const passport = require("passport");
 const cookieParser = require("cookie-parser");
 const { Server } = require("socket.io");
 // const https = require("https"); // https를 사용해야 하는 경우 사용하면 됩니다.
@@ -19,11 +18,6 @@ const {
 } = require("./options");
 
 const { PORT } = require("./config.json").SERVER;
-
-const {
-  AccessTokenStrategy,
-  KakaoOAuthStrategy,
-} = require("./utils/passport.util");
 const {
   errorHandler,
   responseHandler,
@@ -61,12 +55,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // app.use("/static", express.static("public")); // 정적 파일 제공. public 폴더 안에 있는 파일들을 /static 경로를 통해 접근 가능
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// Passport 초기화
-app.use(passport.initialize());
-// Passport Strategy 설정
-passport.use("accessToken", AccessTokenStrategy);
-passport.use("kakao", KakaoOAuthStrategy);
 
 // Swagger 설정
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(specs));

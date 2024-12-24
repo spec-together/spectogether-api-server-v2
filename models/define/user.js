@@ -76,13 +76,13 @@ class User extends Model {
         created_at: {
           type: DataTypes.DATE(6),
           allowNull: false,
-          defaultValue: "CURRENT_TIMESTAMP(6)", // Sequelize.literal("CURRENT_TIMESTAMP(6)")
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
         },
         updated_at: {
           type: DataTypes.DATE(6),
           allowNull: false,
-          defaultValue: "CURRENT_TIMESTAMP(6)",
-          onUpdate: "CURRENT_TIMESTAMP(6)", // Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+          onUpdate: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
         },
       },
       {
