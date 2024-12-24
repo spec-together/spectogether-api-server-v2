@@ -1,11 +1,8 @@
 const config = require("../../config.json");
-const { NotExistsError } = require("../../errors");
 const { logError } = require("../../utils/handlers/error.logger");
 const { KAKAO_REST_API_KEY, KAKAO_REDIRECT_URI } = config.KAKAO;
 
 const kakaoService = require("../../services/auth/kakao.auth.service");
-const logger = require("../../logger");
-const { encrypt62 } = require("../../utils/encrypt.util");
 const { refreshTokenCookieOptions } = require("../../options");
 
 const kakaoLogin = async (req, res, next) => {
