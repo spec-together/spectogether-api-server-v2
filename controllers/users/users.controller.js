@@ -200,7 +200,8 @@ exports.handleEditUserInfo = async (req, res, next) => {
     await userService.checkIfUserExistsByUserId(user_id);
     validateEditUserInfoSchemaService(req.body);
     const { type, content } = req.body;
-    await userService.editUserInfo(user_id, type, content);
+    const userInfo = { userId: user_id, type, content };
+    await userService.editUserInfo(userInfo);
     return res.status(200).success({
       message: "정보가 성공적으로 수정되었습니다.",
     });

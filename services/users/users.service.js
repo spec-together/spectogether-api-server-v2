@@ -291,32 +291,29 @@ exports.getOtherUserProfile = async (otherUserId) => {
   return user;
 };
 
-exports.editUserInfo = async (userId, type, content) => {
+exports.editUserInfo = async (userInfo) => {
+  const { userId, type, content } = userInfo;
   logger.debug(
     `[editUserInfoService] userId: ${userId}, type: ${type}, content: ${content}`
   );
+  let updatedUser;
   if (type === "profile_image") {
-    const updatedUser = await User.update(
-      { profile_image: profileImage },
+    updatedUser = await User.update(
+      { profile_image: content },
       { where: { user_id: userId } }
     );
-    if (updatedUser === 0) {
-      throw new DatabaseError("기존값과 동일해 정보가 수정되지 않았습니다.");
-    }
-
-    return updatedUser;
   } else if (type === "nickname") {
-    const updatedUser = await User.update(
-      { nickname: nickname },
+    updatedUser = await User.update(
+      { nickname: content },
       { where: { user_id: userId } }
     );
-    if (updatedUser === 0) {
-      throw new DatabaseError("기존값과 동일해 정보가 수정되지 않았습니다.");
-    }
-
-    return updatedUser;
   }
-  return result;
+  
+  if (updatedUser === 0) {
+    throw new DatabaseError("기존값과 동일해 정보가 수정되지 않았습니다.");
+  }
+
+  return { updatedUser };
 };
 
 exports.checkIfUserExistsByUserId = async (userId) => {
