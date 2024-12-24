@@ -1,4 +1,8 @@
-const { InvalidInputError, AlreadyExistsError } = require("../../errors");
+const {
+  InvalidInputError,
+  AlreadyExistsError,
+  ServiceImplementationError,
+} = require("../../errors");
 const {
   decrypt62,
   generateHashedPassword,
@@ -9,9 +13,9 @@ const {
   VerificationCode,
   UserOauth,
   UserTerm,
+  Term,
 } = require("../../models");
 const logger = require("../../logger");
-const { en } = require("@faker-js/faker");
 
 // /auth/register
 
@@ -113,9 +117,31 @@ const createNewLocalUser = async (data) => {
   return true;
 };
 
+const getCurrentActiveTerms = async () => {
+  const terms = await Term.findAll({
+    attributes: [
+      "term_id",
+      "name",
+      "description",
+      "is_required",
+      "term_version",
+    ],
+    where: {
+      status: true,
+    },
+  });
+  if (!terms) {
+    logger.error("[getCurrentActiveTerms] 활성화된 약관이 존재하지 않습니다.");
+    throw new ServiceImplementationError("활성화된 약관이 존재하지 않습니다.");
+  }
+
+  return terms;
+};
+
 module.exports = {
   getPhoneNumberByVerificationId,
   checkIfUserExistsByPhoneNumber,
   createNewOauthUser,
   createNewLocalUser,
+  getCurrentActiveTerms,
 };
