@@ -1,85 +1,76 @@
-const {
-  validateonlyStudyroomIdSchemaService,
-  validateStudyroomIdAndContentSchemaService,
-} = require("../../utils/validators/studyroom.chat.socket.validators");
-const {
-  getStudyroomChatByStudyroomIdService,
-  saveChatToDatabaseService,
-} = require("../../services/socket/studyroom.chat.socket.service");
+const validator = require("../../utils/validators/studyroom.chat.socket.validators");
+const chatService = require("../../services/socket/studyroom.chat.socket.service");
 const logger = require("../../logger");
 const { decrypt62, encrypt62 } = require("../../utils/encrypt.util");
 const { socketErrorHandler } = require("../../utils/handlers/socket.handlers");
 
-const handleOnUserEnterStudyroomMessage = async (socket, data) => {
+const userEnter = async (socket, data) => {
   try {
+    logger.debug(`[userEnter] Received: ${JSON.stringify(data, null, 2)}`);
+    // 1. 입력값 검증
+    validator.userEnter(data);
+    // 2-1. studyroom_id 복호화
+    const decryptedStudyroomId = decrypt62(data.studyroom_id);
+
+    // 3. 해당 studyroom_id의 채팅을 가져옴
+    const data = await chatService.getChatByCursor({
+      studyroom_id: decryptedStudyroomId,
+    });
+    // 가져온 채팅 로깅
     logger.debug(
-      `[handleOnUserEnterStudyroomMessage] Received: ${JSON.stringify(data, null, 2)}`
+      `[userEnter] studyroomChat: ${data.chats.length}개의 채팅
+      \n${JSON.stringify(data.chats, null, 2)}`
     );
-    validateonlyStudyroomIdSchemaService(data);
-    const { studyroom_id } = data;
-    const { user_id } = socket.user;
-    const decryptedStudyroomId = decrypt62(studyroom_id);
-    const studyroomChat = await getStudyroomChatByStudyroomIdService(
-      decryptedStudyroomId,
-      user_id
-    );
-    logger.debug(
-      `[handleOnUserEnterStudyroomMessage] studyroomChat: ${JSON.stringify(studyroomChat, null, 2)}`
-    );
-    socket.emit("initial-message", { chats: studyroomChat });
+
+    // 4. 가져온 채팅을 initial-message 로 전송
+    socket.emit("initial-message", data);
   } catch (error) {
-    logger.error(`[handleOnUserEnterStudyroomMessage] Error: ${error}`);
-    socketErrorHandler(socket, "handleOnUserEnterStudyroomMessage", error);
+    logger.error(`[userEnter] Error: ${error}`);
+    socketErrorHandler(socket, "user-enter", error);
   }
 };
 
 // TODO : socket.io middleware의 정보 갱신 주기?
-const handleOnJoinChatroom = async (socket, data) => {
+const userJoin = async (socket, data) => {
   try {
-    logger.debug(
-      `[handleOnJoinChatroom] Received: ${JSON.stringify(data, null, 2)}`
-    );
-    validateonlyStudyroomIdSchemaService(data);
+    logger.debug(`[userJoin] Received: ${JSON.stringify(data, null, 2)}`);
+    validator.userEnter(data);
     const { studyroom_id } = data;
     const decryptedStudyroomId = decrypt62(studyroom_id);
     socket.join(decryptedStudyroomId);
-    logger.debug(
-      `[handleOnJoinChatroom] Joined studyroom_id: ${decryptedStudyroomId}`
-    );
+    logger.debug(`[userJoin] Joined studyroom_id: ${decryptedStudyroomId}`);
     socket.broadcast
       .to(decryptedStudyroomId)
       .emit("user-joined", { user: socket.user });
   } catch (error) {
-    logger.error(`[handleOnJoinChatroom] Error: ${error}`);
-    socketErrorHandler(socket, "handleOnJoinChatroom", error);
+    logger.error(`[userJoin] Error: ${error}`);
+    socketErrorHandler(socket, "user-join", error);
   }
 };
 
 // TODO : service로의 분리 필요
 //      : user가 존재하는지 확인할 필요 있음
-const handleOnLeave = async (socket, data) => {
+const userLeave = async (socket, data) => {
   try {
-    logger.debug(`[handleOnLeave] Received: ${JSON.stringify(data, null, 2)}`);
-    validateonlyStudyroomIdSchemaService(data);
+    logger.debug(`[userLeave] Received: ${JSON.stringify(data, null, 2)}`);
+    validator.userEnter(data);
     const { studyroom_id } = data;
     const decryptedStudyroomId = decrypt62(studyroom_id);
     socket.leave(decryptedStudyroomId);
-    logger.debug(`[handleOnLeave] Left studyroom_id: ${decryptedStudyroomId}`);
+    logger.debug(`[userLeave] Left studyroom_id: ${decryptedStudyroomId}`);
     socket.broadcast
       .to(decryptedStudyroomId)
       .emit("user-left", { user: socket.user });
   } catch (error) {
-    logger.error(`[handleOnLeave] Error: ${error}`);
-    socketErrorHandler(socket, "handleOnLeave", error);
+    logger.error(`[userLeave] Error: ${error}`);
+    socketErrorHandler(socket, "user-leave", error);
   }
 };
 
-const handleOnMessage = async (socket, data) => {
+const onMessage = async (socket, data) => {
   try {
-    logger.debug(
-      `[handleOnMessage] Received: ${JSON.stringify(data, null, 2)}`
-    );
-    validateStudyroomIdAndContentSchemaService(data);
+    logger.debug(`[onMessage] Received: ${JSON.stringify(data, null, 2)}`);
+    validator.message(data);
     const { studyroom_id, type, content } = data;
     const decryptedStudyroomId = decrypt62(studyroom_id);
     // const broadcastData = {
@@ -102,7 +93,7 @@ const handleOnMessage = async (socket, data) => {
     //     .emit("message-image", { ...broadcastData, is_my_chat: false });
     //   socket.emit("message-image", { ...broadcastData, is_my_chat: true });
     // }
-    const newChat = await saveChatToDatabaseService(
+    const newChat = await chatService.saveChat(
       decryptedStudyroomId,
       socket.user.user_id,
       type,
@@ -131,14 +122,14 @@ const handleOnMessage = async (socket, data) => {
       socket.emit("message-image", { ...broadcastData, is_my_chat: true });
     }
   } catch (error) {
-    logger.error(`[handleOnMessage] Error: ${error}`);
-    socketErrorHandler(socket, "handleOnMessage", error);
+    logger.error(`[onMessage] Error: ${error}`);
+    socketErrorHandler(socket, "onMessage", error);
   }
 };
 
 module.exports = {
-  handleOnUserEnterStudyroomMessage,
-  handleOnJoinChatroom,
-  handleOnLeave,
-  handleOnMessage,
+  userEnter,
+  userJoin,
+  userLeave,
+  onMessage,
 };

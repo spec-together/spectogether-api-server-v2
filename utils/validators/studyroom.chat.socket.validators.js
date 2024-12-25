@@ -5,7 +5,7 @@ const { InvalidInputError } = require("../../errors");
 const ajv = new Ajv({ allErrors: true });
 addFormats(ajv);
 
-const validateonlyStudyroomIdSchemaService = (data) => {
+const userEnter = (data) => {
   const onlyStudyroomIdSchema = {
     type: "object",
     properties: {
@@ -29,7 +29,7 @@ const validateonlyStudyroomIdSchemaService = (data) => {
   };
 };
 
-const validateStudyroomIdAndContentSchemaService = (data) => {
+const message = (data) => {
   const studyroomIdAndContentSchema = {
     type: "object",
     properties: {
@@ -58,6 +58,6 @@ const validateStudyroomIdAndContentSchemaService = (data) => {
 };
 
 module.exports = {
-  validateonlyStudyroomIdSchemaService,
-  validateStudyroomIdAndContentSchemaService,
+  userEnter,
+  message,
 };
