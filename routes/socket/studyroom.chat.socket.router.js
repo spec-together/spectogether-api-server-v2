@@ -26,6 +26,7 @@ const socketRouter = (io) => {
       "message",
       async (data) => await chatController.onMessage(socket, data)
     );
+
     // socket.on("reconnect");
     // socket.on("disconnect");
   });

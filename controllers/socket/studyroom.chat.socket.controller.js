@@ -13,17 +13,17 @@ const userEnter = async (socket, data) => {
     const decryptedStudyroomId = decrypt62(data.studyroom_id);
 
     // 3. 해당 studyroom_id의 채팅을 가져옴
-    const data = await chatService.getChatByCursor({
+    const chatData = await chatService.getChatByCursor({
       studyroom_id: decryptedStudyroomId,
     });
     // 가져온 채팅 로깅
     logger.debug(
-      `[userEnter] studyroomChat: ${data.chats.length}개의 채팅
-      \n${JSON.stringify(data.chats, null, 2)}`
+      `[userEnter] studyroomChat: ${chatData.chats.length}개의 채팅
+      \n${JSON.stringify(chatData.chats, null, 2)}`
     );
 
     // 4. 가져온 채팅을 initial-message 로 전송
-    socket.emit("initial-message", data);
+    socket.emit("initial-message", chatData);
   } catch (error) {
     logger.error(`[userEnter] Error: ${error}`);
     socketErrorHandler(socket, "user-enter", error);
