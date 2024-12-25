@@ -29,6 +29,10 @@ class StudyroomChat extends Model {
           type: DataTypes.STRING(2048),
           allowNull: false,
         },
+        type: {
+          type: DataTypes.ENUM("text", "image"),
+          allowNull: false,
+        },
         created_at: {
           type: DataTypes.DATE(6),
           allowNull: false,
