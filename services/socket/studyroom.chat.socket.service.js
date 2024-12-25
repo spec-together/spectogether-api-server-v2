@@ -8,12 +8,12 @@ const {
   Sequelize,
 } = require("../../models");
 
-const getChatByCursor = async ({ studyroom_id, cursor = null, userId }) => {
+const getChatByCursor = async ({ studyroom_id, cursor = null, user_id }) => {
   // LIMIT
   const limit = 5;
   // cursor 유무에 따라 where clause 생성
   const whereClause = {
-    studyroom_id,
+    studyroom_id: studyroom_id,
   };
   if (cursor) {
     // 커서를 기반으로 studyroom_chat_id가 cursor보다 작은(오래된) 채팅을 조회
@@ -56,7 +56,7 @@ const getChatByCursor = async ({ studyroom_id, cursor = null, userId }) => {
   let ret = [];
   for (const chat of chats) {
     ret.push({
-      is_my_chat: chat.sender_id === userId,
+      is_my_chat: chat.sender_id === user_id,
       studyroom_chat_id: chat.studyroom_chat_id,
       studyroom_id: chat.studyroom_id,
       sender_id: encrypt62(chat.sender_id),
@@ -76,17 +76,24 @@ const getChatByCursor = async ({ studyroom_id, cursor = null, userId }) => {
   };
 };
 
-const checkIfUserInStudyroomService = async (studyroomId, userId) => {
+const isUserInStudyroom = async ({ studyroom_id, user_id }) => {
   const result = await StudyroomMember.findOne({
     attributes: ["studyroom_id"],
     where: {
-      studyroom_id: studyroomId,
-      sender_id: userId,
+      studyroom_id: studyroom_id,
+      user_id: user_id,
+      status: "active",
     },
   });
   if (!result) {
+    logger.error(
+      `[isUserInStudyroom] ${user_id} 사용자가 ${studyroom_id} 스터디룸에 접근을 시도했습니다.`
+    );
     throw new NotAllowedError("해당 스터디룸에 속한 사용자가 아닙니다.");
   }
+  logger.debug(
+    `[isUserInStudyroom] ${user_id} 사용자가 ${studyroom_id} 스터디룸에 접근했습니다.`
+  );
   return result;
 };
 
@@ -104,8 +111,26 @@ const saveChat = async (studyroomId, senderId, type, content) => {
   return result;
 };
 
+const getNameAndNicknameById = async (userId) => {
+  const user = await User.findByPk(userId, {
+    attributes: ["name", "nickname"],
+  });
+  logger.info(
+    `[getNameAndNicknameById] ${userId} 사용자 정보 조회: ${user.name}`
+  );
+
+  if (!user) {
+    throw new NotAllowedError("사용자 정보를 찾을 수 없습니다.");
+  }
+  return {
+    name: user.name,
+    nickname: user.nickname,
+  };
+};
+
 module.exports = {
-  checkIfUserInStudyroomService,
+  isUserInStudyroom,
   saveChat,
   getChatByCursor,
+  getNameAndNicknameById,
 };

@@ -34,7 +34,7 @@ const message = (data) => {
     type: "object",
     properties: {
       studyroom_id: { type: "string" },
-      type: { type: "string" },
+      type: { type: "string", enum: ["text", "image"] },
       content: { type: "string" },
     },
     required: ["studyroom_id", "content", "type"],

@@ -1,13 +1,12 @@
 const chatController = require("../../controllers/socket/studyroom.chat.socket.controller");
 const logger = require("../../logger");
-const {
-  socketAuthenticateAccessToken,
-} = require("../../middleware/socket.authenticate.jwt");
+
+const socketMiddleware = require("../../middleware/socket.authenticate.jwt");
 
 const socketRouter = (io) => {
   logger.debug(`[studyroomChatSocketRouter] Loaded`);
 
-  io.use(socketAuthenticateAccessToken);
+  io.use(socketMiddleware.checkAccessToken);
 
   io.on("connection", (socket) => {
     socket.on(
@@ -28,7 +27,10 @@ const socketRouter = (io) => {
     );
 
     // socket.on("reconnect");
-    // socket.on("disconnect");
+    socket.on(
+      "disconnect",
+      async (data) => await chatController.onDisconnect(socket, data)
+    );
   });
 };
 
