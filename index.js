@@ -34,6 +34,7 @@ const contestRouter = require("./routes/contest.router");
 const phoneVerificationRouter = require("./routes/phone.verification.router");
 const emailVerificationRouter = require("./routes/email.verification.router");
 const studyroomRouter = require("./routes/studyroom.router");
+const testRouter = require("./routes/test.router");
 
 // TODO : 일단 구현 중에는 분리해서 구현하고 있으며, 구현 끝나고 스터디 룸 등으로 이동할지 결정하자.
 const todoRouter = require("./routes/todo.router");
@@ -69,6 +70,7 @@ app.use("/verification/email", emailVerificationRouter);
 app.use("/verification/phone", phoneVerificationRouter);
 app.use("/todos", todoRouter);
 app.use("/studyrooms", studyroomRouter);
+app.use("/test", testRouter);
 
 // 에러 핸들러는 최하단에 위치해야 하는 미들웨어입니다. 절대 순서를 변경하지 마세요.
 app.use(errorHandler);

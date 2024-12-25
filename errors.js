@@ -36,6 +36,11 @@ class MaxAttemptsExceededError extends CustomError {
     super(reason, "MAX_ATTEMPTS_EXCEEDED", 429, data);
   }
 }
+class MulterError extends CustomError {
+  constructor(reason, data = null) {
+    super(reason, "MULTER_ERROR", 503, data);
+  }
+}
 class ServiceImplementationError extends CustomError {
   constructor(reason, data = null) {
     super(reason, "NOT_IMPLEMENTED", 501, data);
@@ -136,4 +141,5 @@ module.exports = {
   MaxAttemptsExceededError,
   TimeOutError,
   ServiceImplementationError,
+  MulterError,
 };

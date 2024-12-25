@@ -1,7 +1,19 @@
 // services/upload.service.js
 const path = require("node:path");
 const fs = require("node:fs");
+
 const multer = require("multer");
+const multerS3 = require("multer-s3");
+
+const config = require("../../config.json");
+const { ACCESS_KEY_ID, SECRET_ACCESS_KEY, BUCKET_NAME, REGION } = config.AWS.S3;
+const { v4: uuidv4 } = require("uuid");
+
+const { S3Client } = require("@aws-sdk/client-s3");
+const { NotAllowedError } = require("../../errors");
+const logger = require("../../logger");
+
+const tossHangul = require("es-hangul");
 
 /**
  * 업로드 디렉토리의 존재 여부를 확인하고, 없을 경우 생성합니다.
@@ -42,6 +54,60 @@ const createUploadMiddleware = (destination) => {
   return upload;
 };
 
+/**
+ * Multer-S3 설정을 통한 이미지 업로드 미들웨어 생성 함수.
+ * @returns {Middleware} Express용 multer 미들웨어.
+ */
+const uploadImageToS3 = () => {
+  const s3Client = new S3Client({
+    region: REGION,
+    credentials: {
+      accessKeyId: ACCESS_KEY_ID,
+      secretAccessKey: SECRET_ACCESS_KEY,
+    },
+  });
+
+  return multer({
+    storage: multerS3({
+      s3: s3Client,
+      bucket: BUCKET_NAME,
+      // acl: "public-read", // 업로드된 파일의 접근 권한
+      metadata: (req, file, cb) => {
+        logger.debug(
+          `[uploadImageToS3] file: ${JSON.stringify(file, null, 2)}`
+        );
+        // const romanizedOriginalName = tossHangul.romanize(file.originalname);
+        // const sanitizedOriginalName = romanizedOriginalName.replace(
+        //   /[^a-zA-Z0-9_\-\.]/g,
+        //   "-"
+        // );
+
+        // 도대체 왜 안되는지 모르겠음 ;;;;;;;;
+
+        cb(null, {});
+      },
+      key: (req, file, cb) => {
+        // 파일 확장자 추출
+        const fileExtension = path.extname(file.originalname);
+        // 파일명 중복을 방지하기 위한 UUID 생성
+        const uniqueFileName = `${uuidv4()}${fileExtension}`;
+        cb(null, uniqueFileName);
+      },
+    }),
+    // 파일 크기 제한 (100MB)
+    limits: { fileSize: 100 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+      const allowedMimeTypes = ["image/jpeg", "image/png", "image/gif"];
+      if (allowedMimeTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new NotAllowedError("허용되지 않은 파일 형식입니다."), false);
+      }
+    },
+  });
+};
+
 module.exports = {
   createUploadMiddleware,
+  uploadImageToS3,
 };
