@@ -41,9 +41,9 @@ jobs:
         run: |
           ssh ${{ secrets.SSH_HOST_NAME }} 'sudo npm install -g pm2'
 
-      - name: Setup PM2 to start on system boot
+      - name: Setup PM2 to start on system boot with sudo
         run: |
-          ssh ${{ secrets.SSH_HOST_NAME }} 'pm2 startup systemd -u ubuntu --hp /home/ubuntu'
+          ssh ${{ secrets.SSH_HOST_NAME }} 'sudo env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu'
 
       - name: Start application with PM2
         run: |
