@@ -35,12 +35,12 @@ class InquiryAnswer extends Model {
         created_at: {
           type: DataTypes.DATE(6),
           allowNull: false,
-          defaultValue: "CURRENT_TIMESTAMP(6)",
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
         },
         updated_at: {
           type: DataTypes.DATE(6),
           allowNull: false,
-          defaultValue: "CURRENT_TIMESTAMP(6)",
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
         },
       },
       {

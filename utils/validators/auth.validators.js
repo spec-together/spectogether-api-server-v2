@@ -4,61 +4,109 @@ const addFormats = require("ajv-formats");
 const ajv = new Ajv({ allErrors: true });
 addFormats(ajv);
 
-const newUserInputSchema = {
+/*
+  현재 비밀번호는 8자 이상, 숫자와 특수문자를 최소 하나 포함해야 합니다.
+  약관 동의는 최소 1개 이상이어야 합니다.
+  OAuth 로그인은 kakao만 지원합니다.
+*/
+const userRegisterSchema = {
   type: "object",
   properties: {
-    user_register_type: { type: "string", enum: ["local", "kakao"] },
+    register_type: { type: "string", enum: ["oauth", "local"] },
+    oauth_type: { type: "string", enum: ["kakao"] },
+    // OAuth 로그인 메소드가 추가되면 이부분이 수정되어야 합니다.
+    oauth_id: { type: "string" },
     name: { type: "string" },
     nickname: { type: "string" },
-    birthdate: { type: "string", format: "date" }, // 2001-12-09 와 같은 형식이여야 합니다.
-    phone_number: { type: "string", pattern: "^\\d{3}-\\d{3,4}-\\d{4}$" },
-    phone_number_verification_id: { type: "string" },
+    birthdate: { type: "string", format: "date" },
+    phone_verification_session_id: { type: "string" },
     email: { type: "string", format: "email" },
-    email_verification_id: { type: "string" },
-    profile_image: { type: "string" },
-    password: { type: "string" },
+    password: {
+      type: "string",
+      minLength: 8,
+      pattern: "^(?=.*[0-9])(?=.*[!@#$%^&*]).+$", // 숫자와 특수문자 최소 하나 포함
+    },
     terms: {
       type: "array",
       items: {
         type: "object",
         properties: {
           term_id: { type: "integer" },
-          agreed: { type: "boolean" },
+          is_agreed: { type: "boolean" },
         },
-        required: ["term_id", "agreed"],
+        required: ["term_id", "is_agreed"],
         additionalProperties: false,
       },
+      minItems: 1,
     },
   },
   required: [
-    "user_register_type",
+    "register_type",
     "name",
     "nickname",
     "birthdate",
-    "phone_number",
-    "phone_number_verification_id",
+    "phone_verification_session_id",
     "email",
-    "email_verification_id",
-    "password",
-    "terms",
   ],
   additionalProperties: false,
+  allOf: [
+    {
+      if: {
+        properties: { register_type: { const: "oauth" } },
+      },
+      then: {
+        required: ["oauth_type", "oauth_id", "terms"],
+        properties: {
+          oauth_type: { type: "string", enum: ["kakao"] },
+          oauth_id: { type: "string" },
+          terms: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                term_id: { type: "integer" },
+                is_agreed: { type: "boolean" },
+              },
+              required: ["term_id", "is_agreed"],
+              additionalProperties: false,
+            },
+            minItems: 1,
+          },
+        },
+      },
+    },
+    {
+      if: {
+        properties: { register_type: { const: "local" } },
+      },
+      then: {
+        required: ["password", "terms"],
+        properties: {
+          password: {
+            type: "string",
+            minLength: 8,
+            pattern: "^(?=.*[0-9])(?=.*[!@#$%^&*]).+$", // 숫자와 특수문자 최소 하나 포함
+          },
+        },
+      },
+    },
+  ],
 };
 
 const loginInputSchema = {
   type: "object",
   properties: {
-    login_id: { type: "string", pattern: "^\\d{3}-\\d{3,4}-\\d{4}$" },
+    login_id: { type: "string", pattern: "^0[0-9]{9,10}$" },
     password: { type: "string" },
   },
   required: ["login_id", "password"],
   additionalProperties: false,
 };
 
-const validateNewUserInputSchema = ajv.compile(newUserInputSchema);
-const validateLoginInputSchema = ajv.compile(loginInputSchema);
+const userRegister = ajv.compile(userRegisterSchema);
+const userLogin = ajv.compile(loginInputSchema);
 
 module.exports = {
-  validateNewUserInputSchema,
-  validateLoginInputSchema,
+  userRegister,
+  userLogin,
 };

@@ -11,7 +11,8 @@ const {
   encrypt62,
   decrypt62,
 } = require("../../utils/encrypt.util");
-const { sendSMS } = require("../aws/aws.send.message.service");
+const awsSNS = require("../aws/aws.send.message.service");
+const coolSMS = require("../aws/coolsms.sms.service");
 
 const checkPhoneUnique = async (phone) => {
   //
@@ -39,13 +40,16 @@ const sendTokenToPhone = async (phone) => {
   });
 
   // 입력값으로 들어오는 전화번호는 10으로 시작하고 공백이 존재하지 않아야 합니다.
-  const southKoreaPhone = "+82" + phone.slice(1);
+  // const southKoreaPhone = "+82" + phone.slice(1);
   const message = `[spectogether] 인증번호는 ${token} 입니다.\n절대 타인에게 노출하지 마세요.`;
-  logger.debug(
-    `[sendTokenToPhone]\n핸드폰번호: ${southKoreaPhone}\n메세지: ${message}`
-  );
+  logger.debug(`[sendTokenToPhone]\n핸드폰번호: ${phone}\n메세지: ${message}`);
 
-  await sendSMS(southKoreaPhone, message);
+  // AWS SNS 서비스 사용 시
+  // await awsSNS.sendSMS(southKoreaPhone, message);
+
+  // COOLSMS 사용 시
+  const result = await coolSMS.sdkSendSMS(phone, message);
+  logger.debug(`[sendTokenToPhone] result: ${JSON.stringify(result, null, 2)}`);
 
   return encrypt62(record.verification_code_id);
 };
@@ -101,7 +105,11 @@ const verifyToken = async (id, token) => {
   // 4-2. 토큰 일치하는 경우 true 리턴
   else {
     // 4-3. DB에서 인증세션 삭제
-    await record.destroy();
+    // await record.destroy();
+    // 인증세션을 삭제할 경우 추후 테이블 ID를 기반으로
+    // 전화번호를 조회하는 기능을 사용할 수 없음에 따라 변경합니다.
+
+    // 추후 일괄적으로 삭제하는 로직을 구성할 필요가 있습니다.
     return true;
   }
 };

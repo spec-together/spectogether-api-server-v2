@@ -1,36 +1,90 @@
 const express = require("express");
-const {
-  handleGetUsersAgreedTerm,
-  handleGetUserStudyrooms,
-  handleGetUserTodos,
-  handleGetUserSpecs,
-  handleGetUserNeighborhoods,
-  handleGetUserMyProfile,
-  handleGetOtherUserProfile,
-  handleEditUserInfo,
-  handleGetTodoInfo,
-} = require("../controllers/users/users.controller");
+
+const userController = require("../controllers/users/users.controller");
+const patchUserController = require("../controllers/users/patch.users.controller");
+const profileUserController = require("../controllers/users/profile.users.controller");
+const todoController = require("../controllers/users/todo.users.controller");
+const studyroomController = require("../controllers/users/studyroom.users.controller");
+
 const { authenticateAccessToken } = require("../middleware/authenticate.jwt");
 const router = express.Router();
 
-router.get("/terms", authenticateAccessToken, handleGetUsersAgreedTerm);
+// 사용자가 동의한 약관 가져오기
+router.get(
+  "/terms",
+  authenticateAccessToken,
+  userController.handleGetUsersAgreedTerm
+);
 
-router.get("/studyrooms", authenticateAccessToken, handleGetUserStudyrooms);
-router.get("/todos", authenticateAccessToken, handleGetUserTodos);
-router.get("/todos/:todo_id", authenticateAccessToken, handleGetTodoInfo);
-router.get("/specs", authenticateAccessToken, handleGetUserSpecs);
+// STUDYROOM
+
+// 사용자 스터디룸 가져오기
+router.get(
+  "/studyrooms",
+  authenticateAccessToken,
+  studyroomController.handleGetUserStudyrooms
+);
+
+// TODO
+
+// todo 가져오기
+router.get(
+  "/todos",
+  authenticateAccessToken,
+  todoController.handleGetUserTodos
+);
+router.get(
+  "/todos/:todo_id",
+  authenticateAccessToken,
+  todoController.handleGetTodoInfo
+);
+
+// PROFILE
+
+// 사용자 스펙 가져오기
+router.get(
+  "/specs",
+  authenticateAccessToken,
+  profileUserController.handleGetUserSpecs
+);
+// 사용자 동네 가져오기
 router.get(
   "/neighborhoods",
   authenticateAccessToken,
-  handleGetUserNeighborhoods
+  profileUserController.handleGetUserNeighborhoods
 );
-router.get("/profile", authenticateAccessToken, handleGetUserMyProfile);
+
+// 내 프로필 가져오기
+router.get(
+  "/profile",
+  authenticateAccessToken,
+  profileUserController.handleGetUserMyProfile
+);
+// 남의 프로필 가져오기
 router.get(
   "/:user_id/profile",
   authenticateAccessToken,
-  handleGetOtherUserProfile
+  profileUserController.handleGetOtherUserProfile
 );
-router.patch("/", authenticateAccessToken, handleEditUserInfo);
+
+// PATCH
+
+// 사용자 프로필 수정
+router.patch(
+  "/email",
+  authenticateAccessToken,
+  patchUserController.handleEditUserEmail
+);
+router.patch(
+  "/profile-image",
+  authenticateAccessToken,
+  patchUserController.handleEditUserProfileImage
+);
+router.patch(
+  "/nickname",
+  authenticateAccessToken,
+  patchUserController.handleEditUserNickname
+);
 
 module.exports = router;
 

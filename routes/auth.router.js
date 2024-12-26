@@ -1,48 +1,42 @@
 const express = require("express");
 const router = express.Router();
 
-const {
-  handleUserRegister,
-  handleUserLocalLogin,
-  handleKakaoCallback,
-  handleUserLogout,
-  handleReissueAccessToken,
-  handleCreateTestUser,
-  handleGetTerms,
-} = require("../controllers/auth/auth.controller");
-const passport = require("passport");
+const registerController = require("../controllers/auth/register.auth.controller");
+const loginController = require("../controllers/auth/login.auth.controller");
+const kakaoController = require("../controllers/auth/kakao.auth.controller");
 
-// TODO : 나중에 지워라 컨벤션 심각하게 위반하는거 ..
-const {
-  checkIfUserExistsByEmail,
-  checkIfUserExistsByPhoneNumber,
-} = require("../repositories/auth.repository");
-const { AlreadyExistsError } = require("../errors");
+const authValidator = require("../utils/validators/auth.validators");
 
-// Route Definitions
-router.get("/terms", handleGetTerms);
-router.post("/register", handleUserRegister);
-router.post("/register/test", handleCreateTestUser);
-router.post("/login/local", handleUserLocalLogin);
-router.get("/login/kakao", passport.authenticate("kakao", { session: false }));
-router.get("/login/kakao/callback", handleKakaoCallback);
-router.get("/logout", handleUserLogout);
-router.get("/token/reissue", handleReissueAccessToken);
-router.get("/teapot", (req, res) => res.status(418).send("I'm a teapot"));
+const validate = require("../middleware/validate");
 
-router.post("/verification/email/unique", async (req, res, next) => {
-  const { email } = req.body;
-  const result = await checkIfUserExistsByEmail(email);
-  if (result) next(new AlreadyExistsError("이미 존재하는 이메일입니다."));
-  return res.status(200).success("사용 가능한 이메일입니다.");
-});
+// 24.12.24 다시 작성하였음
 
-router.post("/verification/phone/unique", async (req, res, next) => {
-  const { phone_number } = req.body;
-  const result = await checkIfUserExistsByPhoneNumber(phone_number);
-  if (result) next(new AlreadyExistsError("이미 존재하는 전화번호입니다."));
-  return res.status(200).success("사용 가능한 전화번호입니다.");
-});
+// 회원가입
+router.post(
+  "/register",
+  validate(authValidator.userRegister),
+  registerController.userRegister
+);
+
+// 로컬 로그인
+router.post(
+  "/login/local",
+  validate(authValidator.userLogin),
+  loginController.localLogin
+);
+// 카카오 로그인
+router.get("/login/kakao", kakaoController.kakaoLogin);
+router.get("/login/kakao/callback", kakaoController.kakaoCallback);
+// 로그아웃
+router.get("/logout", loginController.logout);
+
+// AT 재발급
+router.get("/token/reissue", loginController.reissueAccessToken);
+
+router.get("/terms", registerController.getTerms);
+// 24.12.24 terms 삭제 처리, test user 생성 코드도 삭제 처리
+
+router.get("/teapot", (res) => res.status(418).send("I'm a teapot"));
 
 module.exports = router;
 

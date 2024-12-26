@@ -1,12 +1,12 @@
 const { SNSClient, PublishCommand } = require("@aws-sdk/client-sns");
 const logger = require("../../logger");
 const { AWSError } = require("../../errors");
-const { ACCESS_KEY_ID, SECRET_ACCESS_KEY } =
+const { ACCESS_KEY_ID, SECRET_ACCESS_KEY, REGION } =
   require("../../config.json").AWS.ST_MESSAGE_SENDER;
 
 // SNS 클라이언트 생성
 const snsClient = new SNSClient({
-  region: "ap-northeast-1", // 사용하는 리전으로 설정
+  region: REGION, // 사용하는 리전으로 설정
   credentials: {
     accessKeyId: ACCESS_KEY_ID, // 발급받은 Access Key ID
     secretAccessKey: SECRET_ACCESS_KEY, // 발급받은 Secret Access Key
