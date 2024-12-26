@@ -1,7 +1,6 @@
-const Sequelize = require("sequelize");
-
-class UserArea extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+const { DataTypes, Model, Sequelize } = require("sequelize");
+class UserArea extends Model {
+  static init(sequelize) {
     return super.init(
       {
         user_area_id: {
@@ -26,6 +25,23 @@ class UserArea extends Sequelize.Model {
             key: "area_id",
           },
         },
+        sequence: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          defaultValue: 1,
+        },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          // defaultValue: "CURRENT_TIMESTAMP(6)",
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+          onUpdate: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
       },
       {
         sequelize,
@@ -34,10 +50,15 @@ class UserArea extends Sequelize.Model {
       }
     );
   }
-
   static associate(models) {
-    // models.UserArea.belongsTo(models.User, { foreignKey: 'user_id', sourceKey: 'user_id' });
-    // models.UserArea.belongsTo(models.Area, { foreignKey: 'area_id', sourceKey: 'area_id' });
+    this.belongsTo(models.Area, {
+      as: "area",
+      foreignKey: "area_id",
+    });
+    this.belongsTo(models.User, {
+      as: "user",
+      foreignKey: "user_id",
+    });
   }
 }
 

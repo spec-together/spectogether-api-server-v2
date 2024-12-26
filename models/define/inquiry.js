@@ -1,7 +1,6 @@
-const Sequelize = require("sequelize");
-
-class Inquiry extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+const { DataTypes, Model, Sequelize } = require("sequelize");
+class Inquiry extends Model {
+  static init(sequelize) {
     return super.init(
       {
         inquiry_id: {
@@ -42,17 +41,33 @@ class Inquiry extends Sequelize.Model {
           type: DataTypes.DATE(6),
           allowNull: true,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
       },
       {
         sequelize,
         tableName: "inquiry",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.Inquiry.belongsTo(models.User, { foreignKey: "user_id", sourceKey: "user_id" });
+    this.belongsTo(models.User, {
+      as: "user",
+      foreignKey: "user_id",
+    });
+    this.hasOne(models.InquiryAnswer, {
+      as: "inquiry_answer",
+      foreignKey: "inquiry_id",
+    });
   }
 }
 

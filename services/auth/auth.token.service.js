@@ -3,7 +3,17 @@ const { UserRefreshToken } = require("../../models");
 const { encrypt62 } = require("../../utils/encrypt.util");
 const { JWT_SECRET } = require("../../config.json").SERVER;
 
-const createAccessTokenService = (user_id, name, nickname) => {
+const tokenValidator = require("../../utils/validators/token.validator");
+const { NotExistsError } = require("../../errors");
+
+/**
+ * 사용자 ID, 이름, 닉네임을 기반으로 액세스 토큰을 생성하는 서비스 함수.
+ * @param {string|number} user_id - 토큰을 생성할 사용자의 고유 ID.
+ * @param {string} name - 사용자의 이름.
+ * @param {string} nickname - 사용자의 닉네임.
+ * @returns {string} 생성된 JWT 액세스 토큰 문자열.
+ */
+const createAccessToken = ({ user_id, name, nickname }) => {
   const encryptedUserId = encrypt62(user_id.toString());
   const payload = {
     user_id: encryptedUserId,
@@ -16,7 +26,14 @@ const createAccessTokenService = (user_id, name, nickname) => {
   return jwt.sign(payload, JWT_SECRET, options);
 };
 
-const createTestUserTokenService = (user_id, name, nickname) => {
+/**
+ * 테스트용 사용자 ID, 이름, 닉네임을 기반으로 액세스 토큰을 생성하는 서비스 함수.
+ * @param {string|number} user_id - 토큰을 생성할 테스트 사용자의 고유 ID.
+ * @param {string} name - 테스트 사용자의 이름.
+ * @param {string} nickname - 테스트 사용자의 닉네임.
+ * @returns {string} 생성된 JWT 액세스 토큰 문자열.
+ */
+const createTestUserToken = (user_id, name, nickname) => {
   const encryptedUserId = encrypt62(user_id.toString());
   const payload = {
     user_id: encryptedUserId,
@@ -26,10 +43,17 @@ const createTestUserTokenService = (user_id, name, nickname) => {
   const options = {
     expiresIn: "1y",
   };
-  return jwt.sign(payload, JWT_SECRET, options);
+  const token = jwt.sign(payload, JWT_SECRET, options);
+  return `Bearer ${token}`;
 };
 
-const createRefreshTokenService = async (user_id) => {
+/**
+ * 사용자 ID를 기반으로 리프레시 토큰을 생성하고 데이터베이스에 저장하는 서비스 함수.
+ * @param {string|number} user_id - 리프레시 토큰을 생성할 사용자의 고유 ID.
+ * @throws {DatabaseError} 리프레시 토큰 생성 또는 저장에 실패한 경우 오류를 발생시킵니다.
+ * @returns {Promise<string>} 생성된 JWT 리프레시 토큰 문자열.
+ */
+const createRefreshToken = async (user_id) => {
   const encryptedUserId = encrypt62(user_id.toString());
   const payload = {
     user_id: encryptedUserId,
@@ -39,16 +63,50 @@ const createRefreshTokenService = async (user_id) => {
   };
   const result = jwt.sign(payload, JWT_SECRET, options);
 
-  await UserRefreshToken.create({
-    user_id,
-    refresh_token: result,
-  });
+  try {
+    await UserRefreshToken.create({
+      user_id,
+      refresh_token: result,
+    });
+  } catch (error) {
+    throw new DatabaseError("리프레시 토큰 저장에 실패했습니다.", error);
+  }
 
   return result;
 };
 
+const checkIfRefreshTokenExists = (data) => {
+  // 없으면 에러 뱉어주기
+  if (!data) {
+    throw new NotExistsError("리프레시 토큰이 존재하지 않습니다.");
+  }
+};
+
+const isAccessTokenValid = (token) => {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    tokenValidator.accessToken(token);
+    return { ...decoded };
+  } catch (err) {
+    throw new NotAllowedError("유효하지 않은 토큰입니다.");
+  }
+};
+
+const isRefreshTokenValid = (token) => {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    tokenValidator.refreshToken(token);
+    return { ...decoded };
+  } catch (err) {
+    throw new NotAllowedError("유효하지 않은 토큰입니다.");
+  }
+};
+
 module.exports = {
-  createAccessTokenService,
-  createTestUserTokenService,
-  createRefreshTokenService,
+  createAccessToken,
+  createTestUserToken,
+  createRefreshToken,
+  checkIfRefreshTokenExists,
+  isAccessTokenValid,
+  isRefreshTokenValid,
 };

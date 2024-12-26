@@ -1,7 +1,6 @@
-const Sequelize = require("sequelize");
-
-class Organization extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+const { DataTypes, Model, Sequelize } = require("sequelize");
+class Organization extends Model {
+  static init(sequelize) {
     return super.init(
       {
         organization_id: {
@@ -23,17 +22,29 @@ class Organization extends Sequelize.Model {
           type: DataTypes.ENUM("public", "private", "community"),
           allowNull: false,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
       },
       {
         sequelize,
         tableName: "organization",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.Organization.hasMany(models.OrganizationUser, {foreignKey: "organization_id",sourceKey: "organization_id"});
+    this.hasMany(models.OrganizationUser, {
+      as: "organization_users",
+      foreignKey: "organization_id",
+    });
   }
 }
 

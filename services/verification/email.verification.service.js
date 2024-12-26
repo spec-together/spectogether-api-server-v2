@@ -1,48 +1,93 @@
 const crypto = require("node:crypto");
+const { Sequelize, VerificationCode } = require("../../models/index.js");
 // const { Op } = require("sequelize");
-
-const emailVerificationRepo = require("../../repositories/email.verification.repository.js");
-const sendVerificationEmail = require("../../utils/mailer.util.js");
-const { AlreadyExistsError, InvalidTokenError } = require("../../errors.js");
-
-const isEmailUniqueService = async (email) => {
-  const user = await emailVerificationRepo.findUserByEmail(email);
-  if (user === null) {
-    return true;
-  } else {
-    throw new AlreadyExistsError("이미 사용 중인 이메일입니다.");
-  }
-};
+const mailer = require("../../utils/mailer.util.js");
+const {
+  DatabaseError,
+  InvalidTokenError,
+  EmailSendingError,
+  UnknownError,
+} = require("../../errors.js");
 
 const generateToken = () => {
   return crypto.randomInt(100000, 1000000).toString();
 };
 
-const sendVerification = async (email) => {
-  const code = generateToken();
-  await emailVerificationRepo.saveEmailVerificationCode(email, code);
-  await sendVerificationEmail(email, code);
-  return code;
+const sendVerification = async ({ email }) => {
+  try {
+    const code = generateToken();
+    const verificationRecord = await VerificationCode.create({
+      identifier_type: "email",
+      identifier_value: email,
+      verification_code: code,
+    });
+    await mailer.sendVerificationEmail(email, code);
+    return { id: verificationRecord.verification_code_id };
+  } catch (error) {
+    if (error instanceof Sequelize.DatabaseError) {
+      throw new DatabaseError(
+        "이메일 인증 실패. 데이터베이스 오류입니다.",
+        error
+      );
+    }
+    if (error instanceof EmailSendingError) {
+      throw error;
+    }
+    throw new UnknownError("이메일 인증 실패. 알 수 없는 오류가 발생했습니다.");
+  }
 };
 
-const verifyToken = async (email, code) => {
-  const record = await emailVerificationRepo.findByEmailAndCode(email, code);
+const MAX_ATTEMPTS = 5; // 최대 시도 횟수
+
+const verifyToken = async ({ id, code }) => {
+  const record = await VerificationCode.findOne({
+    where: {
+      verification_code_id: id,
+      identifier_type: "email",
+      verification_code: code,
+    },
+  });
+
+  if (record && record.attempt >= MAX_ATTEMPTS) {
+    throw new InvalidTokenError("이메일 인증 실패. 시도 횟수 초과", {
+      current_attempts: MAX_ATTEMPTS, // record.attempt 이지만
+      max_attempts: MAX_ATTEMPTS,
+      statusCode: 429,
+    });
+  }
+
   if (!record) {
-    throw new InvalidTokenError(
-      "이메일 인증 실패. 유효하지 않은 인증 토큰입니다."
-    );
+    const failedRecord = await VerificationCode.findOne({
+      where: { verification_code_id: id },
+    });
+
+    if (failedRecord) {
+      failedRecord.attempt += 1;
+      await failedRecord.save();
+
+      if (failedRecord.attempt >= MAX_ATTEMPTS) {
+        throw new InvalidTokenError("이메일 인증 실패. 시도 횟수 초과", {
+          current_attempts: failedRecord.attempt,
+          max_attempts: MAX_ATTEMPTS,
+          statusCode: 429,
+        });
+      }
+
+      throw new InvalidTokenError(
+        "이메일 인증 실패. 토큰이 유효하지 않습니다.",
+        {
+          current_attempts: failedRecord.attempt,
+          max_attempts: MAX_ATTEMPTS,
+          // statusCode: 400, // 기본값
+        }
+      );
+    }
+
+    throw new InvalidTokenError("이메일 인증 실패. 토큰이 유효하지 않습니다.");
   }
-  if (email !== record.email) {
-    throw new InvalidTokenError(
-      "이메일 인증 실패. 유효하지 않은 이메일입니다."
-    );
-  }
-  await emailVerificationRepo.deleteEmailVerificationCode(code);
-  // TODO : 지금은 유효하면 바로 삭제처리하고 FE에 인증 여부를 반환값으로 간접 제공. 인증 정보를 DB에 저장하는 방안도 고려해보자.
-  return {
-    email_verification_code_id: record.email_verification_code_id,
-    email: record.email,
-  };
+
+  await VerificationCode.destroy({ where: { verification_code_id: id } });
+  return record;
 
   // TODO: 만료 시간 검증 추가
   // const now = Date.now();
@@ -57,7 +102,6 @@ const verifyToken = async (email, code) => {
 };
 
 module.exports = {
-  isEmailUniqueService,
   sendVerification,
   verifyToken,
 };

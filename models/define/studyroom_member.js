@@ -1,7 +1,7 @@
-const Sequelize = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
 
-class StudyroomMember extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+class StudyroomMember extends Model {
+  static init(sequelize) {
     return super.init(
       {
         studyroom_member_id: {
@@ -34,18 +34,33 @@ class StudyroomMember extends Sequelize.Model {
           type: DataTypes.ENUM("active", "blocked"),
           allowNull: false,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
       },
       {
         sequelize,
         tableName: "studyroom_member",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.StudyroomMember.belongsTo(models.User, { foreignKey: "user_id", sourceKey: "user_id" });
-    // models.StudyroomMember.belongsTo(models.Studyroom, { foreignKey: "studyroom_id", sourceKey: "studyroom_id" });
+    this.belongsTo(models.Studyroom, {
+      as: "studyroom",
+      foreignKey: "studyroom_id",
+    });
+    this.belongsTo(models.User, {
+      as: "user",
+      foreignKey: "user_id",
+    });
   }
 }
 

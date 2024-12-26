@@ -1,7 +1,6 @@
-const Sequelize = require("sequelize");
-
-class Spec extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+const { DataTypes, Model, Sequelize } = require("sequelize");
+class Spec extends Model {
+  static init(sequelize) {
     return super.init(
       {
         spec_id: {
@@ -31,22 +30,46 @@ class Spec extends Sequelize.Model {
           type: DataTypes.DATEONLY,
           allowNull: false,
         },
+        status: {
+          type: DataTypes.ENUM("public", "private"),
+          allowNull: false,
+        },
         content: {
           type: DataTypes.STRING(10000),
           allowNull: false,
           defaultValue: "",
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
       },
       {
         sequelize,
         tableName: "spec",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.Spec.belongsTo(models.User, {foreignKey: 'user_id', sourceKey: 'user_id' });
+    this.hasMany(models.SpecPhoto, {
+      as: "spec_photos",
+      foreignKey: "spec_id",
+    });
+    this.hasMany(models.UserSpec, {
+      as: "user_specs",
+      foreignKey: "spec_id",
+    });
+    this.belongsTo(models.User, {
+      as: "user",
+      foreignKey: "user_id",
+    });
   }
 }
 

@@ -1,7 +1,7 @@
-const Sequelize = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
 
-class TodoParticipant extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+class TodoParticipant extends Model {
+  static init(sequelize) {
     return super.init(
       {
         todo_participant_id: {
@@ -27,7 +27,7 @@ class TodoParticipant extends Sequelize.Model {
           },
         },
         status: {
-          type: DataTypes.BOOLEAN,
+          type: DataTypes.ENUM("pending", "done", "deleted"),
           allowNull: false,
         },
         comment: {
@@ -38,18 +38,33 @@ class TodoParticipant extends Sequelize.Model {
           type: DataTypes.STRING(2048),
           allowNull: false,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
       },
       {
         sequelize,
         tableName: "todo_participant",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.TodoParticipant.belongsTo(models.Todo, { foreignKey: "todo_id", sourceKey: "todo_id" });
-    // models.TodoParticipant.belongsTo(models.User, { foreignKey: "assigned_user_id", sourceKey: "user_id" });
+    this.belongsTo(models.Todo, {
+      as: "todo",
+      foreignKey: "todo_id",
+    });
+    this.belongsTo(models.User, {
+      as: "assigned_user",
+      foreignKey: "assigned_user_id",
+    });
   }
 }
 

@@ -1,7 +1,6 @@
-const Sequelize = require("sequelize");
-
-class VerficationCode extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+const { DataTypes, Model, Sequelize } = require("sequelize");
+class VerificationCode extends Model {
+  static init(sequelize) {
     return super.init(
       {
         verification_code_id: {
@@ -27,18 +26,32 @@ class VerficationCode extends Sequelize.Model {
           type: DataTypes.STRING(1024),
           allowNull: false,
         },
+        is_verified: {
+          type: DataTypes.BOOLEAN,
+          allowNull: true,
+          defaultValue: false,
+        },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
       },
       {
         sequelize,
-        tableName: "verfication_code",
-        timestamps: true,
+        tableName: "verification_code",
+        timestamps: false,
       }
     );
   }
-
   static associate(models) {
-    // models.VerficationCode.belongsTo(models.User, {foreignKey: "user_id",sourceKey: "user_id"});
+    // this.
   }
 }
 
-module.exports = VerficationCode;
+module.exports = VerificationCode;

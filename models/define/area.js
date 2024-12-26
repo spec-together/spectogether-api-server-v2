@@ -1,7 +1,7 @@
-const Sequelize = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
 
-class Area extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
+class Area extends Model {
+  static init(sequelize) {
     return super.init(
       {
         area_id: {
@@ -18,17 +18,34 @@ class Area extends Sequelize.Model {
           type: DataTypes.STRING(512),
           allowNull: false,
         },
+        created_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
+        updated_at: {
+          type: DataTypes.DATE(6),
+          allowNull: false,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+        },
       },
       {
         sequelize,
         tableName: "area",
-        timestamps: true,
+        timestamps: false,
       }
     );
   }
 
   static associate(models) {
-    // models.Area.hasMany(models.Comment, {foreignKey: "area_id",sourceKey: "area_id"});
+    this.hasMany(models.Studyroom, {
+      as: "studyrooms",
+      foreignKey: "area_id",
+    });
+    this.hasMany(models.UserArea, {
+      as: "user_areas",
+      foreignKey: "area_id",
+    });
   }
 }
 
