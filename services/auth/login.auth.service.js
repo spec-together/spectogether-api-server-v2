@@ -35,7 +35,7 @@ const getUserPasswordByPhoneNumber = async (phoneNumber) => {
 
 const comparePassword = async (data) => {
   // 비밀번호 비교
-  encryptUtil.comparePassword(data.password, data.hashed_password);
+  await encryptUtil.comparePassword(data.password, data.hashed_password);
   // 비밀번호가 일치하는 경우
   logger.debug("[comparePassword] 비밀번호 일치");
   return true;
