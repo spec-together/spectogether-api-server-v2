@@ -109,6 +109,10 @@ const verifyToken = async (id, token) => {
     // 인증세션을 삭제할 경우 추후 테이블 ID를 기반으로
     // 전화번호를 조회하는 기능을 사용할 수 없음에 따라 변경합니다.
 
+    // 4-4. 사용자의 전화번호를 인증 처리
+    record.is_verified = true;
+    await record.save();
+
     // 추후 일괄적으로 삭제하는 로직을 구성할 필요가 있습니다.
     return true;
   }
