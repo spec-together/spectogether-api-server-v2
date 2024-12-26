@@ -16,48 +16,43 @@ jobs:
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
-          echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
           cat >>~/.ssh/config <<END
-          Host $SSH_HOST_NAME
-            HostName $EC2_HOST
-            User $EC2_USER
+          Host ${{ secrets.SSH_HOST_NAME }}
+            HostName ${{ secrets.EC2_HOST }}
+            User ubuntu
             IdentityFile ~/.ssh/id_rsa
             StrictHostKeyChecking no
           END
-        env:
-          SSH_HOST_NAME: ${{ secrets.SSH_HOST_NAME }}
-          EC2_USER: ubuntu
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
 
       - name: Copy Workspace
         run: |
-          ssh $SSH_HOST_NAME 'sudo mkdir -p /opt/app'
-          ssh $SSH_HOST_NAME 'sudo chown ubuntu:ubuntu /opt/app'
-          scp -r ./[!.]* $SSH_HOST_NAME:/opt/app
+          ssh ${{ secrets.SSH_HOST_NAME }} 'sudo mkdir -p /opt/app'
+          ssh ${{ secrets.SSH_HOST_NAME }} 'sudo chown ubuntu:ubuntu /opt/app'
+          scp -r ./[!.]* ${{ secrets.SSH_HOST_NAME }}:/opt/app
 
       - name: Install dependencies
         run: |
-          ssh $SSH_HOST_NAME 'npm install --prefix /opt/app/'
+          ssh ${{ secrets.SSH_HOST_NAME }} 'npm install --prefix /opt/app/'
 
       - name: Install PM2 globally
         run: |
-          ssh $SSH_HOST_NAME 'sudo npm install -g pm2'
+          ssh ${{ secrets.SSH_HOST_NAME }} 'sudo npm install -g pm2'
 
       - name: Setup PM2 to start on system boot
         run: |
-          ssh $SSH_HOST_NAME 'pm2 startup systemd -u ubuntu --hp /home/ubuntu'
+          ssh ${{ secrets.SSH_HOST_NAME }} 'pm2 startup systemd -u ubuntu --hp /home/ubuntu'
 
       - name: Start application with PM2
         run: |
-          ssh $SSH_HOST_NAME 'pm2 start /opt/app/index.js --name spectogether --watch --env test -i max --log /opt/app/logs/pm2.log'
+          ssh ${{ secrets.SSH_HOST_NAME }} 'pm2 start /opt/app/index.js --name spectogether --watch --env test -i max --log /opt/app/logs/pm2.log'
 
       - name: Save PM2 process list
         run: |
-          ssh $SSH_HOST_NAME 'pm2 save'
+          ssh ${{ secrets.SSH_HOST_NAME }} 'pm2 save'
 
       - name: Restart PM2 service
         run: |
-          ssh $SSH_HOST_NAME 'sudo systemctl restart pm2-ubuntu'
+          ssh ${{ secrets.SSH_HOST_NAME }} 'sudo systemctl restart pm2-ubuntu'
