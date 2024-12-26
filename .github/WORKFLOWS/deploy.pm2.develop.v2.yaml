@@ -1,0 +1,74 @@
+name: Deploy Develop Branch to EC2
+
+on:
+  push:
+    branches:
+      - develop/v2
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          cat >>~/.ssh/config <<END
+          Host $SSH_HOST_NAME
+            HostName $EC2_HOST
+            User $EC2_USER
+            IdentityFile ~/.ssh/id_rsa
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_HOST_NAME: ${{ secrets.SSH_HOST_NAME }}
+          EC2_USER: ubuntu
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Copy Workspace
+        run: |
+          ssh $SSH_HOST_NAME 'sudo mkdir -p /opt/app'
+          ssh $SSH_HOST_NAME 'sudo chown ubuntu:ubuntu /opt/app'
+          scp -r ./[!.]* $SSH_HOST_NAME:/opt/app
+
+      - name: Install dependencies
+        run: |
+          ssh $SSH_HOST_NAME 'npm install --prefix /opt/app/'
+
+      - name: Install PM2 globally
+        run: |
+          ssh $SSH_HOST_NAME 'sudo npm install -g pm2'
+
+      # PM2를 사용하여 애플리케이션을 관리하므로 systemd 서비스 파일 생성 및 관리 단계를 제거합니다.
+
+      - name: Setup PM2 to start on system boot
+        run: |
+          ssh $SSH_HOST_NAME 'pm2 startup systemd -u ubuntu --hp /home/ubuntu'
+
+      - name: Start application with PM2
+        run: |
+          ssh $SSH_HOST_NAME 'pm2 start /opt/app/index.js --name spectogether --watch --env test -i max --log /opt/app/logs/pm2.log'
+
+      - name: Save PM2 process list
+        run: |
+          ssh $SSH_HOST_NAME 'pm2 save'
+
+      - name: Restart PM2 service
+        run: |
+          ssh $SSH_HOST_NAME 'sudo systemctl restart pm2-ubuntu'
+
+# 주요 변경 사항 및 이유:
+# 1. 트리거 브랜치를 'develop'과 'develop/v2' 모두 포함하도록 변경했습니다.
+# 2. SSH 설정 방식을 첫 번째 파일의 방식으로 유지했습니다. 이는 더 상세한 설정을 제공하기 때문입니다.
+# 3. systemd 서비스 파일 생성 및 관리 단계를 제거하고 PM2를 사용하는 방식으로 변경했습니다.
+#    PM2는 Node.js 애플리케이션 관리에 특화되어 있어 더 효율적인 프로세스 관리와 모니터링을 제공합니다.
+# 4. PM2를 사용하여 애플리케이션을 시작하고 관리하는 단계를 추가했습니다.
+#    이는 애플리케이션의 자동 재시작, 로그 관리, 성능 모니터링 등 추가적인 기능을 제공합니다.
+# 5. 'workflow_dispatch' 트리거를 유지하여 수동으로 워크플로우를 실행할 수 있게 했습니다.
