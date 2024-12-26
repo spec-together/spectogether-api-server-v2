@@ -6,14 +6,18 @@ const multer = require("multer");
 const multerS3 = require("multer-s3");
 
 const config = require("../../config.json");
-const { ACCESS_KEY_ID, SECRET_ACCESS_KEY, BUCKET_NAME, REGION } = config.AWS.S3;
+const {
+  ACCESS_KEY_ID,
+  SECRET_ACCESS_KEY,
+  BUCKET_NAME,
+  REGION,
+  CLOUDFRONT_URL,
+} = config.AWS.S3;
 const { v4: uuidv4 } = require("uuid");
 
 const { S3Client } = require("@aws-sdk/client-s3");
 const { NotAllowedError } = require("../../errors");
 const logger = require("../../logger");
-
-const tossHangul = require("es-hangul");
 
 /**
  * 업로드 디렉토리의 존재 여부를 확인하고, 없을 경우 생성합니다.
@@ -91,6 +95,7 @@ const uploadImageToS3 = () => {
         const fileExtension = path.extname(file.originalname);
         // 파일명 중복을 방지하기 위한 UUID 생성
         const uniqueFileName = `${uuidv4()}${fileExtension}`;
+        // const uniqueFileName = uuidv4();
         cb(null, uniqueFileName);
       },
     }),
@@ -107,7 +112,10 @@ const uploadImageToS3 = () => {
   });
 };
 
+const getCloudfrontUrl = (fileKey) => `${CLOUDFRONT_URL}/${fileKey}`;
+
 module.exports = {
   createUploadMiddleware,
   uploadImageToS3,
+  getCloudfrontUrl,
 };

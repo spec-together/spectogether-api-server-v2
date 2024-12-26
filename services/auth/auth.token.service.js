@@ -43,7 +43,8 @@ const createTestUserToken = (user_id, name, nickname) => {
   const options = {
     expiresIn: "1y",
   };
-  return jwt.sign(payload, JWT_SECRET, options);
+  const token = jwt.sign(payload, JWT_SECRET, options);
+  return `Bearer ${token}`;
 };
 
 /**
