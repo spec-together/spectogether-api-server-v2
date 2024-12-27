@@ -2,6 +2,7 @@ const crypto = require("node:crypto");
 const db = require("../../models");
 const mailer = require("../../utils/mailer.util.js");
 const customErrors = require("../../errors.js");
+const encryptUtil = require("../../utils/encrypt.util.js");
 
 const generateToken = () => crypto.randomInt(100000, 1000000).toString();
 
@@ -14,7 +15,10 @@ const sendVerification = async ({ email }) => {
       verification_code: code,
     });
     await mailer.sendVerificationEmail(email, code);
-    return { id: verificationRecord.verification_code_id };
+    const encryptedCodeId = encryptUtil.encrypt62(
+      verificationRecord.verification_code_id.toString()
+    );
+    return { id: encryptedCodeId };
   } catch (error) {
     if (error instanceof db.Sequelize.DatabaseError) {
       throw new customErrors.DatabaseError(
@@ -34,9 +38,10 @@ const sendVerification = async ({ email }) => {
 const MAX_ATTEMPTS = 5; // 최대 시도 횟수
 
 const verifyToken = async ({ id, code }) => {
+  const decryptedCodeId = encryptUtil.decrypt62(id);
   const record = await db.VerificationCode.findOne({
     where: {
-      verification_code_id: id,
+      verification_code_id: decryptedCodeId,
       identifier_type: "email",
       verification_code: code,
     },
@@ -55,7 +60,7 @@ const verifyToken = async ({ id, code }) => {
 
   if (!record) {
     const failedRecord = await db.VerificationCode.findOne({
-      where: { verification_code_id: id },
+      where: { verification_code_id: decryptedCodeId },
     });
 
     if (failedRecord) {
@@ -88,7 +93,7 @@ const verifyToken = async ({ id, code }) => {
     );
   }
 
-  // await db.VerificationCode.destroy({ where: { verification_code_id: id } });
+  // await db.VerificationCode.destroy({ where: { verification_code_id: decryptedCodeId } });
   await record.update({ is_verified: true });
   // console.log(record);
   return;
