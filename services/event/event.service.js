@@ -32,7 +32,7 @@ const getEventById = async ({ id }) => {
   }
 };
 
-const createEvent = async (eventData) => {
+const createEvent = async ({ eventData, userId }) => {
   try {
     const {
       title,
