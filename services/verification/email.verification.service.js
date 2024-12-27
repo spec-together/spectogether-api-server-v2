@@ -88,8 +88,10 @@ const verifyToken = async ({ id, code }) => {
     );
   }
 
-  await db.VerificationCode.destroy({ where: { verification_code_id: id } });
-  return record;
+  // await db.VerificationCode.destroy({ where: { verification_code_id: id } });
+  await record.update({ is_verified: true });
+  // console.log(record);
+  return;
 
   // TODO: 만료 시간 검증 추가
   // const now = Date.now();
