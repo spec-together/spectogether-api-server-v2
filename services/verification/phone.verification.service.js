@@ -17,7 +17,7 @@ const coolSMS = require("../aws/coolsms.sms.service");
 const checkPhoneUnique = async (phone) => {
   //
   const result = await db.User.findOne({
-    attributes: [],
+    attributes: ["user_id"],
     where: {
       phone_number: phone,
     },
