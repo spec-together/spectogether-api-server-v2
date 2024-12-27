@@ -1,9 +1,9 @@
-function createPagination(count, page, limit) {
+function createPagination(prefix, count, page, limit) {
   const totalItems = count;
   const totalPages = Math.ceil(totalItems / limit);
   // const currentPage = page;
-  const next = page < totalPages ? `/events?page=${page + 1}` : null;
-  const previous = page > 1 ? `/events?page=${page - 1}` : null;
+  const next = page < totalPages ? `/${prefix}?page=${page + 1}` : null;
+  const previous = page > 1 ? `/${prefix}?page=${page - 1}` : null;
   const pagination = {
     totalItems,
     totalPages,
