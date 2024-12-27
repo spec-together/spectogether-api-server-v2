@@ -136,9 +136,7 @@ const verifyUnivEmail = async ({ userId, schoolId, codeId, code }) => {
 
   const VERIFICATION_TIME_LIMIT = 5 * 60 * 1000;
   const now = Date.now();
-  console.log("✨ ~ verifyUnivEmail ~ now:", now);
   const createdAt = new Date(verificationCode.created_at).getTime();
-  console.log("✨ ~ verifyUnivEmail ~ createdAt:", createdAt);
   if (now - createdAt > VERIFICATION_TIME_LIMIT) {
     await verificationCode.destroy();
     throw new customErrors.TimeOutError("인증 시간이 만료되었습니다.");
@@ -164,13 +162,11 @@ const verifyUnivEmail = async ({ userId, schoolId, codeId, code }) => {
     });
   } else {
     await verificationCode.update({ is_verified: true });
-    console.log("✨ ~ verifyUnivEmail ~ verificationCode:", verificationCode);
     const userSchool = await db.UserSchool.create({
       user_id: userId,
       school_id: schoolId,
       email: verificationCode.identifier_value,
     });
-    console.log("✨ ~ verifyUnivEmail ~ userSchool:", userSchool);
     return;
   }
 };
