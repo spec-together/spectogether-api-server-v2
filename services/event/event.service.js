@@ -13,7 +13,7 @@ const getAllEvents = async ({ page, limit }) => {
       // include: [],
       order: [["created_at", "DESC"]],
     });
-    const pagination = paginator.createPagination(count, page, limit);
+    const pagination = paginator.createPagination("events", count, page, limit);
     return { events: rows, pagination };
   } catch (error) {
     throw error;
