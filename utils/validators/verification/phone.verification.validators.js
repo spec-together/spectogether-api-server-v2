@@ -32,12 +32,12 @@ const verifyTokenSchema = {
   additionalProperties: false,
 };
 
-const validateCheckPhoneUniqueSchema = ajv.compile(checkPhoneUniqueSchema);
-const validateSendTokenToPhoneSchema = ajv.compile(sendTokenToPhoneSchema);
-const validateVerifyTokenSchema = ajv.compile(verifyTokenSchema);
+const checkPhoneUnique = ajv.compile(checkPhoneUniqueSchema);
+const sendTokenToPhone = ajv.compile(sendTokenToPhoneSchema);
+const verifyToken = ajv.compile(verifyTokenSchema);
 
 module.exports = {
-  validateCheckPhoneUniqueSchema,
-  validateSendTokenToPhoneSchema,
-  validateVerifyTokenSchema,
+  checkPhoneUnique,
+  sendTokenToPhone,
+  verifyToken,
 };
