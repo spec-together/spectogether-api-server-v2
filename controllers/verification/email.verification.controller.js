@@ -26,7 +26,23 @@ const verifyEmail = async (req, res, next) => {
   }
 };
 
+const verifyUnivEmail = async (req, res, next) => {
+  try {
+    const { school_id, code_id, code } = req.body;
+    await emailVerificationService.verifyUnivEmail({
+      userId: req.user.user_id,
+      schoolId: school_id,
+      codeId: code_id,
+      code,
+    });
+    res.status(200).success({ message: "대학 인증이 완료되었습니다." });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   sendVerificationEmail,
   verifyEmail,
+  verifyUnivEmail,
 };
