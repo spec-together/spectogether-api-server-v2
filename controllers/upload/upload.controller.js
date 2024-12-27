@@ -79,7 +79,6 @@ const multipleUploadToS3 = (req, res, next) => {
       if (!req.files || req.files.length === 0) {
         return next(new InvalidInputError("파일이 첨부되지 않았습니다."));
       }
-
       // 업로드된 파일들의 키 추출
       const fileKeys = req.files.map((file) => file.key);
 
@@ -101,8 +100,22 @@ const multipleUploadToS3 = (req, res, next) => {
   }
 };
 
+const getImageWithUrl = (req, res, next) => {
+  try {
+    const { key } = req.params;
+    const imageUrl = uploadService.getCloudfrontUrl(key);
+    res.success({
+      url: imageUrl,
+    });
+  } catch (error) {
+    logError(error);
+    next(error);
+  }
+};
+
 module.exports = {
   handleUpload,
   singleUploadToS3,
   multipleUploadToS3,
+  getImageWithUrl,
 };
