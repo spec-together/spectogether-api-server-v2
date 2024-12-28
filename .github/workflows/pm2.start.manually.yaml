@@ -3,10 +3,10 @@ name: Start PM2 Process on EC2
 on:
   workflow_dispatch:
     inputs:
-      pm2_proccess_name:
-        description: "PM2 Process Name"
+      script:
+        description: "PM2 start [script]"
         required: true
-        default: "spectogether"
+        default: "ecosystem.config.js"
 
 jobs:
   deploy:
@@ -41,4 +41,4 @@ jobs:
 
       - name: PM2 start
         run: |
-          ssh ${{ secrets.SSH_HOST_NAME }} 'pm2 start ${{ github.event.inputs.pm2_proccess_name }}'
+          ssh ${{ secrets.SSH_HOST_NAME }} 'pm2 start ${{ github.event.inputs.script }}'
