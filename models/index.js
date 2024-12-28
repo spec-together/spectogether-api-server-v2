@@ -1,7 +1,7 @@
 "use strict";
 
-const fs = require("node:fs");
-const path = require("node:path");
+// const fs = require("node:fs");
+// const path = require("node:path");
 const Sequelize = require("sequelize");
 
 const logger = require("../logger");
@@ -29,6 +29,7 @@ const sequelize = new Sequelize(
 const db = {};
 db.Admin = require("./define/admin");
 db.Area = require("./define/area");
+db.CarouselAd = require("./define/carousel_ad");
 db.Event = require("./define/event");
 db.EventImage = require("./define/event_image");
 db.Inquiry = require("./define/inquiry");
