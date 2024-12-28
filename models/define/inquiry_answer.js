@@ -3,10 +3,14 @@ class InquiryAnswer extends Model {
   static init(sequelize) {
     return super.init(
       {
+        inquiry_answer_id: {
+          type: DataTypes.BIGINT,
+          autoIncrement: true,
+          primaryKey: true,
+        },
         inquiry_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
-          primaryKey: true,
           references: {
             model: "inquiry",
             key: "inquiry_id",
@@ -54,10 +58,12 @@ class InquiryAnswer extends Model {
     this.belongsTo(models.User, {
       as: "admin",
       foreignKey: "admin_id",
+      targetKey: "user_id",
     });
     this.belongsTo(models.Inquiry, {
       as: "inquiry",
       foreignKey: "inquiry_id",
+      targetKey: "inquiry_id",
     });
   }
 }
