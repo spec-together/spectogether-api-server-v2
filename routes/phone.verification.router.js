@@ -12,12 +12,12 @@ phoneVerificationRouter.post(
 );
 phoneVerificationRouter.post(
   "/send",
-  validate(schema.validateSendTokenToPhoneSchema),
+  validate(schema.sendTokenToPhone),
   phoneController.sendTokenToPhone
 );
 phoneVerificationRouter.post(
   "/verify",
-  validate(schema.validateVerifyTokenSchema),
+  validate(schema.verifyToken),
   phoneController.verifyToken
 );
 
