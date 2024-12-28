@@ -11,7 +11,6 @@ const {
   encrypt62,
   decrypt62,
 } = require("../../utils/encrypt.util");
-const awsSNS = require("../aws/aws.send.message.service");
 const coolSMS = require("../aws/coolsms.sms.service");
 
 const checkPhoneUnique = async (phone) => {
@@ -23,10 +22,10 @@ const checkPhoneUnique = async (phone) => {
     },
   });
 
-  if (!result) {
-    return true;
+  if (result) {
+    throw new NotExistsError("이미 존재하는 전화번호입니다.");
   }
-  return false;
+  return true;
 };
 
 const sendTokenToPhone = async (phone) => {
