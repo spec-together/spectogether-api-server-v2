@@ -2,6 +2,7 @@ const express = require("express");
 const emailVerificationController = require("../controllers/verification/email.verification.controller.js");
 const emailVerificationValidator = require("../utils/validators/email.verification.validators.js");
 const validate = require("../middleware/validate.js");
+const authMiddleware = require("../middleware/authenticate.jwt.js");
 
 const router = express.Router();
 
@@ -17,6 +18,12 @@ router.post(
   "/verify",
   validate(emailVerificationValidator.validateVerifyEmail),
   emailVerificationController.verifyEmail
+);
+
+router.post(
+  "/verify-univ",
+  authMiddleware.authenticateAccessToken,
+  emailVerificationController.verifyUnivEmail
 );
 
 module.exports = router;

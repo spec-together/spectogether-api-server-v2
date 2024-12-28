@@ -1,99 +1,49 @@
-const contestService = require("../../services/event/contest.service.js");
+const eventService = require("../../services/event/event.service");
 const logger = require("../../logger");
 
-exports.getAllContests = async (req, res, next) => {
+const getAllevents = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
-    // const { page = 1, limit = 10 } = req.query;
-    const result = await contestService.getAllContests(page, limit);
+    const result = await eventService.getAllEvents({ page, limit });
     return res.status(200).success({
-      contests: result.contests,
+      events: result.events,
       pagination: result.pagination,
     });
   } catch (error) {
-    logger.error(`[getAllContests] Error: ${error.stack}`);
+    logger.error(`[getAllevents] Error: ${error.stack}`);
     next(error);
   }
 };
 
-exports.getContestById = async (req, res, next) => {
+const getEventById = async (req, res, next) => {
   try {
-    const contestId = parseInt(req.params.id, 10);
-    const contest = await contestService.getContestById(contestId);
-    return res.status(200).success({ contest });
+    const eventId = parseInt(req.params.id, 10);
+    const event = await eventService.getEventById({ id: eventId });
+    return res.status(200).success({ event });
   } catch (error) {
-    logger.error(`[getContestById] Error: ${error.stack}`);
+    logger.error(`[getEventById] Error: ${error.stack}`);
     next(error);
   }
 };
 
-exports.createContestWithAssociations = async (req, res, next) => {
+const createEvent = async (req, res, next) => {
   try {
-    logger.debug(
-      `[createContestWithAssociations] Request body: ${JSON.stringify(req.body)}`
-    );
-
-    const {
-      title,
-      subtitle,
-      description,
-      host,
-      location,
-      online_offline_type,
-      application_start_date,
-      application_end_date,
-      start_date,
-      end_date,
-    } = req.body;
-
-    const locationObj =
-      typeof location === "string" ? JSON.parse(location) : location;
-
-    const contestData = {
-      title,
-      subtitle,
-      description,
-      host,
-      location: locationObj,
-      online_offline_type,
-      application_start_date,
-      application_end_date,
-      start_date,
-      end_date,
-    };
-
-    if (contestData.application_url === "") {
-      contestData.application_url = null;
-    }
-
-    let image_url = null;
-
-    if (req.file) {
-      image_url = `${req.protocol}://${req.get("host")}/uploads/contests/${req.file.filename}`;
-      logger.debug(
-        `[createContestWithAssociations] Image uploaded: ${image_url}`
-      );
-    }
-
-    const result = await contestService.createContestWithAssociations({
-      ...contestData,
-      image_url,
+    logger.debug(`[createEvent] Request body: ${JSON.stringify(req.body)}`);
+    const eventData = req.body;
+    // const eventPosterImage = req.file.
+    // const evnetImagesData = req.file.;
+    const userId = req.user.user_id;
+    const newEvent = await eventService.createEvent({
+      eventData,
+      // evnetImagesData,
+      userId,
     });
-
-    logger.info(
-      `[createContestWithAssociations] Contest created: ${result.contest.contest_id}`
-    );
-    return res.status(201).success({
-      contest: result.contest,
-      contestCalendar: result.contestCalendar,
-      contestBoard: result.contestBoard,
-      message: "대회를 성공적으로 생성했습니다.",
-    });
+    return res.status(201).success({ event_id: newEvent.event_id });
   } catch (error) {
-    logger.error(`[createContestWithAssociations] Error: ${error.stack}`);
+    logger.error(`[createEvent] Error: ${error.stack}`);
     next(error);
   }
 };
 
-// 추가적인 컨트롤러 메서드 구현...
+module.exports = { getAllevents, getEventById, createEvent };

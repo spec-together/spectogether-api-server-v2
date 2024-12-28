@@ -67,6 +67,7 @@ class Inquiry extends Model {
     this.hasOne(models.InquiryAnswer, {
       as: "inquiry_answer",
       foreignKey: "inquiry_id",
+      sourceKey: "inquiry_id",
     });
   }
 }

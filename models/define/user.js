@@ -104,10 +104,12 @@ class User extends Model {
     this.hasMany(models.Inquiry, {
       as: "inquiries",
       foreignKey: "user_id",
+      sourceKey: "user_id",
     });
     this.hasMany(models.InquiryAnswer, {
       as: "inquiry_answers",
       foreignKey: "admin_id",
+      sourceKey: "user_id",
     });
     this.hasMany(models.Notice, {
       as: "notices",

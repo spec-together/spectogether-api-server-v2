@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 const config = require("../config.json");
 const mailerConfig = config.MAILER;
-const { EmailSendingError } = require("../errors");
+const customErrors = require("../errors");
 
 // 이메일 전송 함수
 async function sendVerificationEmail(email, token) {
@@ -24,7 +24,7 @@ async function sendVerificationEmail(email, token) {
     console.log("Message sent: %s", info.messageId);
   } catch (error) {
     console.error("Failed to send email:", error); // 개발 중에만 포함
-    throw new EmailSendingError("메일 전송 실패.");
+    throw new customErrors.EmailSendingError("메일 전송 실패.");
   }
 }
 
