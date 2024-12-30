@@ -35,6 +35,7 @@ class NoticeImage extends Model {
           type: DataTypes.DATE(6),
           allowNull: false,
           defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
+          onUpdate: "SET DEFAULT",
         },
       },
       {

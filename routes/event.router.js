@@ -1,17 +1,31 @@
 const express = require("express");
 const eventRouter = express.Router();
 const eventController = require("../controllers/event/event.controller.js");
-// const uploadController = require("../controllers/upload/upload.controller");
+const uploadController = require("../controllers/upload/upload.controller");
 const authMiddleware = require("../middleware/authenticate.jwt.js");
 
 // const contestUploadPath = "uploads/contests/";
+const eventUploadPath = "uploads/events/";
 
 eventRouter.get("/", eventController.getAllevents);
-eventRouter.get("/:id", eventController.getEventById);
+eventRouter.get("/:eventId", eventController.getEventByEventId);
 eventRouter.post(
   "/",
   authMiddleware.authenticateAccessToken,
+  uploadController.handleArrayUpload(eventUploadPath),
   eventController.createEvent
+);
+eventRouter.patch(
+  "/:eventId",
+  authMiddleware.authenticateAccessToken,
+  uploadController.handleArrayUpload(eventUploadPath),
+  eventController.updateEvent
+);
+
+eventRouter.delete(
+  "/:eventId",
+  authMiddleware.authenticateAccessToken,
+  eventController.deleteEvent
 );
 
 module.exports = eventRouter;

@@ -115,8 +115,12 @@ class User extends Model {
       as: "notices",
       foreignKey: "author_id",
     });
-    this.hasMany(models.OrganizationUser, {
-      as: "organization_users",
+    // this.hasMany(models.OrganizationUser, {
+    //   as: "organization_users",
+    //   foreignKey: "user_id",
+    // });
+    this.hasOne(models.OrganizationUser, {
+      as: "organization_user",
       foreignKey: "user_id",
     });
     this.hasMany(models.Spec, {
