@@ -12,10 +12,8 @@ const getAllNotices = async (req, res, next) => {
 const getNoticeByNoticeId = async (req, res, next) => {
   try {
     const { noticeId } = req.params;
-    const result = await noticeService.getNoticeByNoticeId({
-      noticeId: noticeId,
-    });
-    res.status(200).success({ notice: result.notice });
+    const result = await noticeService.getNoticeByNoticeId({ noticeId });
+    res.status(200).success({ notice_id: result.notice.notide_id });
   } catch (error) {
     next(error);
   }

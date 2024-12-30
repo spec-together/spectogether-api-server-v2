@@ -74,30 +74,25 @@ const getNoticeByNoticeId = async ({ noticeId }) => {
 
 const createNotice = async ({ authorId, title, content, noticeImages }) => {
   try {
-    console.log("Creating notice with:", {
-      authorId,
-      title,
-      content,
-      noticeImages,
-    });
+    // console.log("Creating notice with:", {authorId,title,content,noticeImages});
     const newNotice = await db.Notice.create({
       author_id: authorId,
       title: title,
       content: content,
     });
-    console.log("Notice created:", newNotice);
+    // console.log("Notice created:", newNotice);
     if (noticeImages) {
-      const noticeImageRecords = noticeImages.map((image, index) => ({
+      const noticeImageRecords = noticeImages.map((img, index) => ({
         notice_id: newNotice.notice_id,
-        image_url: image.image_url,
+        image_url: img.image_url,
         sequence: index + 1,
       }));
-      console.log("Creating notice images with:", noticeImageRecords);
+      // console.log("Creating notice images with:", noticeImageRecords);
       await db.NoticeImage.bulkCreate(noticeImageRecords);
     }
     return { notice: newNotice };
   } catch (error) {
-    console.error("Error creating notice:", error);
+    // console.error("Error creating notice:", error);
     if (error instanceof db.Sequelize.DatabaseError) {
       throw new CustomError.DatabaseError("공지 생성 실패");
     }
