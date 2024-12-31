@@ -37,6 +37,7 @@ const kakaoCallback = async (req, res, next) => {
       return res.status(202).send(
         kakaoService.createScript({
           is_registered: false,
+          id: kakaoUserInfo.oauth_id,
           email: kakaoUserInfo.email,
         })
       );
