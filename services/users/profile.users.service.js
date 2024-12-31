@@ -90,6 +90,7 @@ exports.getUserNeighborhoodsByUserId = async (userId) => {
   const neighborhoods = userNeighborhoods.map((un) => {
     const area = un.area;
     return {
+      area_id: area.area_id,
       sequence: un.sequence,
       sido: area.sido,
       gungu: area.gungu,
