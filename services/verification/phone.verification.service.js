@@ -3,6 +3,7 @@ const {
   MaxAttemptsExceededError,
   TimeOutError,
   InvalidTokenError,
+  AlreadyExistsError,
 } = require("../../errors");
 const logger = require("../../logger");
 const db = require("../../models");
@@ -23,7 +24,7 @@ const checkPhoneUnique = async (phone) => {
   });
 
   if (result) {
-    throw new NotExistsError("이미 존재하는 전화번호입니다.");
+    throw new AlreadyExistsError("이미 존재하는 전화번호입니다.");
   }
   return true;
 };
