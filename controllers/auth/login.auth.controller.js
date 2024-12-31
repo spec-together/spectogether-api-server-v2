@@ -35,16 +35,20 @@ const localLogin = async (req, res, next) => {
       \nRT : ${refreshToken}`
     );
 
+    const ret = {
+      user_id: encrypt62(data.user_id),
+      name: data.name,
+      nickname: data.nickname,
+    };
+
+    logger.debug(`[localLogin] 응답 데이터: ${JSON.stringify(ret, null, 2)}`);
+
     // 5. 응답
     return res
       .status(200)
       .cookie("SPECTOGETHER_RT", refreshToken, refreshTokenCookieOptions)
       .success({
-        user: {
-          user_id: encrypt62(data.user_id),
-          name: data.name,
-          nickname: data.nickname,
-        },
+        user: ret,
         access_token: accessToken,
       });
   } catch (err) {
