@@ -56,8 +56,10 @@ const deleteRefreshToken = async (token) => {
     logger.error(
       `[deleteRefreshToken] 존재하지 않는 리프레시 토큰입니다.\nRT : ${token}`
     );
-    throw new NotExistsError("존재하지 않는 리프레시 토큰입니다.");
+    return false;
+    // throw new NotExistsError("존재하지 않는 리프레시 토큰입니다.");
   }
+  return true;
 };
 
 // AT 재발급

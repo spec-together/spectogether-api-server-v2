@@ -58,9 +58,9 @@ const logout = async (req, res, next) => {
     // 1. RT가 DB에 존재하는지 확인하고, 존재한다면 DB에서 제거
     // 1-1. DB에 존재하지 않으면 에러 로깅
     const refreshToken = req.cookies.SPECTOGETHER_RT;
-    tokenService.checkIfRefreshTokenExists(refreshToken);
+    const isTokenExist = tokenService.checkIfRefreshTokenExists(refreshToken);
     // 1-2. DB에서 제거
-    await loginService.deleteRefreshToken(refreshToken);
+    if (isTokenExist) await loginService.deleteRefreshToken(refreshToken);
 
     // 2. 응답
     return res
