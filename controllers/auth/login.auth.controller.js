@@ -5,6 +5,7 @@ const tokenService = require("../../services/auth/auth.token.service");
 const { encrypt62 } = require("../../utils/encrypt.util");
 
 const { logError } = require("../../utils/handlers/error.logger");
+const registerService = require("../../services/auth/register.auth.service");
 
 const localLogin = async (req, res, next) => {
   try {
@@ -105,8 +106,32 @@ const reissueAccessToken = async (req, res, next) => {
   }
 };
 
+const resetPassword = async (req, res, next) => {
+  try {
+    // 1. 들어온 입력 검증
+    // 2. 해당 세션의 전화번호 찾기
+    const phone = await registerService.getPhoneNumberByVerificationId(
+      req.body.phone_verification_session_id
+    );
+    // 2. 존재하는 사용자면 해당 인증 세션의 사용자 ID를 변경해주기
+    const data = await loginService.setPassword({
+      phone: phone,
+      newPassword: req.body.password,
+    });
+
+    // 4. 응답
+    return res.status(200).success({
+      message: "비밀번호가 변경되었습니다.",
+    });
+  } catch (err) {
+    logError(err);
+    next(err);
+  }
+};
+
 module.exports = {
   localLogin,
   logout,
   reissueAccessToken,
+  resetPassword,
 };

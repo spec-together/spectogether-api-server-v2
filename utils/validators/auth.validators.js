@@ -103,10 +103,26 @@ const loginInputSchema = {
   additionalProperties: false,
 };
 
+const resetPasswordSchema = {
+  type: "object",
+  properties: {
+    phone_verification_session_id: { type: "string" },
+    password: {
+      type: "string",
+      minLength: 8,
+      pattern: "^(?=.*[0-9])(?=.*[!@#$%^&*]).+$", // 숫자와 특수문자 최소 하나 포함
+    },
+  },
+  required: ["phone_verification_session_id", "password"],
+  additionalProperties: false,
+};
+
 const userRegister = ajv.compile(userRegisterSchema);
 const userLogin = ajv.compile(loginInputSchema);
+const resetPassword = ajv.compile(resetPasswordSchema);
 
 module.exports = {
   userRegister,
   userLogin,
+  resetPassword,
 };
