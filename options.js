@@ -1,4 +1,6 @@
 // const fs = require("fs");
+const config = require("./config.json");
+const { SERVER_DOMAIN } = config.SERVER;
 
 const corsOptions = {
   origin: [
@@ -22,18 +24,12 @@ const refreshTokenCookieOptions = {
   httpOnly: true,
   sameSite: "none",
   secure: true,
-};
-
-const logoutCookieOptions = {
-  maxAge: 0,
-  httpOnly: true,
-  sameSite: "none",
-  secure: true,
+  domain: SERVER_DOMAIN, // 백엔드 도메인
+  path: "/",
 };
 
 module.exports = {
   corsOptions,
   // sslOptions,
   refreshTokenCookieOptions,
-  logoutCookieOptions,
 };

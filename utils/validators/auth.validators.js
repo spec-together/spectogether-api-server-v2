@@ -103,10 +103,47 @@ const loginInputSchema = {
   additionalProperties: false,
 };
 
+const resetPasswordSchema = {
+  type: "object",
+  properties: {
+    phone_verification_session_id: { type: "string" },
+    new_password: {
+      type: "string",
+      minLength: 8,
+      pattern: "^(?=.*[0-9])(?=.*[!@#$%^&*]).+$", // 숫자와 특수문자 최소 하나 포함
+    },
+  },
+  required: ["phone_verification_session_id", "new_password"],
+  additionalProperties: false,
+};
+
+const changePasswordSchema = {
+  type: "object",
+  properties: {
+    phone_verification_session_id: { type: "string" },
+    old_password: {
+      type: "string",
+      minLength: 8,
+      pattern: "^(?=.*[0-9])(?=.*[!@#$%^&*]).+$", // 숫자와 특수문자 최소 하나 포함
+    },
+    new_password: {
+      type: "string",
+      minLength: 8,
+      pattern: "^(?=.*[0-9])(?=.*[!@#$%^&*]).+$", // 숫자와 특수문자 최소 하나 포함
+    },
+  },
+  required: ["phone_verification_session_id", "old_password", "new_password"],
+  additionalProperties: false,
+};
+
 const userRegister = ajv.compile(userRegisterSchema);
 const userLogin = ajv.compile(loginInputSchema);
+const resetPassword = ajv.compile(resetPasswordSchema);
+const changePassword = ajv.compile(changePasswordSchema);
 
 module.exports = {
   userRegister,
   userLogin,
+  resetPassword,
+  changePassword,
 };
