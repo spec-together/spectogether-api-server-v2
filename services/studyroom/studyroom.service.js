@@ -228,7 +228,7 @@ exports.joinStudyroom = async (joinData) => {
   }
 };
 
-exports.updateStudyroom = async (studyroomId, studyroom) => {};
+// exports.updateStudyroom = async (studyroomId, studyroom) => {};
 
 exports.deleteStudyroom = async ({ studyroomId, userId }) => {
   try {

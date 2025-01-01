@@ -17,7 +17,13 @@ studyroomRouter.post(
   authenticateMiddleware.authenticateAccessToken,
   studyroomController.joinStudyroom
 ); // TODO : 스터디룸 가입
+
 // studyroomRouter.patch("/:id",authenticateMiddleware.authenticateAccessToken,studyroomController.updateStudyroom);
-// studyroomRouter.delete("/:id",authenticateMiddleware.authenticateAccessToken,studyroomController.deleteStudyroom);
+
+studyroomRouter.delete(
+  "/:studyroomId",
+  authenticateMiddleware.authenticateAccessToken,
+  studyroomController.deleteStudyroom
+);
 
 module.exports = studyroomRouter;
