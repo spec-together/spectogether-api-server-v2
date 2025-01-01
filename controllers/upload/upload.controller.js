@@ -10,10 +10,10 @@ const { logError } = require("../../utils/handlers/error.logger");
 const multer = require("multer");
 
 // handleSingleUpload
-const handleUpload = (destination) => {
+const handleUpload = (destination, fieldName = "image") => {
   const upload = uploadService
     .createUploadMiddleware(destination)
-    .single("image");
+    .single(fieldName);
 
   return (req, res, next) => {
     upload(req, res, function (err) {
