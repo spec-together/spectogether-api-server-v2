@@ -221,6 +221,7 @@ const updateEvent = async ({
         image_url: img.image_url,
         sequence: index + 1,
       }));
+      console.log(eventImageRecords);
       await db.EventImage.bulkCreate(eventImageRecords);
     }
     return { event_id: event.event_id, event, message: "이벤트 수정 성공" };
@@ -252,10 +253,36 @@ const deleteEvent = async ({ hostId, eventId }) => {
   }
 };
 
+const getEventBasicInfo = async ({ eventId }) => {
+  try {
+    const event = await db.Event.findByPk(eventId, {
+      attributes: [
+        "event_id",
+        "title",
+        "application_url",
+        "starts_at",
+        "ends_at",
+        "application_start_date",
+        "application_end_date",
+      ],
+    });
+    if (!event) {
+      throw new CustomError.NotExistsError("해당 이벤트가 존재하지 않습니다."); // event is null
+    }
+    return { event, message: "이벤트 일정 조회 성공" };
+  } catch (error) {
+    if (error instanceof db.Sequelize.DatabaseError) {
+      throw new CustomError.DatabaseError("이벤트 일정 조회 실패");
+    }
+    throw error;
+  }
+};
+
 module.exports = {
   getAllEvents,
   getEventByEventId,
   createEvent,
   updateEvent,
   deleteEvent,
+  getEventBasicInfo,
 };
