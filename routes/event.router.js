@@ -27,6 +27,11 @@ eventRouter.delete(
   authMiddleware.authenticateAccessToken,
   eventController.deleteEvent
 );
+eventRouter.get(
+  "/:eventId/todos",
+  // authMiddleware.authenticateAccessToken,
+  eventController.getEventBasicInfo
+);
 
 module.exports = eventRouter;
 

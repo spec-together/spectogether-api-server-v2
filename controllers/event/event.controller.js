@@ -131,10 +131,24 @@ const deleteEvent = async (req, res, next) => {
   }
 };
 
+const getEventBasicInfo = async (req, res, next) => {
+  try {
+    const eventId = parseInt(req.params.eventId, 10);
+    const result = await eventService.getEventBasicInfo({ eventId });
+    return res
+      .status(200)
+      .success({ event: result.event, message: result.message });
+  } catch (error) {
+    logger.error(`[getEventTodos] Error: ${error.stack}`);
+    next(error);
+  }
+};
+
 module.exports = {
   getAllevents,
   getEventByEventId,
   createEvent,
   updateEvent,
   deleteEvent,
+  getEventBasicInfo,
 };
