@@ -4,17 +4,19 @@ const eventController = require("../controllers/event/event.controller.js");
 const uploadController = require("../controllers/upload/upload.controller");
 const authMiddleware = require("../middleware/authenticate.jwt.js");
 
-// const contestUploadPath = "uploads/contests/";
 const eventUploadPath = "uploads/events/";
 
-eventRouter.get("/", eventController.getAllevents);
+eventRouter.get("/", eventController.getAllEvents);
+
 eventRouter.get("/:eventId", eventController.getEventByEventId);
+
 eventRouter.post(
   "/",
   authMiddleware.authenticateAccessToken,
   uploadController.handleArrayUpload(eventUploadPath),
   eventController.createEvent
 );
+
 eventRouter.patch(
   "/:eventId",
   authMiddleware.authenticateAccessToken,
@@ -27,6 +29,7 @@ eventRouter.delete(
   authMiddleware.authenticateAccessToken,
   eventController.deleteEvent
 );
+
 eventRouter.get(
   "/:eventId/todos",
   // authMiddleware.authenticateAccessToken,

@@ -1,7 +1,7 @@
 const eventService = require("../../services/event/event.service");
 const logger = require("../../logger");
 
-const getAllevents = async (req, res, next) => {
+const getAllEvents = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
@@ -145,7 +145,7 @@ const getEventBasicInfo = async (req, res, next) => {
 };
 
 module.exports = {
-  getAllevents,
+  getAllEvents,
   getEventByEventId,
   createEvent,
   updateEvent,
