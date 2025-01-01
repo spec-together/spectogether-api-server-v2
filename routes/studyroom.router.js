@@ -26,4 +26,37 @@ studyroomRouter.delete(
   studyroomController.deleteStudyroom
 );
 
+studyroomRouter.get(
+  "/:studyroomId/todos",
+  authenticateMiddleware.authenticateAccessToken,
+  studyroomController.getTodosByStudyroomId
+);
+
+studyroomRouter.post(
+  "/:studyroomId/todos",
+  authenticateMiddleware.authenticateAccessToken,
+  uploadController.handleUpload("uploads/todos", "image"), // none
+  studyroomController.createTodo
+);
+
+studyroomRouter.post(
+  "/:studyroomId/todos/:todoId",
+  authenticateMiddleware.authenticateAccessToken,
+  uploadController.handleUpload("uploads/todos", "image"),
+  studyroomController.joinTodo
+);
+
+studyroomRouter.patch(
+  "/:studyroomId/todos/:todoId",
+  authenticateMiddleware.authenticateAccessToken,
+  uploadController.handleUpload("uploads/todos", "image"),
+  studyroomController.submitTodo
+);
+
+studyroomRouter.get(
+  "/:studyroomId/members",
+  authenticateMiddleware.authenticateAccessToken,
+  studyroomController.getMembersByStudyroomId
+);
+
 module.exports = studyroomRouter;

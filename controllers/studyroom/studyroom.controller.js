@@ -78,3 +78,97 @@ exports.deleteStudyroom = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getTodosByStudyroomId = async (req, res, next) => {
+  try {
+    const userId = parseInt(req.user.user_id);
+    const studyroomId = parseInt(req.params.studyroomId);
+    const todos = await studyroomService.getTodosByStudyroomId({
+      userId,
+      studyroomId,
+    });
+    return res
+      .status(200)
+      .success({ message: "스터디룸의 할일 목록 조회 성공", todos });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.createTodo = async (req, res, next) => {
+  try {
+    const userId = parseInt(req.user.user_id);
+    const studyroomId = parseInt(req.params.studyroomId);
+    const { title, content, location, starts_at, ends_at } = req.body;
+    const result = await studyroomService.createTodo({
+      userId,
+      studyroomId,
+      title,
+      content,
+      location,
+      starts_at,
+      ends_at,
+    });
+    return res
+      .status(201)
+      .success({ message: result.message, todo_id: result.todo_id });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.joinTodo = async (req, res, next) => {
+  try {
+    const userId = parseInt(req.user.user_id);
+    const studyroomId = parseInt(req.params.studyroomId);
+    const todoId = parseInt(req.params.todoId);
+    const result = await studyroomService.joinTodo({
+      userId,
+      studyroomId,
+      todoId,
+    });
+    return res
+      .status(201)
+      .success({ message: result.message, todo_id: result.todo_id });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.submitTodo = async (req, res, next) => {
+  try {
+    const userId = parseInt(req.user.user_id);
+    const studyroomId = parseInt(req.params.studyroomId);
+    const todoId = parseInt(req.params.todoId);
+    const uploadedImage = req.file;
+    const { comment } = req.body;
+    const result = await studyroomService.submitTodo({
+      userId,
+      studyroomId,
+      todoId,
+      comment,
+      image_url: uploadedImage ? uploadedImage.path : "",
+    });
+    return res
+      .status(200)
+      .success({ message: result.message, todo_id: result.todo_id });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getMembersByStudyroomId = async (req, res, next) => {
+  try {
+    const userId = parseInt(req.user.user_id);
+    const studyroomId = parseInt(req.params.studyroomId);
+    const members = await studyroomService.getMembersByStudyroomId({
+      userId,
+      studyroomId,
+    });
+    return res
+      .status(200)
+      .success({ message: "스터디룸의 멤버 목록 조회 성공", members });
+  } catch (error) {
+    next(error);
+  }
+};

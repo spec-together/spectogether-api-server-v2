@@ -263,3 +263,274 @@ exports.deleteStudyroom = async ({ studyroomId, userId }) => {
     throw error;
   }
 };
+
+exports.getTodosByStudyroomId = async ({ userId, studyroomId }) => {
+  try {
+    const studyroom = await db.Studyroom.findOne({
+      where: { studyroom_id: studyroomId, status: "active" },
+    });
+    if (!studyroom) {
+      throw new CustomError.NotExistsError(
+        "스터디룸 정보가 존재하지 않습니다."
+      );
+    }
+    const studyroomMember = await db.StudyroomMember.findOne({
+      where: { studyroom_id: studyroomId, user_id: userId, status: "active" },
+    });
+    if (!studyroomMember) {
+      throw new CustomError.NotExistsError(
+        "스터디룸 멤버 정보가 존재하지 않습니다."
+      );
+    }
+    const todos = await db.StudyroomTodo.findAll({
+      where: { studyroom_id: studyroomId },
+      include: [
+        {
+          model: db.Todo,
+          as: "todo",
+          attributes: {
+            exclude: ["updated_at"],
+          },
+          include: [
+            {
+              model: db.User,
+              as: "creater",
+              attributes: ["user_id", "nickname"],
+            },
+            {
+              model: db.TodoParticipant,
+              as: "todo_participants",
+              include: [
+                {
+                  model: db.User,
+                  as: "assigned_user",
+                  attributes: ["user_id", "nickname"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    return todos;
+  } catch (error) {
+    // logger.error(error);
+    if (error instanceof db.Sequelize.DatabaseError) {
+      throw new CustomError.DatabaseError(
+        "스터디룸 할일 목록 조회 중 에러.",
+        error
+      );
+    }
+    throw error;
+  }
+};
+
+exports.createTodo = async ({ userId, studyroomId, ...todoData }) => {
+  try {
+    console.log("✨✨ ~ exports.createTodo= ~ todoData:", todoData);
+    const studyroom = await db.Studyroom.findOne({
+      where: { studyroom_id: studyroomId, status: "active" },
+    });
+    if (!studyroom) {
+      throw new CustomError.NotExistsError(
+        "스터디룸 정보가 존재하지 않습니다."
+      );
+    }
+    const studyroomMember = await db.StudyroomMember.findOne({
+      where: {
+        studyroom_id: studyroomId,
+        user_id: userId,
+        status: "active",
+        [db.Sequelize.Op.or]: [{ role: "owner" }, { role: "admin" }],
+      },
+    });
+    if (!studyroomMember) {
+      throw new CustomError.NotAllowedError(
+        "스터디룸 할일 생성 권한이 없습니다."
+      );
+    }
+    const todo = await db.Todo.create({
+      title: todoData.title,
+      content: todoData.content,
+      location: todoData.location,
+      starts_at: todoData.starts_at,
+      ends_at: todoData.ends_at,
+      creater_id: userId,
+      status: "pending",
+    });
+    const todoParticipant = await db.TodoParticipant.create({
+      todo_id: todo.todo_id,
+      assigned_user_id: userId, // TODO : 현재는 본인만 할당 되도록 설정함.
+      status: "pending",
+      comment: "",
+      image_url: "",
+    });
+    const userTodo = await db.UserTodo.create({
+      user_id: userId,
+      todo_id: todo.todo_id,
+    });
+    const studyroomTodo = await db.StudyroomTodo.create({
+      studyroom_id: studyroomId,
+      todo_id: todo.todo_id,
+    });
+    // TODO : transaction 처리
+    return { message: "할일 생성 성공", todo_id: todo.todo_id };
+  } catch (error) {
+    // logger.error(error);
+    if (error instanceof db.Sequelize.DatabaseError) {
+      throw new CustomError.DatabaseError("할일 생성 중 에러.", error);
+    }
+    throw error;
+  }
+};
+
+exports.joinTodo = async ({ userId, studyroomId, todoId }) => {
+  try {
+    const studyroom = await db.Studyroom.findOne({
+      where: { studyroom_id: studyroomId, status: "active" },
+    });
+    if (!studyroom) {
+      throw new CustomError.NotExistsError(
+        "스터디룸 정보가 존재하지 않습니다."
+      );
+    }
+    const studyroomMember = await db.StudyroomMember.findOne({
+      where: {
+        studyroom_id: studyroomId,
+        user_id: userId,
+        status: "active",
+      },
+    });
+    if (!studyroomMember) {
+      throw new CustomError.NotAllowedError(
+        "스터디룸 할일 참여 권한이 없습니다."
+      );
+    }
+    const todo = await db.Todo.findByPk(todoId);
+    if (!todo) {
+      throw new CustomError.NotExistsError("할일 정보가 존재하지 않습니다.");
+    }
+    const todoParticipant = await db.TodoParticipant.findOne({
+      where: { todo_id: todoId, assigned_user_id: userId },
+    });
+    if (todoParticipant) {
+      throw new CustomError.AlreadyExistsError("이미 참여한 할일입니다.");
+    }
+    const newTodoParticipant = await db.TodoParticipant.create({
+      todo_id: todoId,
+      assigned_user_id: userId,
+      status: "pending",
+      comment: "",
+      image_url: "",
+    });
+    const userTodo = await db.UserTodo.create({
+      user_id: userId,
+      todo_id: todoId,
+    });
+    return { message: "할일 가입 성공", todo_id: todoId };
+  } catch (error) {
+    // logger.error(error);
+    if (error instanceof db.Sequelize.DatabaseError) {
+      throw new CustomError.DatabaseError("할일 가입 중 에러.", error);
+    }
+    throw error;
+  }
+};
+
+exports.submitTodo = async ({
+  userId,
+  studyroomId,
+  todoId,
+  comment,
+  image_url,
+}) => {
+  try {
+    const studyroom = await db.Studyroom.findOne({
+      where: { studyroom_id: studyroomId, status: "active" },
+    });
+    if (!studyroom) {
+      throw new CustomError.NotExistsError(
+        "스터디룸 정보가 존재하지 않습니다."
+      );
+    }
+    const studyroomMember = await db.StudyroomMember.findOne({
+      where: {
+        studyroom_id: studyroomId,
+        user_id: userId,
+        status: "active",
+      },
+    });
+    if (!studyroomMember) {
+      throw new CustomError.NotAllowedError(
+        "스터디룸 할일 제출 권한이 없습니다."
+      );
+    }
+    const todo = await db.Todo.findByPk(todoId);
+    if (!todo) {
+      throw new CustomError.NotExistsError("할일 정보가 존재하지 않습니다.");
+    }
+    const todoParticipant = await db.TodoParticipant.findOne({
+      where: { todo_id: todoId, assigned_user_id: userId },
+    });
+    if (!todoParticipant) {
+      throw new CustomError.NotExistsError(
+        "할일 참여 정보가 존재하지 않습니다."
+      );
+    }
+    await db.TodoParticipant.update(
+      {
+        status: "done",
+        comment: comment,
+        image_url: image_url,
+      },
+      { where: { todo_id: todoId, assigned_user_id: userId } }
+    );
+    return { message: "할일 제출 성공", todo_id: todoId };
+  } catch (error) {
+    // logger.error(error);
+    if (error instanceof db.Sequelize.DatabaseError) {
+      throw new CustomError.DatabaseError("할일 제출 중 에러.", error);
+    }
+    throw error;
+  }
+};
+
+exports.getMembersByStudyroomId = async ({ userId, studyroomId }) => {
+  try {
+    const studyroom = await db.Studyroom.findOne({
+      where: { studyroom_id: studyroomId, status: "active" },
+    });
+    if (!studyroom) {
+      throw new CustomError.NotExistsError(
+        "스터디룸 정보가 존재하지 않습니다."
+      );
+    }
+    const studyroomMember = await db.StudyroomMember.findOne({
+      where: {
+        studyroom_id: studyroomId,
+        user_id: userId,
+        status: "active",
+      },
+    });
+    if (!studyroomMember) {
+      throw new CustomError.NotAllowedError(
+        "스터디룸 멤버 조회 권한이 없습니다."
+      );
+    }
+
+    const studyroomMembers = await db.StudyroomMember.findAll({
+      where: { studyroom_id: studyroomId, status: "active" },
+      include: [{ model: db.User, as: "user", attributes: ["nickname"] }],
+    });
+    return { message: "스터디룸 멤버 조회 성공", members: studyroomMembers };
+  } catch (error) {
+    // logger.error(error);
+    if (error instanceof db.Sequelize.DatabaseError) {
+      throw new CustomError.DatabaseError(
+        "스터디룸 멤버 목록 조회 중 에러.",
+        error
+      );
+    }
+    throw error;
+  }
+};
