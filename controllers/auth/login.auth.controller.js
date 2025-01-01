@@ -113,10 +113,39 @@ const resetPassword = async (req, res, next) => {
     const phone = await registerService.getPhoneNumberByVerificationId(
       req.body.phone_verification_session_id
     );
-    // 2. 존재하는 사용자면 해당 인증 세션의 사용자 ID를 변경해주기
+    // 3. 해당 전화번호를 가진 사용자의 비밀번호 변경
     const data = await loginService.setPassword({
       phone: phone,
-      newPassword: req.body.password,
+      newPassword: req.body.new_password,
+    });
+
+    // 4. 응답
+    return res.status(200).success({
+      message: "비밀번호가 초기화되었습니다.",
+    });
+  } catch (err) {
+    logError(err);
+    next(err);
+  }
+};
+
+const changePassword = async (req, res, next) => {
+  try {
+    // 1. 들어온 입력 검증
+    // 2. 해당 세션의 전화번호 찾기
+    const phone = await registerService.getPhoneNumberByVerificationId(
+      req.body.phone_verification_session_id
+    );
+    // 3. 기존 비밀번호가 일치하는지 확인
+    const oldData = await loginService.getUserPasswordByPhoneNumber(phone);
+    await loginService.comparePassword({
+      password: req.body.old_password,
+      hashed_password: oldData.password,
+    });
+    // 4. 일치하면 새로운 비밀번호로 변경
+    await loginService.setPassword({
+      phone: phone,
+      newPassword: req.body.new_password,
     });
 
     // 4. 응답
@@ -134,4 +163,5 @@ module.exports = {
   logout,
   reissueAccessToken,
   resetPassword,
+  changePassword,
 };

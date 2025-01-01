@@ -38,9 +38,15 @@ router.get("/terms", registerController.getTerms);
 // terms는 다시 작성완료
 
 router.post(
-  "/reset/password",
+  "/password/reset",
   validate(authValidator.resetPassword),
   loginController.resetPassword
+);
+
+router.post(
+  "/password/change",
+  validate(authValidator.changePassword),
+  loginController.changePassword
 );
 
 router.get("/teapot", (res) => res.status(418).send("I'm a teapot"));

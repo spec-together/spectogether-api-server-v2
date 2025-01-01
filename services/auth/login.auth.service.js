@@ -92,8 +92,7 @@ const setPassword = async ({ phone, newPassword }) => {
     );
     throw new NotExistsError("존재하지 않는 사용자입니다.");
   }
-
-  const hashedPassword = await encryptUtil.hashPassword(newPassword);
+  const hashedPassword = await encryptUtil.generateHashedPassword(newPassword);
   user.password = hashedPassword;
   await user.save();
 
@@ -106,4 +105,5 @@ module.exports = {
   comparePassword,
   deleteRefreshToken,
   getUserInfoByEncryptedUserId,
+  setPassword,
 };
