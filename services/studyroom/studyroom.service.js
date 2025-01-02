@@ -12,60 +12,30 @@ exports.getAllStudyrooms = async () => {
         {
           model: db.Area,
           as: "area",
-          attributes: ["area_id", "sido", "gungu"],
+          // attributes: ["area_id", "sido", "gungu"],
         },
         {
           model: db.StudyroomMember,
           as: "studyroom_members",
           where: { status: "active" },
-          attributes: ["role", "status"],
-          include: [
-            { model: db.User, as: "user", attributes: ["user_id", "nickname"] },
-          ],
-        },
-        // { model: db.UserStudyroom, as: "user_studyrooms" }, // TODO : 스터디룸멤버 모델(테이블)과 중복되는 부분이 있는데, 굳이 필요한가?
-        // {
-        //   model: db.StudyroomChat,
-        //   as: "studyroom_chats",
-        //   attributes: ["sender_id", "type", "content", "created_at"],
-        //   include: [{ model: db.User, as: "sender" }],
-        // },
-        {
-          model: db.StudyroomTodo,
-          as: "studyroom_todos",
-          attributes: ["todo_id"],
-          include: [
-            {
-              model: db.Todo,
-              as: "todo",
-              attributes: {
-                exclude: ["updated_at"],
-              },
-              include: [
-                {
-                  model: db.User,
-                  as: "creater",
-                  attributes: ["user_id", "nickname"],
-                },
-                {
-                  model: db.TodoParticipant,
-                  as: "todo_participants",
-                  include: [
-                    {
-                      model: db.User,
-                      as: "assigned_user",
-                      attributes: ["user_id", "nickname"],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
+          attributes: ["role", "status", "user_id"],
+          include: [{ model: db.User, as: "user", attributes: ["nickname"] }],
         },
       ],
     });
+    // user_id 를 encrypt62 한 값으로 변경
+    const encryptedStudyrooms = studyrooms.map((studyroom) => {
+      studyroom.studyroom_members = studyroom.studyroom_members.map(
+        (member) => {
+          member.user_id = encrypt62(member.user_id);
+          return member;
+        }
+      );
+      return studyroom;
+    });
+    return encryptedStudyrooms;
     // TODO : pagination
-    return studyrooms;
+    // return studyrooms;
   } catch (error) {
     // logger.error(error);
     if (error instanceof db.Sequelize.DatabaseError) {
@@ -77,70 +47,122 @@ exports.getAllStudyrooms = async () => {
 
 exports.getStudyroomByStudyroomId = async (studyroomId) => {
   try {
-    const studyroom = await db.Studyroom.findByPk(studyroomId, {
-      attributes: { exclude: ["updated_at"] },
-      include: [
-        {
-          model: db.Area,
-          as: "area",
-          attributes: ["area_id", "sido", "gungu"],
-        },
-        {
-          model: db.StudyroomMember,
-          as: "studyroom_members",
-          where: { status: "active" },
-          attributes: ["role", "status"],
-          include: [
-            { model: db.User, as: "user", attributes: ["user_id", "nickname"] },
-          ],
-        },
-        // { model: db.UserStudyroom, as: "user_studyrooms" }, // TODO : 스터디룸멤버 모델(테이블)과 중복되는 부분이 있는데, 굳이 필요한가?
-        // {
-        //   model: db.StudyroomChat,
-        //   as: "studyroom_chats",
-        //   attributes: ["sender_id", "type", "content", "created_at"],
-        //   include: [{ model: db.User, as: "sender" }],
-        // },
-        {
-          model: db.StudyroomTodo,
-          as: "studyroom_todos",
-          attributes: ["todo_id"],
-          include: [
-            {
-              model: db.Todo,
-              as: "todo",
-              attributes: {
-                exclude: ["updated_at"],
-              },
-              include: [
-                {
-                  model: db.User,
-                  as: "creater",
-                  attributes: ["user_id", "nickname"],
-                },
-                {
-                  model: db.TodoParticipant,
-                  as: "todo_participants",
-                  include: [
-                    {
-                      model: db.User,
-                      as: "assigned_user",
-                      attributes: ["user_id", "nickname"],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    }); // if not found, return null
+    const studyroom = await db.Studyroom.findByPk(studyroomId);
     if (!studyroom) {
       throw new CustomError.NotExistsError(
         "스터디룸 정보가 존재하지 않습니다."
       );
     }
-    return studyroom;
+    const area = await studyroom.getArea({
+      // attributes: ["area_id", "sido", "gungu"],
+    });
+    const studyroomMembers = await studyroom.getStudyroom_members({
+      // where: { status: "active" },
+      // attributes: ["role", "status"],
+      include: [{ model: db.User, as: "user", attributes: ["nickname"] }],
+    });
+    // const studyroomMemberUsers = await studyroomMembers.
+    // const studyroomTodos = await studyroom.getStudyroom_todos({
+    //   //  where: { status: "active" } ,
+    // });
+
+    // user_id 를 encrypt62 한 값으로 변경
+    const encryptedStudyroomMembers = studyroomMembers.map((member) => {
+      member.user_id = encrypt62(member.user_id);
+      return member;
+    });
+    const studyroomTodos = await studyroom.getStudyroom_todos({
+      include: [
+        {
+          model: db.Todo,
+          as: "todo",
+          include: [{ model: db.TodoParticipant, as: "todo_participants" }],
+        },
+      ],
+    });
+    // const todos =
+    return {
+      studyroom,
+      area,
+      studyroomMembers: encryptedStudyroomMembers,
+      studyroomTodos,
+    };
+
+    // const studyroom = await db.Studyroom.findByPk(studyroomId, {
+    //   attributes: { exclude: ["updated_at"] },
+    //   // attributes: [
+    //   //   "studyroom_id",
+    //   //   "title",
+    //   //   "subtitle",
+    //   //   "area_id",
+    //   //   "goal",
+    //   //   "goal_url",
+    //   //   "profile_image",
+    //   //   "status",
+    //   //   "created_at",
+    //   // ],
+    //   include: [
+    //     {
+    //       model: db.Area,
+    //       as: "area",
+    //       attributes: ["area_id", "sido", "gungu"],
+    //     },
+    //     {
+    //       model: db.StudyroomMember,
+    //       as: "studyroom_members",
+    //       where: { status: "active" },
+    //       attributes: ["role", "status"],
+    //       include: [
+    //         { model: db.User, as: "user", attributes: ["user_id", "nickname"] },
+    //       ],
+    //     },
+    //     // { model: db.UserStudyroom, as: "user_studyrooms" }, // TODO : 스터디룸멤버 모델(테이블)과 중복되는 부분이 있는데, 굳이 필요한가?
+    //     // {
+    //     //   model: db.StudyroomChat,
+    //     //   as: "studyroom_chats",
+    //     //   attributes: ["sender_id", "type", "content", "created_at"],
+    //     //   include: [{ model: db.User, as: "sender" }],
+    //     // },
+    //     {
+    //       model: db.StudyroomTodo,
+    //       as: "studyroom_todos",
+    //       attributes: ["todo_id"],
+    //       include: [
+    //         {
+    //           model: db.Todo,
+    //           as: "todo",
+    //           attributes: {
+    //             exclude: ["updated_at"],
+    //           },
+    //           include: [
+    //             {
+    //               model: db.User,
+    //               as: "creater",
+    //               attributes: ["user_id", "nickname"],
+    //             },
+    //             {
+    //               model: db.TodoParticipant,
+    //               as: "todo_participants",
+    //               include: [
+    //                 {
+    //                   model: db.User,
+    //                   as: "assigned_user",
+    //                   attributes: ["user_id", "nickname"],
+    //                 },
+    //               ],
+    //             },
+    //           ],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // }); // if not found, return null
+    // if (!studyroom) {
+    //   throw new CustomError.NotExistsError(
+    //     "스터디룸 정보가 존재하지 않습니다."
+    //   );
+    // }
+    // return studyroom;
   } catch (error) {
     // logger.error(error);
     if (error instanceof db.Sequelize.DatabaseError) {
@@ -284,27 +306,43 @@ exports.getTodosByStudyroomId = async ({ userId, studyroomId }) => {
     }
     const todos = await db.StudyroomTodo.findAll({
       where: { studyroom_id: studyroomId },
+      attributes: ["studyroom_todo_id", "todo_id", "created_at", "updated_at"],
       include: [
         {
           model: db.Todo,
           as: "todo",
-          attributes: {
-            exclude: ["updated_at"],
-          },
+          attributes: [
+            "title",
+            "content",
+            "location",
+            "starts_at",
+            "ends_at",
+            "status",
+            "creater_id",
+            "created_at",
+            "updated_at",
+          ],
           include: [
             {
               model: db.User,
               as: "creater",
-              attributes: ["user_id", "nickname"],
+              attributes: ["nickname"],
             },
             {
               model: db.TodoParticipant,
               as: "todo_participants",
+              attributes: [
+                "todo_participant_id",
+                "assigned_user_id",
+                "status",
+                "comment",
+                "image_url",
+              ],
               include: [
                 {
                   model: db.User,
                   as: "assigned_user",
-                  attributes: ["user_id", "nickname"],
+                  attributes: ["nickname"],
                 },
               ],
             },
@@ -312,7 +350,20 @@ exports.getTodosByStudyroomId = async ({ userId, studyroomId }) => {
         },
       ],
     });
-    return todos;
+    // encrypt62로 creater_id, assigned_user_id 변경
+    const encryptedTodos = todos.map((todo) => {
+      todo.todo.creater_id = encrypt62(todo.todo.creater_id);
+      todo.todo.todo_participants = todo.todo.todo_participants.map(
+        (participant) => {
+          participant.assigned_user_id = encrypt62(
+            participant.assigned_user_id
+          );
+          return participant;
+        }
+      );
+      return todo;
+    });
+    return encryptedTodos;
   } catch (error) {
     // logger.error(error);
     if (error instanceof db.Sequelize.DatabaseError) {
