@@ -10,7 +10,8 @@ const userEnter = async (socket, data) => {
     // 1. 입력값 검증
     validator.userEnter(data);
     // 2-1. studyroom_id 복호화
-    const decryptedStudyroomId = decrypt62(data.studyroom_id);
+    // const decryptedStudyroomId = decrypt62(data.studyroom_id);
+    const decryptedStudyroomId = data.studyroom_id;
 
     // 해당 사용자가 해당 스터디룸에 속해있는지 검증
     // if not, throws error
@@ -22,11 +23,11 @@ const userEnter = async (socket, data) => {
     // 3. 해당 studyroom_id의 채팅을 가져옴
     const chatData = await chatService.getChatByCursor({
       studyroom_id: decryptedStudyroomId,
+      user_id: socket.user.user_id,
     });
     // 가져온 채팅 로깅
     logger.debug(
-      `[userEnter] studyroomChat: ${chatData.chats.length}개의 채팅
-      \n${JSON.stringify(chatData.chats, null, 2)}`
+      `[userEnter] studyroomChat: ${chatData.chats.length}개의 채팅`
     );
 
     // 4. 가져온 채팅을 initial-message 로 전송
@@ -37,6 +38,42 @@ const userEnter = async (socket, data) => {
   }
 };
 
+const getMoreChat = async (socket, data) => {
+  try {
+    logger.debug(`[getMoreChat] Received: ${JSON.stringify(data, null, 2)}`);
+    // 입력값 검증
+    // validator.getMoreChat(data);
+    // studyroom_id 복호화
+    // const decryptedStudyroomId = decrypt62(data.studyroom_id);
+    const decryptedStudyroomId = data.studyroom_id;
+
+    // 해당 사용자가 해당 스터디룸에 속해있는지 검증
+    // if not, throws error
+    await chatService.isUserInStudyroom({
+      studyroom_id: decryptedStudyroomId,
+      user_id: socket.user.user_id,
+    });
+
+    // cursor를 기반으로 채팅 가져오기
+    const chatData = await chatService.getChatByCursor({
+      studyroom_id: decryptedStudyroomId,
+      cursor: data.cursor,
+      user_id: socket.user.user_id,
+    });
+
+    // 가져온 채팅 로깅
+    logger.debug(
+      `[getMoreChat] studyroomChat: ${chatData.chats.length}개의 채팅`
+    );
+
+    // 가져온 채팅을 more-message 로 전송
+    socket.emit("more-messages", chatData);
+  } catch (error) {
+    logger.error(`[getMoreChat] Error: ${error}`);
+    socketErrorHandler(socket, "more-messages", error);
+  }
+};
+
 // TODO : socket.io middleware의 정보 갱신 주기?
 const userJoin = async (socket, data) => {
   try {
@@ -44,7 +81,8 @@ const userJoin = async (socket, data) => {
     // 입력값 검증
     validator.userEnter(data);
     // studyroom_id 복호화
-    const decryptedStudyroomId = decrypt62(data.studyroom_id);
+    // const decryptedStudyroomId = decrypt62(data.studyroom_id);
+    const decryptedStudyroomId = data.studyroom_id;
 
     // 해당 사용자가 해당 스터디룸에 속해있는지 검증
     // if not, throws error
@@ -79,7 +117,8 @@ const userLeave = async (socket, data) => {
     // 입력값 검증
     validator.userEnter(data);
     // studyroom_id 복호화
-    const decryptedStudyroomId = decrypt62(data.studyroom_id);
+    // const decryptedStudyroomId = decrypt62(data.studyroom_id);
+    const decryptedStudyroomId = data.studyroom_id;
 
     // leave는 굳이 해당 사용자가 해당 스터디룸에 속해있는지 검증할 필요 없음
 
@@ -106,7 +145,8 @@ const onMessage = async (socket, data) => {
     // 입력값 검증
     validator.message(data);
     // studyroom_id 복호화
-    const decryptedStudyroomId = decrypt62(data.studyroom_id);
+    // const decryptedStudyroomId = decrypt62(data.studyroom_id);
+    const decryptedStudyroomId = data.studyroom_id;
 
     // 해당 사용자가 해당 스터디룸에 속해있는지 검증
     // if not, throws error
@@ -170,4 +210,5 @@ module.exports = {
   userLeave,
   onMessage,
   onDisconnect,
+  getMoreChat,
 };

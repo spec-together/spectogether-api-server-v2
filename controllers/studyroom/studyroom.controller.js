@@ -19,7 +19,7 @@ exports.getStudyroomByStudyroomId = async (req, res, next) => {
     const studyroom = await studyroomService.getStudyroomByStudyroomId(
       req.params.id
     );
-    res.status(200).json(studyroom);
+    res.status(200).success(studyroom);
   } catch (error) {
     next(error);
   }
