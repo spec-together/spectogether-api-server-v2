@@ -68,12 +68,9 @@ const logout = async (req, res, next) => {
     if (isTokenExist) await loginService.deleteRefreshToken(refreshToken);
 
     // 2. 응답
-    return res
-      .status(200)
-      .clearCookie("SPECTOGETHER_RT", refreshTokenCookieOptions)
-      .success({
-        message: "로그아웃 되었습니다.",
-      });
+    return res.status(200).clearCookie("SPECTOGETHER_RT").success({
+      message: "로그아웃 되었습니다.",
+    });
   } catch (err) {
     logError(err);
     next(err);
