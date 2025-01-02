@@ -1,7 +1,7 @@
 const eventService = require("../../services/event/event.service");
 const logger = require("../../logger");
 
-const getAllevents = async (req, res, next) => {
+const getAllEvents = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
@@ -29,28 +29,31 @@ const getEventByEventId = async (req, res, next) => {
 
 const createEvent = async (req, res, next) => {
   try {
-    logger.debug(`[createEvent] Request body: ${JSON.stringify(req.body)}`);
     const userId = parseInt(req.user.user_id);
-    // const eventData = req.body;
+    const uploadedPosterImage = req.files.image[0];
+    const uploadedEventImages = req.files.images;
+    const poster_image_url = uploadedPosterImage
+      ? uploadedPosterImage.path
+      : "";
+    const eventImageUrls = uploadedEventImages
+      ? uploadedEventImages.map((file) => file.path)
+      : [];
     const {
       title,
       subtitle,
-      poster_image_url,
       description,
       application_url,
       location,
+      is_online,
       starts_at,
       ends_at,
-      is_online,
       application_start_date,
       application_end_date,
     } = req.body;
-    const eventImages = req.files.map((file) => ({ image_url: file.path }));
     const result = await eventService.createEvent({
-      hostId: userId,
+      host_id: userId,
       title,
       subtitle,
-      poster_image_url,
       description,
       application_url,
       location,
@@ -59,13 +62,9 @@ const createEvent = async (req, res, next) => {
       is_online,
       application_start_date,
       application_end_date,
-      eventImages,
+      poster_image_url: poster_image_url,
+      eventImageUrls: eventImageUrls,
     });
-    // const newEvent = await eventService.createEvent({
-    //   eventData,
-    //   // evnetImagesData,
-    //   userId,
-    // });
     return res.status(201).success({ event_id: result.event_id });
   } catch (error) {
     logger.error(`[createEvent] Error: ${error.stack}`);
@@ -78,27 +77,32 @@ const updateEvent = async (req, res, next) => {
     logger.debug(`[updateEvent] Request body: ${JSON.stringify(req.body)}`);
     const userId = parseInt(req.user.user_id);
     const eventId = parseInt(req.params.eventId, 10);
+    const uploadedPosterImage = req.files.image[0];
+    const uploadedEventImages = req.files.images;
+    const poster_image_url = uploadedPosterImage
+      ? uploadedPosterImage.path
+      : "";
+    const eventImageUrls = uploadedEventImages
+      ? uploadedEventImages.map((file) => file.path)
+      : [];
     const {
       title,
       subtitle,
-      poster_image_url,
+      // poster_image_url,
       description,
       application_url,
       location,
+      is_online,
       starts_at,
       ends_at,
-      is_online,
       application_start_date,
       application_end_date,
     } = req.body;
-    const eventImages = req.files.map((file) => ({ image_url: file.path }));
-    console.log(eventImages);
     const result = await eventService.updateEvent({
       hostId: userId,
       eventId,
       title,
       subtitle,
-      poster_image_url,
       description,
       application_url,
       location,
@@ -107,7 +111,8 @@ const updateEvent = async (req, res, next) => {
       is_online,
       application_start_date,
       application_end_date,
-      eventImages,
+      poster_image_url,
+      eventImageUrls,
     });
     return res.status(200).success({
       event_id: result.event_id,
@@ -145,7 +150,7 @@ const getEventBasicInfo = async (req, res, next) => {
 };
 
 module.exports = {
-  getAllevents,
+  getAllEvents,
   getEventByEventId,
   createEvent,
   updateEvent,

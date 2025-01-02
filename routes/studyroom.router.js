@@ -9,7 +9,7 @@ studyroomRouter.get("/:id", studyroomController.getStudyroomByStudyroomId);
 studyroomRouter.post(
   "/",
   authenticateMiddleware.authenticateAccessToken,
-  uploadController.handleUpload("uploads/studyrooms"),
+  uploadController.handleSingleUpload("uploads/studyrooms"),
   studyroomController.createStudyroom
 );
 studyroomRouter.post(
@@ -35,21 +35,21 @@ studyroomRouter.get(
 studyroomRouter.post(
   "/:studyroomId/todos",
   authenticateMiddleware.authenticateAccessToken,
-  uploadController.handleUpload("uploads/todos", "image"), // none
+  uploadController.handleSingleUpload("uploads/todos", "image"), // none
   studyroomController.createTodo
 );
 
 studyroomRouter.post(
   "/:studyroomId/todos/:todoId",
   authenticateMiddleware.authenticateAccessToken,
-  uploadController.handleUpload("uploads/todos", "image"),
+  uploadController.handleSingleUpload("uploads/todos", "image"),
   studyroomController.joinTodo
 );
 
 studyroomRouter.patch(
   "/:studyroomId/todos/:todoId",
   authenticateMiddleware.authenticateAccessToken,
-  uploadController.handleUpload("uploads/todos", "image"),
+  uploadController.handleSingleUpload("uploads/todos", "image"),
   studyroomController.submitTodo
 );
 

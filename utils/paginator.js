@@ -2,8 +2,10 @@ function createPagination(prefix, count, page, limit) {
   const totalItems = count;
   const totalPages = Math.ceil(totalItems / limit);
   // const currentPage = page;
-  const next = page < totalPages ? `/${prefix}?page=${page + 1}` : null;
-  const previous = page > 1 ? `/${prefix}?page=${page - 1}` : null;
+  const next =
+    page < totalPages ? `/${prefix}?page=${page + 1}&limit=${limit}` : null;
+  const previous =
+    page > 1 ? `/${prefix}?page=${page - 1}&limit=${limit}` : null;
   const pagination = {
     totalItems,
     totalPages,
@@ -15,4 +17,6 @@ function createPagination(prefix, count, page, limit) {
   return pagination;
 }
 
-module.exports = { createPagination };
+module.exports = {
+  createPagination,
+};

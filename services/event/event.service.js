@@ -17,10 +17,11 @@ const getAllEvents = async ({ page, limit }) => {
         "poster_image_url",
         "description",
         "host_id",
+        "application_url",
         "location",
+        "is_online",
         "starts_at",
         "ends_at",
-        "is_online",
         "application_start_date",
         "application_end_date",
       ],
@@ -127,46 +128,58 @@ const getEventByEventId = async ({ eventId }) => {
 };
 
 const createEvent = async ({
-  hostId,
+  host_id,
   title,
   subtitle,
-  poster_image_url,
   description,
   application_url,
   location,
+  is_online,
   starts_at,
   ends_at,
-  is_online,
   application_start_date,
   application_end_date,
-  eventImages,
+  poster_image_url,
+  eventImageUrls,
 }) => {
   try {
-    const newEvent = await db.Event.create({
-      host_id: hostId,
-      title,
-      subtitle,
-      poster_image_url,
-      description,
-      application_url,
-      location,
-      starts_at,
-      ends_at,
-      is_online,
-      application_start_date,
-      application_end_date,
-    });
-    if (eventImages) {
-      const eventImageRecords = eventImages.map((img, index) => ({
+    const t = await db.sequelize.transaction();
+    const newEvent = await db.Event.create(
+      {
+        host_id,
+        title,
+        subtitle,
+        description,
+        application_url,
+        location,
+        is_online,
+        starts_at,
+        ends_at,
+        application_start_date,
+        application_end_date,
+        starts_at,
+        ends_at,
+        poster_image_url,
+      },
+      { transaction: t }
+    );
+    if (eventImageUrls.length > 0) {
+      const eventImageRecords = eventImageUrls.map((url, index) => ({
         event_id: newEvent.event_id,
-        image_url: img.image_url,
+        image_url: url,
         sequence: index + 1,
       }));
-      await db.EventImage.bulkCreate(eventImageRecords);
+      await db.EventImage.bulkCreate(eventImageRecords, { transaction: t });
     }
-    return { newEvent };
+    await t.commit();
+    return { event_id: newEvent.event_id, message: "이벤트 생성 성공" };
   } catch (error) {
-    throw new CustomError.DatabaseError("이벤트 생성에 실패했습니다.", error);
+    if (error instanceof db.Sequelize.DatabaseError) {
+      await t.rollback();
+      throw new CustomError.DatabaseError("이벤트 생성에 실패했습니다.", error);
+    }
+    await t.rollback();
+    throw error;
   }
 };
 
@@ -184,9 +197,10 @@ const updateEvent = async ({
   is_online,
   application_start_date,
   application_end_date,
-  eventImages,
+  eventImageUrls,
 }) => {
   try {
+    const t = await db.sequelize.transaction();
     const event = await db.Event.findByPk(eventId);
     if (!event) {
       throw new CustomError.NotExistsError("해당 이벤트가 존재하지 않습니다.");
@@ -194,41 +208,50 @@ const updateEvent = async ({
     if (event.host_id !== hostId) {
       throw new CustomError.NotAllowedError("이벤트 수정 권한이 없습니다.");
     }
-    await event.update({
-      title,
-      subtitle,
-      poster_image_url,
-      description,
-      application_url,
-      location,
-      starts_at,
-      ends_at,
-      is_online,
-      application_start_date,
-      application_end_date,
-    });
-    if (eventImages) {
+    await event.update(
+      {
+        title,
+        subtitle,
+        poster_image_url,
+        description,
+        application_url,
+        location,
+        starts_at,
+        ends_at,
+        is_online,
+        application_start_date,
+        application_end_date,
+      },
+      { transaction: t }
+    );
+    if (eventImageUrls.length > 0) {
       const existingImages = await db.EventImage.findAll({
         where: { event_id: eventId },
       });
       // 기존 이미지 row 가 있으면 삭제 처리
       if (existingImages.length > 0) {
-        await db.EventImage.destroy({ where: { event_id: eventId } });
+        await db.EventImage.destroy(
+          { where: { event_id: eventId } },
+          { transaction: t }
+        );
       }
       // 없으면 바로 추가
-      const eventImageRecords = eventImages.map((img, index) => ({
+      const eventImageRecords = eventImageUrls.map((url, index) => ({
         event_id: eventId,
-        image_url: img.image_url,
+        image_url: url,
         sequence: index + 1,
       }));
       console.log(eventImageRecords);
-      await db.EventImage.bulkCreate(eventImageRecords);
+      await db.EventImage.bulkCreate(eventImageRecords, { transaction: t });
     }
+    await t.commit();
     return { event_id: event.event_id, event, message: "이벤트 수정 성공" };
   } catch (error) {
     if (error instanceof db.Sequelize.DatabaseError) {
+      await t.rollback();
       throw new CustomError.DatabaseError("이벤트 수정에 실패했습니다.", error);
     }
+    await t.rollback();
     throw error;
   }
 };
