@@ -10,7 +10,8 @@ const chatService = require("../services/socket/studyroom.chat.socket.service");
  * Bearer 토큰을 추출하고 검증하는 미들웨어
  */
 const checkAccessToken = (socket, next) => {
-  const authHeader = socket.request.headers.authorization;
+  const authHeader =
+    socket.handshake.auth.token || socket.request.headers.authorization;
   // const authHeader = socket.handshake.auth.token;
   logger.debug(`[checkAccessToken] Authorization Header: ${authHeader}`);
 

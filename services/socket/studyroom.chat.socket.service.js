@@ -39,19 +39,19 @@ const getChatByCursor = async ({ studyroom_id, cursor = null, user_id }) => {
     ],
     where: whereClause,
     limit: limit + 1, // 다음 페이지 존재 여부 확인을 위해 하나 더 조회
-    order: [["studyroom_chat_id", "DESC"]],
+    order: [["studyroom_chat_id", "DESC"]], // 오래된게 앞에 표시되도록 ASC로 변경
   });
 
   let hasNextPage = false;
 
+  logger.debug(`[getChatByCursor] chats: ${chats.length}`);
   if (chats.length > limit) {
     hasNextPage = true;
     chats.pop(); // limit + 1로 조회한 초과 레코드는 제거
   }
+  chats.reverse(); // 오래된 채팅이 앞에 표시되도록 순서 변경
 
-  const nextCursor = hasNextPage
-    ? chats[chats.length - 1].studyroom_chat_id
-    : null;
+  const nextCursor = hasNextPage ? chats[0].studyroom_chat_id : null;
 
   let ret = [];
   for (const chat of chats) {
@@ -68,6 +68,10 @@ const getChatByCursor = async ({ studyroom_id, cursor = null, user_id }) => {
       created_at: chat.created_at,
     });
   }
+
+  logger.debug(
+    `[getChatByCursor] nextCursor: ${nextCursor} hasNextPage: ${hasNextPage}`
+  );
 
   return {
     chats: ret,

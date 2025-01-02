@@ -31,7 +31,8 @@ exports.getUserStudyroom = async (userId) => {
   let ret = [];
   for (const studyroom of studyrooms) {
     ret.push({
-      studyroom_id: encrypt62(studyroom.studyroom.studyroom_id),
+      // studyroom_id: encrypt62(studyroom.studyroom.studyroom_id),
+      studyroom_id: studyroom.studyroom.studyroom_id,
       title: studyroom.studyroom.title,
       subtitle: studyroom.studyroom.subtitle,
       area: studyroom.studyroom.area_id,
