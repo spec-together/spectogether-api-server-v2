@@ -10,7 +10,7 @@ const { logError } = require("../../utils/handlers/error.logger");
 const multer = require("multer");
 
 // handleSingleUpload
-const handleUpload = (destination, fieldName = "image") => {
+const handleSingleUpload = (destination, fieldName = "image") => {
   const upload = uploadService
     .createUploadMiddleware(destination)
     .single(fieldName);
@@ -27,10 +27,10 @@ const handleUpload = (destination, fieldName = "image") => {
   };
 };
 
-const handleArrayUpload = (destination) => {
+const handleArrayUpload = (destination, fieldName = "images", maxCount = 3) => {
   const upload = uploadService
     .createUploadMiddleware(destination)
-    .array("images", 3);
+    .array(fieldName, maxCount);
 
   return (req, res, next) => {
     upload(req, res, function (err) {
@@ -39,6 +39,20 @@ const handleArrayUpload = (destination) => {
       }
       // 업로드 후 추가 처리 로직
       // res.status(200).json({ filename: req.file.filename });
+      next();
+    });
+  };
+};
+
+const handlefieldsUpload = (destination) => {
+  const upload = uploadService
+    .createUploadMiddleware(destination)
+    .fields([{ name: "image" }, { name: "images", maxCount: 5 }]);
+  return (req, res, next) => {
+    upload(req, res, function (err) {
+      if (err) {
+        return next(err);
+      }
       next();
     });
   };
@@ -132,8 +146,9 @@ const getImageWithUrl = (req, res, next) => {
 };
 
 module.exports = {
-  handleUpload,
+  handleSingleUpload,
   handleArrayUpload,
+  handlefieldsUpload,
   singleUploadToS3,
   multipleUploadToS3,
   getImageWithUrl,
