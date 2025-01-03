@@ -585,3 +585,150 @@ exports.getMembersByStudyroomId = async ({ userId, studyroomId }) => {
     throw error;
   }
 };
+
+exports.inviteUser = async ({ inviterId, studyroomId, inviteePhone }) => {
+  try {
+    const studyroom = await db.Studyroom.findOne({
+      where: { studyroom_id: studyroomId, status: "active" },
+    });
+    if (!studyroom) {
+      throw new CustomError.NotExistsError(
+        "스터디룸 정보가 존재하지 않습니다."
+      );
+    }
+
+    const studyroomMember = await db.StudyroomMember.findOne({
+      where: {
+        studyroom_id: studyroomId,
+        user_id: inviterId,
+        role: "owner",
+      },
+    });
+    if (!studyroomMember) {
+      throw new CustomError.NotAllowedError(
+        "스터디룸 멤버 초대 권한이 없습니다."
+      );
+    }
+
+    // TODO : 휴대폰 번호로 사용자 조회
+    const invitee = await db.User.findOne({
+      where: { phone_number: inviteePhone },
+    });
+    if (!invitee) {
+      throw new CustomError.NotExistsError(
+        "초대할 사용자 정보가 존재하지 않습니다."
+      );
+    }
+
+    const exMember = await db.StudyroomMember.findOne({
+      where: {
+        studyroom_id: studyroomId,
+        user_id: invitee.user_id,
+      },
+    });
+    if (exMember) {
+      throw new CustomError.AlreadyExistsError("이미 가입한 사용자입니다.");
+    }
+
+    const invite = await db.StudyroomInvite.create({
+      studyroom_id: studyroomId,
+      inviter_id: inviterId,
+      invitee_id: invitee.user_id,
+      status: "pending",
+    });
+    return { message: "사용자 초대 요청 완료" };
+  } catch (error) {
+    // logger.error(error);
+    if (error instanceof db.Sequelize.DatabaseError) {
+      throw new CustomError.DatabaseError("사용자 초대 중 에러.", error);
+    }
+    throw error;
+  }
+};
+
+exports.acceptInvitation = async ({ userId, inviteId }) => {
+  try {
+    const invite = await db.StudyroomInvite.findOne({
+      where: {
+        studyroom_invite_id: inviteId,
+        invitee_id: userId,
+        status: "pending",
+      },
+    });
+    if (!invite) {
+      throw new CustomError.NotExistsError(
+        "초대 정보가 존재하지 않거나 이미 처리된 초대입니다."
+      );
+    }
+    const studyroom = await db.Studyroom.findOne({
+      where: { studyroom_id: invite.studyroom_id, status: "active" },
+    });
+    if (!studyroom) {
+      throw new CustomError.NotExistsError(
+        "스터디룸 정보가 존재하지 않습니다."
+      );
+    }
+
+    const studyroomMember = await db.StudyroomMember.create({
+      studyroom_id: invite.studyroom_id,
+      user_id: userId,
+      role: "member",
+      status: "active",
+    }); // user_studyroom 은 중복되므로 생략
+    await invite.update({ status: "accepted" });
+    return { message: "초대 수락 성공" };
+  } catch (error) {
+    // logger.error(error);
+    if (error instanceof db.Sequelize.DatabaseError) {
+      throw new CustomError.DatabaseError("초대 수락 중 에러.", error);
+    }
+    throw error;
+  }
+};
+
+exports.getReceivedInvites = async ({ userId }) => {
+  try {
+    const invites = await db.StudyroomInvite.findAll({
+      where: {
+        invitee_id: userId,
+        status: "pending",
+      },
+      attributes: [
+        "studyroom_invite_id",
+        "studyroom_id",
+        "inviter_id",
+        "status",
+        "created_at",
+        "updated_at",
+      ],
+      include: [
+        {
+          model: db.Studyroom,
+          as: "studyroom",
+          attributes: ["title"],
+        },
+        {
+          model: db.User,
+          as: "inviter",
+          attributes: ["nickname"],
+        },
+      ],
+    });
+    // user_id 를 encrypt62 한 값으로 변경
+    const encryptedInvites = invites.map((invite) => {
+      invite.inviter_id = encrypt62(invite.inviter_id);
+      return invite;
+    });
+
+    return { message: "받은 초대 목록 조회 성공", invites: encryptedInvites };
+  } catch (error) {
+    // logger.error(error);
+    if (error instanceof db.Sequelize.DatabaseError) {
+      throw new CustomError.DatabaseError(
+        "받은 초대 목록 조회 중 에러.",
+        error
+      );
+    }
+    throw error;
+  }
+};

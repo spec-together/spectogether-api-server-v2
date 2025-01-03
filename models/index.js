@@ -43,6 +43,7 @@ db.Spec = require("./define/spec");
 db.SpecPhoto = require("./define/spec_photo");
 db.Studyroom = require("./define/studyroom");
 db.StudyroomChat = require("./define/studyroom_chat");
+db.StudyroomInvite = require("./define/studyroom_invite");
 db.StudyroomMember = require("./define/studyroom_member");
 db.StudyroomTodo = require("./define/studyroom_todo");
 db.Term = require("./define/term");
