@@ -3,6 +3,8 @@ const studyroomRouter = express.Router();
 const studyroomController = require("../controllers/studyroom/studyroom.controller.js");
 const authenticateMiddleware = require("../middleware/authenticate.jwt");
 const uploadController = require("../controllers/upload/upload.controller.js");
+const validate = require("../middleware/validate.js");
+const studyroomValidator = require("../utils/validators/studyroom.validator.js");
 
 studyroomRouter.get("/", studyroomController.getAllStudyrooms);
 
@@ -17,6 +19,7 @@ studyroomRouter.post(
   "/",
   authenticateMiddleware.authenticateAccessToken,
   uploadController.handleSingleUpload("uploads/studyrooms"),
+  validate(studyroomValidator.createStudyroom),
   studyroomController.createStudyroom
 );
 

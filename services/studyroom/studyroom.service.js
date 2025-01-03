@@ -8,6 +8,7 @@ exports.getAllStudyrooms = async () => {
     const studyrooms = await db.Studyroom.findAll({
       where: { status: "active" },
       attributes: { exclude: ["updated_at"] },
+      order: [["created_at", "DESC"]],
       include: [
         {
           model: db.Area,
@@ -20,6 +21,7 @@ exports.getAllStudyrooms = async () => {
           where: { status: "active" },
           attributes: ["role", "status", "user_id"],
           include: [{ model: db.User, as: "user", attributes: ["nickname"] }],
+          separate: true,
         },
       ],
     });
