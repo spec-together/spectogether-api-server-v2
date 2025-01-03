@@ -5,6 +5,13 @@ const authenticateMiddleware = require("../middleware/authenticate.jwt");
 const uploadController = require("../controllers/upload/upload.controller.js");
 
 studyroomRouter.get("/", studyroomController.getAllStudyrooms);
+
+studyroomRouter.get(
+  "/invites",
+  authenticateMiddleware.authenticateAccessToken,
+  studyroomController.getReceivedInvites
+);
+
 studyroomRouter.get("/:id", studyroomController.getStudyroomByStudyroomId);
 studyroomRouter.post(
   "/",
@@ -12,6 +19,7 @@ studyroomRouter.post(
   uploadController.handleSingleUpload("uploads/studyrooms"),
   studyroomController.createStudyroom
 );
+
 studyroomRouter.post(
   "/:studyroomId",
   authenticateMiddleware.authenticateAccessToken,
@@ -57,6 +65,18 @@ studyroomRouter.get(
   "/:studyroomId/members",
   authenticateMiddleware.authenticateAccessToken,
   studyroomController.getMembersByStudyroomId
+);
+
+studyroomRouter.post(
+  "/:studyroomId/invite",
+  authenticateMiddleware.authenticateAccessToken,
+  studyroomController.inviteUser
+);
+
+studyroomRouter.post(
+  "/invites/:inviteId/accept",
+  authenticateMiddleware.authenticateAccessToken,
+  studyroomController.acceptInvitation
 );
 
 module.exports = studyroomRouter;

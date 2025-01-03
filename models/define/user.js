@@ -131,6 +131,14 @@ class User extends Model {
       as: "studyroom_chats",
       foreignKey: "sender_id",
     });
+    this.hasMany(models.StudyroomInvite, {
+      as: "studyroom_invites_sent",
+      foreignKey: "inviter_id",
+    });
+    this.hasMany(models.StudyroomInvite, {
+      as: "studyroom_invites_received",
+      foreignKey: "invitee_id",
+    });
     this.hasMany(models.StudyroomMember, {
       as: "studyroom_members",
       foreignKey: "user_id",

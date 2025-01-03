@@ -69,6 +69,10 @@ class Studyroom extends Model {
       as: "studyroom_chats",
       foreignKey: "studyroom_id",
     });
+    this.hasMany(models.StudyroomInvite, {
+      as: "studyroom_invites",
+      foreignKey: "studyroom_id",
+    });
     this.hasMany(models.StudyroomMember, {
       as: "studyroom_members",
       foreignKey: "studyroom_id",

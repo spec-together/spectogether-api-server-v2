@@ -172,3 +172,46 @@ exports.getMembersByStudyroomId = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.inviteUser = async (req, res, next) => {
+  try {
+    const userId = parseInt(req.user.user_id);
+    const studyroomId = parseInt(req.params.studyroomId);
+    const inviteePhone = req.body.invitee_phone; // const { email } = req.body;
+
+    const result = await studyroomService.inviteUser({
+      inviterId: userId,
+      studyroomId,
+      inviteePhone,
+    });
+    return res.status(200).success({ message: result.message });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.acceptInvitation = async (req, res, next) => {
+  try {
+    const userId = parseInt(req.user.user_id);
+    const inviteId = parseInt(req.params.inviteId);
+    const result = await studyroomService.acceptInvitation({
+      userId,
+      inviteId,
+    });
+    return res.status(200).success({ message: result.message });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getReceivedInvites = async (req, res, next) => {
+  try {
+    const userId = parseInt(req.user.user_id);
+    const result = await studyroomService.getReceivedInvites({ userId });
+    return res
+      .status(200)
+      .success({ message: result.message, invites: result.invites });
+  } catch (error) {
+    next(error);
+  }
+};
