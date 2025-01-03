@@ -4,11 +4,15 @@ const uploadService = require("../../services/upload/upload.service.js");
 
 exports.getAllStudyrooms = async (req, res, next) => {
   try {
-    const studyrooms = await studyroomService.getAllStudyrooms();
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+
+    const result = await studyroomService.getAllStudyrooms({ page, limit });
+    // const studyrooms = await studyroomService.getAllStudyrooms();
     res.status(200).success({
-      message: "스터디룸 목록 조회 성공",
-      studyrooms,
-      // pagination
+      message: result.message,
+      studyrooms: result.studyrooms,
+      pagination: result.pagination,
     });
   } catch (error) {
     next(error);
