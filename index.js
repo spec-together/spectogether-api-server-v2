@@ -29,11 +29,13 @@ const { swaggerUi, specs } = require("./swagger/swagger");
 // ex) const exampleRouter = require("./routers/example.router");
 const authRouter = require("./routes/auth.router");
 const usersRouter = require("./routes/users.router");
+const noticeRouter = require("./routes/notice.router");
 const inquiryRouter = require("./routes/inquiry.router");
-const contestRouter = require("./routes/contest.router");
+const eventRouter = require("./routes/event.router");
 const phoneVerificationRouter = require("./routes/phone.verification.router");
 const emailVerificationRouter = require("./routes/email.verification.router");
 const studyroomRouter = require("./routes/studyroom.router");
+const advertisementRouter = require("./routes/advertisement.router");
 const testRouter = require("./routes/test.router");
 
 // TODO : 일단 구현 중에는 분리해서 구현하고 있으며, 구현 끝나고 스터디 룸 등으로 이동할지 결정하자.
@@ -64,12 +66,14 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(specs));
 // ex) app.use("/example", exampleRouter);
 app.use("/auth", authRouter);
 app.use("/users", usersRouter);
+app.use("/notices", noticeRouter);
 app.use("/inquiries", inquiryRouter);
-app.use("/contests", contestRouter);
+app.use("/events", eventRouter);
 app.use("/verification/email", emailVerificationRouter);
 app.use("/verification/phone", phoneVerificationRouter);
 app.use("/todos", todoRouter);
 app.use("/studyrooms", studyroomRouter);
+app.use("/ads", advertisementRouter);
 app.use("/test", testRouter);
 
 // 에러 핸들러는 최하단에 위치해야 하는 미들웨어입니다. 절대 순서를 변경하지 마세요.

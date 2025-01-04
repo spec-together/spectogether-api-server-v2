@@ -9,10 +9,11 @@ const uploadService = require("../../services/upload/upload.service");
 const { logError } = require("../../utils/handlers/error.logger");
 const multer = require("multer");
 
-const handleUpload = (destination) => {
+// handleSingleUpload
+const handleSingleUpload = (destination, fieldName = "image") => {
   const upload = uploadService
     .createUploadMiddleware(destination)
-    .single("image");
+    .single(fieldName);
 
   return (req, res, next) => {
     upload(req, res, function (err) {
@@ -21,6 +22,37 @@ const handleUpload = (destination) => {
       }
       // 업로드 후 추가 처리 로직
       // res.status(200).json({ filename: req.file.filename });
+      next();
+    });
+  };
+};
+
+const handleArrayUpload = (destination, fieldName = "images", maxCount = 3) => {
+  const upload = uploadService
+    .createUploadMiddleware(destination)
+    .array(fieldName, maxCount);
+
+  return (req, res, next) => {
+    upload(req, res, function (err) {
+      if (err) {
+        return next(err);
+      }
+      // 업로드 후 추가 처리 로직
+      // res.status(200).json({ filename: req.file.filename });
+      next();
+    });
+  };
+};
+
+const handlefieldsUpload = (destination) => {
+  const upload = uploadService
+    .createUploadMiddleware(destination)
+    .fields([{ name: "image" }, { name: "images", maxCount: 5 }]);
+  return (req, res, next) => {
+    upload(req, res, function (err) {
+      if (err) {
+        return next(err);
+      }
       next();
     });
   };
@@ -42,9 +74,11 @@ const singleUploadToS3 = (req, res, next) => {
         return next(new UnknownError(err.message));
       }
 
-      if (!req.file) {
-        return next(new InvalidInputError("파일이 첨부되지 않았습니다."));
-      }
+      // if (!req.file) {
+      //   return next(new InvalidInputError("파일이 첨부되지 않았습니다."));
+      // }
+      return next();
+
       // 업로드된 파일의 키 추출
       const fileKey = req.file.key;
 
@@ -88,6 +122,8 @@ const multipleUploadToS3 = (req, res, next) => {
         `[multipleUploadToS3] metadata: ${JSON.stringify(metadata)}`
       );
 
+      return next();
+
       // 클라이언트에 여러 이미지의 URL과 메타데이터 반환
       res.status(201).json({
         message: "S3 이미지 업로드 성공.",
@@ -114,7 +150,9 @@ const getImageWithUrl = (req, res, next) => {
 };
 
 module.exports = {
-  handleUpload,
+  handleSingleUpload,
+  handleArrayUpload,
+  handlefieldsUpload,
   singleUploadToS3,
   multipleUploadToS3,
   getImageWithUrl,

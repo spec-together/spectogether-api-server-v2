@@ -6,8 +6,9 @@ class EventImage extends Model {
       {
         event_image_id: {
           type: DataTypes.BIGINT,
-          allowNull: false,
           primaryKey: true,
+          autoIncrement: true,
+          allowNull: false,
         },
         event_id: {
           type: DataTypes.BIGINT,

@@ -1,7 +1,14 @@
 // const fs = require("fs");
+const config = require("./config.json");
+const { SERVER_DOMAIN } = config.SERVER;
 
 const corsOptions = {
-  origin: ["http://localhost:5173", "http://192.168.0.24:5173"], // CORS domain 설정
+  origin: [
+    "http://localhost:5173",
+    "http://192.168.0.24:5173",
+    "http://spectogether.shop",
+    "https://spectogether.shop",
+  ], // CORS domain 설정
   // origin: "*", // CORS domain 설정
   credentials: true,
 };
@@ -17,18 +24,12 @@ const refreshTokenCookieOptions = {
   httpOnly: true,
   sameSite: "none",
   secure: true,
-};
-
-const logoutCookieOptions = {
-  maxAge: 0,
-  httpOnly: true,
-  sameSite: "none",
-  secure: true,
+  domain: SERVER_DOMAIN, // 백엔드 도메인
+  path: "/",
 };
 
 module.exports = {
   corsOptions,
   // sslOptions,
   refreshTokenCookieOptions,
-  logoutCookieOptions,
 };

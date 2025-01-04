@@ -1,99 +1,159 @@
-const contestService = require("../../services/event/contest.service.js");
+const eventService = require("../../services/event/event.service");
 const logger = require("../../logger");
 
-exports.getAllContests = async (req, res, next) => {
+const getAllEvents = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
-    // const { page = 1, limit = 10 } = req.query;
-    const result = await contestService.getAllContests(page, limit);
+    const result = await eventService.getAllEvents({ page, limit });
     return res.status(200).success({
-      contests: result.contests,
+      events: result.events,
       pagination: result.pagination,
     });
   } catch (error) {
-    logger.error(`[getAllContests] Error: ${error.stack}`);
+    logger.error(`[getAllevents] Error: ${error.stack}`);
     next(error);
   }
 };
 
-exports.getContestById = async (req, res, next) => {
+const getEventByEventId = async (req, res, next) => {
   try {
-    const contestId = parseInt(req.params.id, 10);
-    const contest = await contestService.getContestById(contestId);
-    return res.status(200).success({ contest });
+    const eventId = parseInt(req.params.eventId, 10);
+    const result = await eventService.getEventByEventId({ eventId });
+    return res.status(200).success({ event: result.event });
   } catch (error) {
-    logger.error(`[getContestById] Error: ${error.stack}`);
+    logger.error(`[getEventById] Error: ${error.stack}`);
     next(error);
   }
 };
 
-exports.createContestWithAssociations = async (req, res, next) => {
+const createEvent = async (req, res, next) => {
   try {
-    logger.debug(
-      `[createContestWithAssociations] Request body: ${JSON.stringify(req.body)}`
-    );
-
+    const userId = parseInt(req.user.user_id);
+    const uploadedPosterImage = req.files.image[0];
+    const uploadedEventImages = req.files.images;
+    const poster_image_url = uploadedPosterImage
+      ? uploadedPosterImage.path
+      : "";
+    const eventImageUrls = uploadedEventImages
+      ? uploadedEventImages.map((file) => file.path)
+      : [];
     const {
       title,
       subtitle,
       description,
-      host,
+      application_url,
       location,
-      online_offline_type,
+      is_online,
+      starts_at,
+      ends_at,
       application_start_date,
       application_end_date,
-      start_date,
-      end_date,
     } = req.body;
-
-    const locationObj =
-      typeof location === "string" ? JSON.parse(location) : location;
-
-    const contestData = {
+    const result = await eventService.createEvent({
+      host_id: userId,
       title,
       subtitle,
       description,
-      host,
-      location: locationObj,
-      online_offline_type,
+      application_url,
+      location,
+      starts_at,
+      ends_at,
+      is_online,
       application_start_date,
       application_end_date,
-      start_date,
-      end_date,
-    };
-
-    if (contestData.application_url === "") {
-      contestData.application_url = null;
-    }
-
-    let image_url = null;
-
-    if (req.file) {
-      image_url = `${req.protocol}://${req.get("host")}/uploads/contests/${req.file.filename}`;
-      logger.debug(
-        `[createContestWithAssociations] Image uploaded: ${image_url}`
-      );
-    }
-
-    const result = await contestService.createContestWithAssociations({
-      ...contestData,
-      image_url,
+      poster_image_url: poster_image_url,
+      eventImageUrls: eventImageUrls,
     });
-
-    logger.info(
-      `[createContestWithAssociations] Contest created: ${result.contest.contest_id}`
-    );
-    return res.status(201).success({
-      contest: result.contest,
-      contestCalendar: result.contestCalendar,
-      contestBoard: result.contestBoard,
-      message: "대회를 성공적으로 생성했습니다.",
-    });
+    return res.status(201).success({ event_id: result.event_id });
   } catch (error) {
-    logger.error(`[createContestWithAssociations] Error: ${error.stack}`);
+    logger.error(`[createEvent] Error: ${error.stack}`);
     next(error);
   }
 };
 
-// 추가적인 컨트롤러 메서드 구현...
+const updateEvent = async (req, res, next) => {
+  try {
+    logger.debug(`[updateEvent] Request body: ${JSON.stringify(req.body)}`);
+    const userId = parseInt(req.user.user_id);
+    const eventId = parseInt(req.params.eventId, 10);
+    const uploadedPosterImage = req.files.image[0];
+    const uploadedEventImages = req.files.images;
+    const poster_image_url = uploadedPosterImage
+      ? uploadedPosterImage.path
+      : "";
+    const eventImageUrls = uploadedEventImages
+      ? uploadedEventImages.map((file) => file.path)
+      : [];
+    const {
+      title,
+      subtitle,
+      // poster_image_url,
+      description,
+      application_url,
+      location,
+      is_online,
+      starts_at,
+      ends_at,
+      application_start_date,
+      application_end_date,
+    } = req.body;
+    const result = await eventService.updateEvent({
+      hostId: userId,
+      eventId,
+      title,
+      subtitle,
+      description,
+      application_url,
+      location,
+      starts_at,
+      ends_at,
+      is_online,
+      application_start_date,
+      application_end_date,
+      poster_image_url,
+      eventImageUrls,
+    });
+    return res.status(200).success({
+      event_id: result.event_id,
+      message: result.message,
+    });
+  } catch (error) {
+    logger.error(`[updateEvent] Error: ${error.stack}`);
+    next(error);
+  }
+};
+
+const deleteEvent = async (req, res, next) => {
+  try {
+    const userId = parseInt(req.user.user_id);
+    const eventId = parseInt(req.params.eventId, 10);
+    const result = await eventService.deleteEvent({ hostId: userId, eventId });
+    return res.status(200).success({ message: result.message });
+  } catch (error) {
+    logger.error(`[deleteEvent] Error: ${error.stack}`);
+    next(error);
+  }
+};
+
+const getEventBasicInfo = async (req, res, next) => {
+  try {
+    const eventId = parseInt(req.params.eventId, 10);
+    const result = await eventService.getEventBasicInfo({ eventId });
+    return res
+      .status(200)
+      .success({ event: result.event, message: result.message });
+  } catch (error) {
+    logger.error(`[getEventTodos] Error: ${error.stack}`);
+    next(error);
+  }
+};
+
+module.exports = {
+  getAllEvents,
+  getEventByEventId,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  getEventBasicInfo,
+};

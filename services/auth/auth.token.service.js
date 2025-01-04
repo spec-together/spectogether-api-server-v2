@@ -5,6 +5,7 @@ const { JWT_SECRET } = require("../../config.json").SERVER;
 
 const tokenValidator = require("../../utils/validators/token.validator");
 const { NotExistsError } = require("../../errors");
+const logger = require("../../logger");
 
 /**
  * 사용자 ID, 이름, 닉네임을 기반으로 액세스 토큰을 생성하는 서비스 함수.
@@ -78,7 +79,10 @@ const createRefreshToken = async (user_id) => {
 const checkIfRefreshTokenExists = (data) => {
   // 없으면 에러 뱉어주기
   if (!data) {
-    throw new NotExistsError("리프레시 토큰이 존재하지 않습니다.");
+    logger.error(
+      "[checkIfRefreshTokenExists] 리프레시 토큰이 존재하지 않습니다."
+    );
+    // throw new NotExistsError("리프레시 토큰이 존재하지 않습니다.");
   }
 };
 

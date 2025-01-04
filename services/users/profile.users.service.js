@@ -2,6 +2,15 @@ const { NotExistsError } = require("../../errors");
 const logger = require("../../logger");
 const db = require("../../models");
 
+exports.checkIfUserExistsByUserId = async (userId) => {
+  const user = await db.User.findByPk(userId);
+  console.log(user);
+  if (!user) {
+    throw new NotExistsError("해당 사용자가 없습니다.");
+  }
+  return;
+};
+
 exports.getUserSpecsByUserId = async (userId) => {
   const userSpecs = await db.UserSpec.findAll({
     where: { user_id: userId },
@@ -81,6 +90,7 @@ exports.getUserNeighborhoodsByUserId = async (userId) => {
   const neighborhoods = userNeighborhoods.map((un) => {
     const area = un.area;
     return {
+      area_id: area.area_id,
       sequence: un.sequence,
       sido: area.sido,
       gungu: area.gungu,

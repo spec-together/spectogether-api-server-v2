@@ -1,29 +1,19 @@
 const { DataTypes, Model, Sequelize } = require("sequelize");
-
-class Notice extends Model {
+class CarouselAd extends Model {
   static init(sequelize) {
     return super.init(
       {
-        notice_id: {
+        carousel_ad_id: {
           autoIncrement: true,
           type: DataTypes.BIGINT,
-          allowNull: false,
           primaryKey: true,
         },
-        author_id: {
-          type: DataTypes.BIGINT,
-          allowNull: false,
-          references: {
-            model: "user",
-            key: "user_id",
-          },
-        },
-        title: {
+        link: {
           type: DataTypes.STRING(1024),
           allowNull: false,
         },
-        content: {
-          type: DataTypes.TEXT,
+        is_active: {
+          type: DataTypes.BOOLEAN,
           allowNull: false,
         },
         created_at: {
@@ -35,27 +25,16 @@ class Notice extends Model {
           type: DataTypes.DATE(6),
           allowNull: false,
           defaultValue: Sequelize.literal("CURRENT_TIMESTAMP(6)"),
-          onUpdate: "SET DEFAULT",
         },
       },
       {
         sequelize,
-        tableName: "notice",
+        tableName: "carousel_ad",
         timestamps: false,
       }
     );
   }
-
-  static associate(models) {
-    this.hasMany(models.NoticeImage, {
-      as: "notice_images",
-      foreignKey: "notice_id",
-    });
-    this.belongsTo(models.User, {
-      as: "author",
-      foreignKey: "author_id",
-    });
-  }
+  static associate(models) {}
 }
 
-module.exports = Notice;
+module.exports = CarouselAd;

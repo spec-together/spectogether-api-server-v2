@@ -104,17 +104,23 @@ class User extends Model {
     this.hasMany(models.Inquiry, {
       as: "inquiries",
       foreignKey: "user_id",
+      sourceKey: "user_id",
     });
     this.hasMany(models.InquiryAnswer, {
       as: "inquiry_answers",
       foreignKey: "admin_id",
+      sourceKey: "user_id",
     });
     this.hasMany(models.Notice, {
       as: "notices",
       foreignKey: "author_id",
     });
-    this.hasMany(models.OrganizationUser, {
-      as: "organization_users",
+    // this.hasMany(models.OrganizationUser, {
+    //   as: "organization_users",
+    //   foreignKey: "user_id",
+    // });
+    this.hasOne(models.OrganizationUser, {
+      as: "organization_user",
       foreignKey: "user_id",
     });
     this.hasMany(models.Spec, {
@@ -124,6 +130,14 @@ class User extends Model {
     this.hasMany(models.StudyroomChat, {
       as: "studyroom_chats",
       foreignKey: "sender_id",
+    });
+    this.hasMany(models.StudyroomInvite, {
+      as: "studyroom_invites_sent",
+      foreignKey: "inviter_id",
+    });
+    this.hasMany(models.StudyroomInvite, {
+      as: "studyroom_invites_received",
+      foreignKey: "invitee_id",
     });
     this.hasMany(models.StudyroomMember, {
       as: "studyroom_members",

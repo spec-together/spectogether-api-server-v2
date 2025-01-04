@@ -1,7 +1,7 @@
 const Ajv = require("ajv");
 const addFormats = require("ajv-formats");
 
-const ajv = new Ajv({ allError: true });
+const ajv = new Ajv({ allErrors: true });
 addFormats(ajv);
 
 const sendVerificationEmailSchema = {

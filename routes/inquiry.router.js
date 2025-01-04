@@ -12,7 +12,7 @@ router.get("/", authenticateAccessToken, inquiryController.handleGetInquiries);
 router.post(
   "/",
   authenticateAccessToken,
-  uploadController.handleUpload(inquiryUploadPath),
+  uploadController.handleSingleUpload(inquiryUploadPath),
   inquiryController.handlePostInquiry
 );
 router.get(
@@ -23,7 +23,7 @@ router.get(
 router.put(
   "/:id",
   authenticateAccessToken,
-  uploadController.handleUpload(inquiryUploadPath),
+  uploadController.handleSingleUpload(inquiryUploadPath),
   inquiryController.handlePutInquiry
 );
 

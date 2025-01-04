@@ -35,6 +35,19 @@ router.get("/token/reissue", loginController.reissueAccessToken);
 
 router.get("/terms", registerController.getTerms);
 // 24.12.24 terms 삭제 처리, test user 생성 코드도 삭제 처리
+// terms는 다시 작성완료
+
+router.post(
+  "/password/reset",
+  validate(authValidator.resetPassword),
+  loginController.resetPassword
+);
+
+router.post(
+  "/password/change",
+  validate(authValidator.changePassword),
+  loginController.changePassword
+);
 
 router.get("/teapot", (res) => res.status(418).send("I'm a teapot"));
 

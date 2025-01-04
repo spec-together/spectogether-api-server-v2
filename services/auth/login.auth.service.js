@@ -56,8 +56,10 @@ const deleteRefreshToken = async (token) => {
     logger.error(
       `[deleteRefreshToken] 존재하지 않는 리프레시 토큰입니다.\nRT : ${token}`
     );
-    throw new NotExistsError("존재하지 않는 리프레시 토큰입니다.");
+    return false;
+    // throw new NotExistsError("존재하지 않는 리프레시 토큰입니다.");
   }
+  return true;
 };
 
 // AT 재발급
@@ -73,9 +75,35 @@ const getUserInfoByEncryptedUserId = async (encryptedId) => {
   };
 };
 
+const setPassword = async ({ phone, newPassword }) => {
+  const user = await UserLocal.findOne({
+    include: {
+      model: User,
+      as: "user",
+      where: {
+        phone_number: phone,
+      },
+    },
+  });
+
+  if (!user) {
+    logger.error(
+      `[setPassword] 존재하지 않는 사용자입니다.\n전화번호 : ${phone}`
+    );
+    throw new NotExistsError("존재하지 않는 사용자입니다.");
+  }
+  const hashedPassword = await encryptUtil.generateHashedPassword(newPassword);
+  user.password = hashedPassword;
+  await user.save();
+
+  logger.debug(`[setPassword] 비밀번호 변경 완료\n전화번호 : ${phone}`);
+  return true;
+};
+
 module.exports = {
   getUserPasswordByPhoneNumber,
   comparePassword,
   deleteRefreshToken,
   getUserInfoByEncryptedUserId,
+  setPassword,
 };

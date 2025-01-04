@@ -37,6 +37,6 @@ jobs:
         run: |
           ssh ${{ secrets.SSH_HOST_NAME }} 'npm install --prefix /opt/app/'
 
-      - name: Install PM2 globally
+      - name: Restart PM2
         run: |
           ssh ${{ secrets.SSH_HOST_NAME }} 'pm2 restart spectogether'
