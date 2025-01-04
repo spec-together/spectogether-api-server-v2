@@ -74,9 +74,11 @@ const singleUploadToS3 = (req, res, next) => {
         return next(new UnknownError(err.message));
       }
 
-      if (!req.file) {
-        return next(new InvalidInputError("파일이 첨부되지 않았습니다."));
-      }
+      // if (!req.file) {
+      //   return next(new InvalidInputError("파일이 첨부되지 않았습니다."));
+      // }
+      return next();
+
       // 업로드된 파일의 키 추출
       const fileKey = req.file.key;
 
@@ -119,6 +121,8 @@ const multipleUploadToS3 = (req, res, next) => {
       logger.debug(
         `[multipleUploadToS3] metadata: ${JSON.stringify(metadata)}`
       );
+
+      return next();
 
       // 클라이언트에 여러 이미지의 URL과 메타데이터 반환
       res.status(201).json({

@@ -2,12 +2,18 @@ const db = require("../../models");
 const CustomError = require("../../errors");
 // const logger = require("../../logger");
 const { encrypt62 } = require("../../utils/encrypt.util");
+const paginator = require("../../utils/paginator");
 
-exports.getAllStudyrooms = async () => {
+exports.getAllStudyrooms = async ({ page, limit }) => {
+  const offset = (page - 1) * limit;
   try {
-    const studyrooms = await db.Studyroom.findAll({
+    const { rows, count } = await db.Studyroom.findAndCountAll({
+      limit,
+      offset,
+
       where: { status: "active" },
       attributes: { exclude: ["updated_at"] },
+      order: [["created_at", "DESC"]],
       include: [
         {
           model: db.Area,
@@ -20,11 +26,12 @@ exports.getAllStudyrooms = async () => {
           where: { status: "active" },
           attributes: ["role", "status", "user_id"],
           include: [{ model: db.User, as: "user", attributes: ["nickname"] }],
+          separate: true,
         },
       ],
     });
     // user_id 를 encrypt62 한 값으로 변경
-    const encryptedStudyrooms = studyrooms.map((studyroom) => {
+    const encryptedStudyrooms = rows.map((studyroom) => {
       studyroom.studyroom_members = studyroom.studyroom_members.map(
         (member) => {
           member.user_id = encrypt62(member.user_id);
@@ -33,9 +40,17 @@ exports.getAllStudyrooms = async () => {
       );
       return studyroom;
     });
-    return encryptedStudyrooms;
-    // TODO : pagination
-    // return studyrooms;
+    const pagination = paginator.createPagination(
+      "studyrooms",
+      count,
+      page,
+      limit
+    );
+    return {
+      message: "스터디룸 목록 조회 성공",
+      studyrooms: encryptedStudyrooms,
+      pagination,
+    };
   } catch (error) {
     // logger.error(error);
     if (error instanceof db.Sequelize.DatabaseError) {

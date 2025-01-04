@@ -1,13 +1,18 @@
 const studyroomService = require("../../services/studyroom/studyroom.service.js");
-// const logger = require("../../logger");
+const logger = require("../../logger");
+const uploadService = require("../../services/upload/upload.service.js");
 
 exports.getAllStudyrooms = async (req, res, next) => {
   try {
-    const studyrooms = await studyroomService.getAllStudyrooms();
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+
+    const result = await studyroomService.getAllStudyrooms({ page, limit });
+    // const studyrooms = await studyroomService.getAllStudyrooms();
     res.status(200).success({
-      message: "스터디룸 목록 조회 성공",
-      studyrooms,
-      // pagination
+      message: result.message,
+      studyrooms: result.studyrooms,
+      pagination: result.pagination,
     });
   } catch (error) {
     next(error);
@@ -17,7 +22,7 @@ exports.getAllStudyrooms = async (req, res, next) => {
 exports.getStudyroomByStudyroomId = async (req, res, next) => {
   try {
     const studyroom = await studyroomService.getStudyroomByStudyroomId(
-      req.params.id
+      req.params.studyroomId
     );
     res.status(200).success(studyroom);
   } catch (error) {
@@ -28,15 +33,18 @@ exports.getStudyroomByStudyroomId = async (req, res, next) => {
 exports.createStudyroom = async (req, res, next) => {
   try {
     const userId = parseInt(req.user.user_id);
-    const uploadedStudyroomProfileImage = req.file;
+    // 1. 파일 존재 여부 로깅 // logger.debug(`[createStudyroom] req.file 존재 여부: ${!!req.file}`);
+    // 2. 파일 정보 전체 로깅 // if (req.file) { logger.debug(`[createStudyroom] req.file: ${JSON.stringify(req.file, null, 2)}`);}
+    const imageUrl = req.file
+      ? uploadService.getCloudfrontUrl(req.file.key)
+      : ""; // null 대신 빈 문자열로
+    // 3. 최종 URL 로깅 // logger.debug(`[createStudyroom] imageUrl: ${imageUrl}`);
     const result = await studyroomService.createStudyroom({
       user_id: userId,
       title: req.body.title,
       subtitle: req.body.subtitle,
       area_id: req.body.area_id,
-      profile_image: uploadedStudyroomProfileImage
-        ? uploadedStudyroomProfileImage.path
-        : "",
+      profile_image: imageUrl,
       goal: req.body.goal,
       goal_url: req.body.goal_url,
       todos: req.body.todos,
@@ -52,9 +60,10 @@ exports.createStudyroom = async (req, res, next) => {
 exports.joinStudyroom = async (req, res, next) => {
   try {
     const userId = parseInt(req.user.user_id);
+    const studyroomId = parseInt(req.params.studyroomId);
     const result = await studyroomService.joinStudyroom({
       user_id: userId,
-      studyroom_id: req.params.studyroomId,
+      studyroom_id: studyroomId,
     });
     return res
       .status(201)
@@ -141,13 +150,16 @@ exports.submitTodo = async (req, res, next) => {
     const studyroomId = parseInt(req.params.studyroomId);
     const todoId = parseInt(req.params.todoId);
     const uploadedImage = req.file;
+    const imageUrl = uploadedImage
+      ? uploadService.getCloudfrontUrl(uploadedImage.key)
+      : ""; // null 대신 빈 문자열로
     const { comment } = req.body;
     const result = await studyroomService.submitTodo({
       userId,
       studyroomId,
       todoId,
       comment,
-      image_url: uploadedImage ? uploadedImage.path : "",
+      image_url: imageUrl,
     });
     return res
       .status(200)
